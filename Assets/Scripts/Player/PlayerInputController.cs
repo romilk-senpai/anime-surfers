@@ -25,6 +25,8 @@ namespace Player
         private void OnEnable()
         {
             _inputActions.Enable();
+
+            _inputActions.Player.Jump.performed += ProcessJump;
         }
 
         private void OnDisable()
@@ -34,10 +36,24 @@ namespace Player
 
         private void Update()
         {
-            if (_inputActions.Player.Jump.triggered)
+            if (_inputActions.Player.Move.triggered)
             {
-                _playerInputHandler.ProcessJump();
+                float moveValue = _inputActions.Player.Move.ReadValue<float>();
+
+                if (moveValue > 0)
+                {
+                    _playerInputHandler.ProcessRight();
+                }
+                else
+                {
+                    _playerInputHandler.ProcessLeft();
+                }
             }
+        }
+
+        private void ProcessJump(InputAction.CallbackContext ctx)
+        {
+            _playerInputHandler.ProcessJump();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -23,28 +25,31 @@ namespace Player
             _playerObject.PlayerAnimator.SetFloat(_speedProp, 1f);
         }
 
-        public async void JumpAnimation()
+        public void JumpAnimation()
+        {
+            StartCoroutine(JumpCoroutine());
+        }
+
+        private IEnumerator JumpCoroutine()
         {
             _playerObject.PlayerAnimator.SetTrigger(_jumpProp);
             _playerObject.PlayerAnimator.SetBool(_airborneProp, true);
 
-            await UniTask.Yield(PlayerLoopTiming.FixedUpdate);
+            yield return new WaitForSeconds(.15f);
 
-            await UniTask.WaitForSeconds(.7f);
-            
             while (true)
             {
-                if (Physics.Raycast(_playerObject.PlayerTransform.position, transform.TransformDirection(Vector3.down),
+                if (Physics.Raycast(_playerObject.PlayerTransform.position, Vector3.down,
                         out RaycastHit hit, 100f))
                 {
-                    if (hit.distance < 3f)
+                    if (hit.distance < .5f)
                     {
                         _playerObject.PlayerAnimator.SetBool(_airborneProp, false);
                         break;
                     }
                 }
 
-                await UniTask.Yield(PlayerLoopTiming.FixedUpdate);
+                yield return new WaitForFixedUpdate();
             }
         }
     }

@@ -33,14 +33,14 @@ namespace Player
         private void Start()
         {
             _cameraController.StartFollowing(_playerObject.LookAtTarget);
-            _playerAnimatorController.SetRunAnimation();
         }
 
         private void Update()
         {
-            _playerObject.PlayerCharacterController.Move(_playerObject.PlayerTransform.forward * moveSpeed *
-                                                         Time.deltaTime);
-            
+            Vector3 moveVector = _playerObject.PlayerTransform.forward 
+                                 + new Vector3(_playerLine - _playerObject.transform.position.x, 0f, 0f);
+            _playerObject.PlayerCharacterController.Move(moveVector * (moveSpeed * Time.deltaTime));
+
             if (_playerObject.PlayerCharacterController.isGrounded)
             {
                 _verticalVelocity = -2f;
@@ -48,9 +48,9 @@ namespace Player
                 if (_jump)
                 {
                     _jump = false;
-                    
+
                     _verticalVelocity = Mathf.Sqrt(jumpHeight * 2f * gravity);
-                    
+
                     _playerAnimatorController.JumpAnimation();
                 }
             }
@@ -67,6 +67,7 @@ namespace Player
             }
             else
             {
+                _playerLine--;
             }
         }
 
@@ -77,6 +78,7 @@ namespace Player
             }
             else
             {
+                _playerLine++;
             }
         }
 

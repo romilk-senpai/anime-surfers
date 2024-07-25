@@ -7,7 +7,8 @@ namespace Player
         [SerializeField] private Transform playerTransform;
         [SerializeField] private CharacterController playerCharacterController;
         [SerializeField] private Animator playerAnimator;
-
+        [SerializeField] private CharacterCollider playerCollider;
+        
         [SerializeField] private Transform lookAtTarget;
         
         public Transform PlayerTransform => playerTransform;
@@ -16,5 +17,6 @@ namespace Player
 
         public Animator PlayerAnimator => playerAnimator;
         public Transform LookAtTarget => lookAtTarget;
+        public CharacterCollider PlayerCollider => playerCollider;
     }
 }
