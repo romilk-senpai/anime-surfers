@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6257788808184022817
+--- !u!1 &6194106825414461356
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8990438468096943915}
-  - component: {fileID: 6245710737447611752}
+  - component: {fileID: 6564295802027549814}
+  - component: {fileID: 4784238375857894195}
   m_Layer: 0
-  m_Name: PlayerController
+  m_Name: GameController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8990438468096943915
+--- !u!4 &6564295802027549814
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6257788808184022817}
+  m_GameObject: {fileID: 6194106825414461356}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,22 +32,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6245710737447611752
+--- !u!114 &4784238375857894195
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6257788808184022817}
+  m_GameObject: {fileID: 6194106825414461356}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bcebc390d2688b4da80cd8a30ff629b, type: 3}
+  m_Script: {fileID: 11500000, guid: 354840ea3ff20ce469894a729efbd7f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  jumpHeight: 1.5
-  gravity: 14
-  groundDistance: 0.4
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 1
+  maxHp: 2
+  hpRegenTime: 10
+  defaultScoreMultiplier: 2
