@@ -6,7 +6,7 @@ using Zenject;
 
 namespace Player
 {
-    public class PlayerAnimatorController : MonoBehaviour
+    public class PlayerAnimatorController : MonoBehaviour, IPlayerAnimatorController
     {
         private PlayerObject _playerObject;
 

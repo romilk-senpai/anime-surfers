@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Game;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,7 +45,7 @@ namespace UI
 
             for (int i = 0; i < _spawnedLives.Length; i++)
             {
-                _spawnedLives[i].color = i < hp ? Color.white : new Color(1, 1, 1, 0);
+                _spawnedLives[i].DOColor(i < hp ? Color.white : new Color(1, 1, 1, 0), .25f);
             }
         }
     }

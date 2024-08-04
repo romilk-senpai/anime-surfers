@@ -6,7 +6,8 @@ namespace Player
     {
         public override void InstallBindings()
         {
-            Container.Bind<PlayerAnimatorController>()
+            Container.Bind<IPlayerAnimatorController>()
+                .To<PlayerAnimatorController>()
                 .FromNewComponentOnNewGameObject()
                 .AsSingle();
         }

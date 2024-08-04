@@ -1,18 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
+using Game;
+using TMPro;
 using UnityEngine;
+using Zenject;
 
-public class ScoreBar : MonoBehaviour
+namespace UI
 {
-    // Start is called before the first frame update
-    void Start()
+    public class ScoreBar : MonoBehaviour
     {
-        
-    }
+        [SerializeField] private TextMeshProUGUI scoreText;
+        [SerializeField] private TextMeshProUGUI globalMultiplierText;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        private IGameController _gameController;
+
+        [Inject]
+        private void Inject(IGameController gameController)
+        {
+            _gameController = gameController;
+        }
+
+        private void Start()
+        {
+            _gameController.OnPlayerScoreUpdated += OnPlayerScoreUpdated;
+
+            globalMultiplierText.text = _gameController.ScoreGlobalMultiplier.ToString("0x");
+        }
+
+        private void OnPlayerScoreUpdated(int score)
+        {
+            scoreText.text = score.ToString("000000");
+        }
     }
 }

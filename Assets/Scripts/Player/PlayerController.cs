@@ -12,10 +12,11 @@ namespace Player
         [SerializeField] private LayerMask groundMask;
 
         private PlayerObject _playerObject;
-        private PlayerCameraController _cameraController;
-        private PlayerAnimatorController _playerAnimatorController;
+        private IPlayerCameraController _cameraController;
+        private IPlayerAnimatorController _playerAnimatorController;
 
-        private bool _running = false;
+        private bool _running;
+        private float _runSpeedMultiplier;
         private float _verticalVelocity;
         private bool _jump;
 
@@ -26,8 +27,8 @@ namespace Player
         public float JumpHeight => jumpHeight;
 
         [Inject]
-        private void Inject(PlayerObject playerObject, PlayerCameraController cameraController,
-            PlayerAnimatorController playerAnimatorController)
+        private void Inject(PlayerObject playerObject, IPlayerCameraController cameraController,
+            IPlayerAnimatorController playerAnimatorController)
         {
             _playerObject = playerObject;
             _cameraController = cameraController;
@@ -37,29 +38,29 @@ namespace Player
         private void Start()
         {
             _cameraController.StartFollowing(_playerObject.LookAtTarget);
-            
+
             _playerAnimatorController.SetSpeed(0f);
         }
 
         public void StartRunning()
         {
             _running = true;
+
+            _runSpeedMultiplier = 1f;
         }
 
         private void Update()
         {
-            if (!_running)
-            {
-                return;
-            }
-
             _isGrounded = Physics.CheckSphere(_playerObject.GroundCheck.position, groundDistance, groundMask);
-            
-            _playerAnimatorController.SetSpeed(1f);
-            
-            Vector3 moveVector = _playerObject.PlayerTransform.forward 
-                                 + new Vector3(_playerLine - _playerObject.transform.position.x, 0f, 0f);
-            _playerObject.PlayerCharacterController.Move(moveVector * (moveSpeed * Time.deltaTime));
+
+            _playerAnimatorController.SetSpeed(_runSpeedMultiplier);
+
+            if (_running)
+            {
+                Vector3 moveVector = _playerObject.PlayerTransform.forward
+                                     + new Vector3(_playerLine - _playerObject.transform.position.x, 0f, 0f);
+                _playerObject.PlayerCharacterController.Move(moveVector * (_runSpeedMultiplier * (moveSpeed * Time.deltaTime)));
+            }
 
             if (_isGrounded && _verticalVelocity < 0f)
             {
@@ -115,7 +116,7 @@ namespace Player
         public void ProcessDeath()
         {
             _running = false;
-            
+
             _playerAnimatorController.SetSpeed(0f);
 
             _playerAnimatorController.PlayDeath();

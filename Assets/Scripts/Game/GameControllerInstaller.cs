@@ -1,14 +1,16 @@
+using UnityEngine;
 using Zenject;
 
 namespace Game
 {
     public class GameControllerInstaller : MonoInstaller
     {
+        [SerializeField] private GameController gameControllerPrefab;
+        
         public override void InstallBindings()
         {
             Container.Bind<IGameController>()
-                .To<GameController>()
-                .FromNewComponentOnNewGameObject()
+                .FromComponentInNewPrefab(gameControllerPrefab)
                 .AsSingle()
                 .NonLazy();
         }
