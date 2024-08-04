@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game
+namespace Game.Chunks
 {
-    public class ChunkObject : MonoBehaviour
+    public class ChunkObjectD : MonoBehaviour
     {
         private const int ChunkWidth = 3;
 
@@ -15,11 +15,7 @@ namespace Game
         private bool[,] _chunkArray;
         private List<AStarGrid.Node> _path;
 
-        private void Start()
-        {
-            FulfillChunk();
-        }
-
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             int floorLength = Mathf.FloorToInt(chunkLength);
@@ -36,26 +32,31 @@ namespace Game
             Gizmos.DrawLine(transform.TransformPoint(new Vector3(-1.5f, 0, 0)),
                 transform.TransformPoint(new Vector3(-1.5f, 0, 0) + new Vector3(0, 0, floorLength)));
 
-            for (int i = 0; i < floorLength; i++)
+            for (int i = 0; i <= floorLength; i++)
             {
                 Gizmos.DrawLine(transform.TransformPoint(new Vector3(1.5f, 0, 0) + new Vector3(0, 0, i)),
                     transform.TransformPoint(new Vector3(-1.5f, 0, 0) + new Vector3(0, 0, i)));
             }
 
+            if (_chunkArray == null)
+            {
+                return;
+            }
+            
             for (int i = 0; i < chunkLength; i++)
             {
                 for (int j = 0; j < ChunkWidth; j++)
                 {
                     if (_chunkArray[i, j])
                     {
-                        Gizmos.DrawCube(transform.TransformPoint(new Vector3(j - 1, 0, i + 0.5f)),
-                            new Vector3(1, 0.1f, 1));
+                        //Gizmos.DrawCube(transform.TransformPoint(new Vector3(j - 1, 0, i + 0.5f)), new Vector3(1, 0.1f, 1));
                     }
                 }
             }
         }
-
-        private void FulfillChunk()
+#endif
+        
+        public void Generate()
         {
             _chunkArray = new bool[Mathf.FloorToInt(chunkLength), ChunkWidth];
 
@@ -67,7 +68,7 @@ namespace Game
                 }
             }
 
-            for (int i = 1; i < chunkLength; i++)
+            for (int i = 3; i < chunkLength; i++)
             {
                 for (int j = 0; j < ChunkWidth; j++)
                 {
@@ -75,7 +76,7 @@ namespace Game
                     {
                         bool continueIteration = false;
 
-                        for (int k = 1; k < 3; k++)
+                        for (int k = 2; k < 3; k++)
                         {
                             for (int l = 0; l < 2; l++)
                             {
@@ -119,7 +120,7 @@ namespace Game
                     {
                         bool continueIteration = false;
 
-                        for (int k = 0; k < 3; k++)
+                        for (int k = 2; k < 3; k++)
                         {
                             for (int l = 0; l < 3; l++)
                             {
@@ -143,7 +144,7 @@ namespace Game
 
                     if (generate)
                     {
-                        generate = new AStarGrid().Calculate(_chunkArray,
+                        generate = AStarGrid.Calculate(_chunkArray,
                             new Vector2Int(0, 1),
                             new Vector2Int((int)chunkLength - 1, 1),
                             null, out _path);

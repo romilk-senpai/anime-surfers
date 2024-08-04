@@ -13,6 +13,7 @@ namespace Player
         private readonly int _speedProp = Animator.StringToHash("Speed");
         private readonly int _jumpProp = Animator.StringToHash("Jump");
         private readonly int _airborneProp = Animator.StringToHash("Airborne");
+        private readonly int _deathProp = Animator.StringToHash("Death");
 
         [Inject]
         private void Inject(PlayerObject playerObject)
@@ -20,9 +21,9 @@ namespace Player
             _playerObject = playerObject;
         }
 
-        public void SetRunAnimation()
+        public void SetSpeed(float speed)
         {
-            _playerObject.PlayerAnimator.SetFloat(_speedProp, 1f);
+            _playerObject.PlayerAnimator.SetFloat(_speedProp, speed);
         }
 
         public void JumpAnimation()
@@ -51,6 +52,11 @@ namespace Player
 
                 yield return new WaitForFixedUpdate();
             }
+        }
+
+        public void PlayDeath()
+        {
+            _playerObject.PlayerAnimator.SetTrigger(_deathProp);
         }
     }
 }

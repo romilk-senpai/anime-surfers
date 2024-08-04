@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Player
 {
-    public class PlayerCameraController : MonoBehaviour
+    public class PlayerCameraController : MonoBehaviour, IPlayerCameraController
     {
         [SerializeField] private CinemachineVirtualCamera cinemachineCamera;
 

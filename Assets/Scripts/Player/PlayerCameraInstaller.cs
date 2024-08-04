@@ -9,7 +9,7 @@ namespace Player
 
         public override void InstallBindings()
         {
-            Container.Bind<PlayerCameraController>()
+            Container.Bind<IPlayerCameraController>()
                 .FromComponentInNewPrefab(cameraControllerPrefab)
                 .AsSingle();
         }

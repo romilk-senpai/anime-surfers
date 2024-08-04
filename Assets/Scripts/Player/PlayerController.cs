@@ -8,15 +8,19 @@ namespace Player
         [SerializeField] private float moveSpeed = 3f;
         [SerializeField] private float jumpHeight = 10f;
         [SerializeField] private float gravity = 20f;
+        [SerializeField] private float groundDistance = 0.4f;
+        [SerializeField] private LayerMask groundMask;
 
         private PlayerObject _playerObject;
         private PlayerCameraController _cameraController;
         private PlayerAnimatorController _playerAnimatorController;
 
+        private bool _running = false;
         private float _verticalVelocity;
         private bool _jump;
 
         private int _playerLine;
+        private bool _isGrounded;
 
         public float MoveSpeed => moveSpeed;
         public float JumpHeight => jumpHeight;
@@ -33,15 +37,31 @@ namespace Player
         private void Start()
         {
             _cameraController.StartFollowing(_playerObject.LookAtTarget);
+            
+            _playerAnimatorController.SetSpeed(0f);
+        }
+
+        public void StartRunning()
+        {
+            _running = true;
         }
 
         private void Update()
         {
+            if (!_running)
+            {
+                return;
+            }
+
+            _isGrounded = Physics.CheckSphere(_playerObject.GroundCheck.position, groundDistance, groundMask);
+            
+            _playerAnimatorController.SetSpeed(1f);
+            
             Vector3 moveVector = _playerObject.PlayerTransform.forward 
                                  + new Vector3(_playerLine - _playerObject.transform.position.x, 0f, 0f);
             _playerObject.PlayerCharacterController.Move(moveVector * (moveSpeed * Time.deltaTime));
 
-            if (_playerObject.PlayerCharacterController.isGrounded)
+            if (_isGrounded && _verticalVelocity < 0f)
             {
                 _verticalVelocity = -2f;
 
@@ -84,12 +104,21 @@ namespace Player
 
         public void ProcessJump()
         {
-            if (!_playerObject.PlayerCharacterController.isGrounded)
+            if (!_isGrounded)
             {
                 return;
             }
 
             _jump = true;
+        }
+
+        public void ProcessDeath()
+        {
+            _running = false;
+            
+            _playerAnimatorController.SetSpeed(0f);
+
+            _playerAnimatorController.PlayDeath();
         }
     }
 }

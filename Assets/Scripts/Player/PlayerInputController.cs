@@ -21,19 +21,7 @@ namespace Player
         {
             _inputActions = new SurfersInputActions();
         }
-
-        private void OnEnable()
-        {
-            _inputActions.Enable();
-
-            _inputActions.Player.Jump.performed += ProcessJump;
-        }
-
-        private void OnDisable()
-        {
-            _inputActions.Enable();
-        }
-
+        
         private void Update()
         {
             if (_inputActions.Player.Move.triggered)
@@ -54,6 +42,20 @@ namespace Player
         private void ProcessJump(InputAction.CallbackContext ctx)
         {
             _playerInputHandler.ProcessJump();
+        }
+
+        public void Activate()
+        {
+            _inputActions.Player.Jump.performed += ProcessJump;
+
+            _inputActions.Enable();
+        }
+
+        public void Deactivate()
+        {
+            _inputActions.Player.Jump.performed -= ProcessJump;
+
+            _inputActions.Disable();
         }
     }
 }
