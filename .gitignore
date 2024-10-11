@@ -11,6 +11,11 @@
 !/[Ll]ibrary/**/*.asset
 !/[Aa]ssets/**/*.meta
 
+/Assets/Bin/*
+/Assets/Bin.meta
+
+/.vscode/
+
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
 
@@ -60,4 +65,4 @@ crashlytics-build.properties
 .idea/
 /[Ll]ibrary/**/InspectorExpandedItems.asset
 /[Ll]ibrary/**/SceneVisibilityState.asset
-UserSettings/Layouts/default-2021.dwlt
+/UserSettings/Layouts/*
