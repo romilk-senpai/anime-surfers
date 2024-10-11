@@ -6,6 +6,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 /[Aa]ssets/EMX/
+/[Uu]serSettings/*
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Ll]ibrary/**/*.asset
@@ -65,4 +66,3 @@ crashlytics-build.properties
 .idea/
 /[Ll]ibrary/**/InspectorExpandedItems.asset
 /[Ll]ibrary/**/SceneVisibilityState.asset
-/UserSettings/Layouts/*
