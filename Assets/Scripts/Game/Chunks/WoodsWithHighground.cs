@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Game.Chunks
 {
-    public class WoodsWithHighground : ChunkObject
+    public class WoodsWithHighground : Chunk
     {
         [SerializeField] private GameObject deadTreePrefab;
 

@@ -8,7 +8,7 @@ namespace Game.Chunks
     {
         [SerializeField] private float spawnDistance = 50;
 
-        [Space(10)] [SerializeField] private ChunkObject[] chunkPrefabs;
+        [Space(10)] [SerializeField] private Chunk[] chunkPrefabs;
 
         private PlayerObject _playerObject;
         private Vector3 _nextChunkPosition;
