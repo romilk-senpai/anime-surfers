@@ -20,6 +20,10 @@ public class SimpleChunk : Chunk
     private const int MinSegmentLength = 10;
     private const int FreeCellsAfterPoint = 3;
 
+    private const int ObstacleCell = 1;
+    private const int ReservedFreeCell = 2;
+    private const int PathCell = 3;
+
     public override void Generate(Vector2Int start, Vector2Int dest)
     {
         //Random.InitState(randomSpeed);
@@ -50,14 +54,14 @@ public class SimpleChunk : Chunk
             {
                 for (int k = 0; k < ChunkWidth; k++)
                 {
-                    arr[ChunkWidth * j + k] = 1;
+                    arr[ChunkWidth * j + k] = ReservedFreeCell;
                 }
             }
 
             int l = points[i].y;
             for (int j = points[i].x; j < points[i + 1].x; j++)
             {
-                arr[ChunkWidth * j + l] = 1;
+                arr[ChunkWidth * j + l] = PathCell;
             }
         }
 
@@ -72,8 +76,49 @@ public class SimpleChunk : Chunk
 
             for (int j = 0; j < ChunkWidth; j++)
             {
-                if (arr[ChunkWidth * i + j] > 0)
+                if (arr[ChunkWidth * i + j] == ReservedFreeCell)
                     continue;
+
+                if (arr[ChunkWidth * i + j] == PathCell)
+                {
+                    float r1 = Random.Range(0f, 1f);
+
+                    if (r1 > .025f)
+                        continue;
+
+                    if (j == 0)
+                    {
+                        if (arr[ChunkWidth * i + j + 1] == ObstacleCell)
+                            continue;
+
+                        ChunkObject obstacleL = Instantiate(sideObstacleLPrefab, transform);
+                        obstacleL.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleL.gameObject.SetActive(true);
+
+                        arr[ChunkWidth * i + j] = ObstacleCell;
+                    }
+                    else if (j == ChunkWidth - 1)
+                    {
+                        if (arr[ChunkWidth * i + j - 1] == ObstacleCell)
+                            continue;
+
+                        ChunkObject obstacleR = Instantiate(sideObstacleRPrefab, transform);
+                        obstacleR.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleR.gameObject.SetActive(true);
+
+                        arr[ChunkWidth * i + j] = ObstacleCell;
+                    }
+                    else
+                    {
+                        ChunkObject obstacleFloor = Instantiate(floorObstaclePrefab, transform);
+                        obstacleFloor.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleFloor.gameObject.SetActive(true);
+
+                        arr[ChunkWidth * i + j] = ObstacleCell;
+                    }
+
+                    continue;
+                }
 
                 if (i + highgroundPrefab.Length > points[targetPointIndex].x)
                     continue;
@@ -81,9 +126,9 @@ public class SimpleChunk : Chunk
                 if (ChunkWidth * (i + highgroundPrefab.Length) + j > arr.Length)
                     continue;
 
-                float r = Random.Range(0f, 1f);
-                
-                if (r > 0.25f)
+                float r2 = Random.Range(0f, 1f);
+
+                if (r2 > 0.25f)
                     continue;
 
                 ChunkObject spawn = Instantiate(highgroundPrefab, transform);
@@ -92,7 +137,7 @@ public class SimpleChunk : Chunk
 
                 for (int k = i; k < i + spawn.Length; k++)
                 {
-                    arr[ChunkWidth * k + j] = 1;
+                    arr[ChunkWidth * k + j] = ObstacleCell;
                 }
             }
         }
