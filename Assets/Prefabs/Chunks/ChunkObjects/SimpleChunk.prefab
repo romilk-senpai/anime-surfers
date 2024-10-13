@@ -60,6 +60,7 @@ MonoBehaviour:
   minCellX: -1
   cellWidth: 1
   randomSpeed: 777
+  test_points: []
 --- !u!1 &2340795750767766662
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,10 +505,6 @@ PrefabInstance:
     - target: {fileID: 2406542697530812219, guid: a361c7847dfa0c08594af7a5ad23dd34, type: 3}
       propertyPath: m_IsActive
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2976628880559408941, guid: a361c7847dfa0c08594af7a5ad23dd34, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.025
       objectReference: {fileID: 0}
     - target: {fileID: 3706975813720505498, guid: a361c7847dfa0c08594af7a5ad23dd34, type: 3}
       propertyPath: m_LocalPosition.x
