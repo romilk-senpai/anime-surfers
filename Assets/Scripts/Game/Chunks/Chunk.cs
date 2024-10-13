@@ -11,7 +11,7 @@ namespace Game.Chunks
         public int ChunkWidth => chunkWidth;
 
 #if UNITY_EDITOR
-        private void OnDrawGizmos()
+        protected virtual void OnDrawGizmos()
         {
             int floorLength = Mathf.FloorToInt(chunkLength);
 
