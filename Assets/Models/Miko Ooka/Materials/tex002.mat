@@ -16,6 +16,7 @@ Material:
   - N_F_RELGI_ON
   - N_F_SS_ON
   m_InvalidKeywords:
+  - NOKEWO
   - TINTED_OUTLINE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -190,8 +191,8 @@ Material:
     - _Oper: 0
     - _OutlineExtrudeMethod: 0
     - _OutlineMode: 1
-    - _OutlineWidth: 0.001
-    - _OutlineWidthAffectedByViewDistance: 0
+    - _OutlineWidth: 0.0015
+    - _OutlineWidthAffectedByViewDistance: 1
     - _OutlineZPostionInCamera: 0
     - _OverallShadowColorPower: 1
     - _PSGLOTEX: 0
