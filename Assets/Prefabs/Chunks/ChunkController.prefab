@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4772a7a07a12934fbef29ba787c11be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnDistance: 50
+  spawnDistance: 30
+  despawnDistance: 5
+  startingChunkPrefab: {fileID: 7784952361029200452, guid: b851aaa01bd6991d6afe3dc3b67bf29b, type: 3}
   chunkPrefabs:
   - {fileID: 8947782437388407631, guid: 8c19507058adad91cbc2cc6f38104279, type: 3}

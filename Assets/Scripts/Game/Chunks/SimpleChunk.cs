@@ -1,5 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
 using Game.Chunks;
-using Game.Chunks.WFC;
 using UnityEngine;
 
 public class SimpleChunk : Chunk
@@ -10,12 +11,10 @@ public class SimpleChunk : Chunk
     [SerializeField] private ChunkObject highgroundPrefab;
     [SerializeField] private ChunkObject entranceHighgroundPrefab;
 
-    [SerializeField] private float minCellX = -1;
-    [SerializeField] private float cellWidth = 1;
-
     [SerializeField] private int randomSpeed = 777;
 
-    [SerializeField] private Vector2Int[] test_points;
+    private Vector2Int[] _testPoints = new Vector2Int[] { };
+    private List<ChunkObject> _spawnedHighgrounds;
 
     private const int MinSegmentLength = 10;
     private const int FreeCellsAfterPoint = 3;
@@ -28,15 +27,22 @@ public class SimpleChunk : Chunk
     {
         //Random.InitState(randomSpeed);
 
+        _spawnedHighgrounds = new List<ChunkObject>();
+
         int pointsCount = 2 + Random.Range(1, Mathf.RoundToInt(ChunkLength / (1.5f * MinSegmentLength)));
         var points = new Vector2Int[pointsCount];
 
         int currentX = 0;
+        int lastY = start.y;
 
         for (int i = 1; i < points.Length - 1; i++)
         {
             int x = Random.Range(currentX + MinSegmentLength, ChunkLength - MinSegmentLength * (points.Length - i - 1) + 1);
-            int y = Random.Range(0, ChunkWidth);
+            int y = lastY;
+            while (y == lastY)
+            {
+                y = Random.Range(0, ChunkWidth);
+            }
             points[i] = new Vector2Int(x, y);
             currentX = x;
         }
@@ -44,7 +50,7 @@ public class SimpleChunk : Chunk
         points[0] = start;
         points[^1] = dest;
 
-        test_points = points;
+        _testPoints = points;
 
         var arr = new int[ChunkLength * ChunkWidth];
 
@@ -92,7 +98,7 @@ public class SimpleChunk : Chunk
                             continue;
 
                         ChunkObject obstacleL = Instantiate(sideObstacleLPrefab, transform);
-                        obstacleL.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleL.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleL.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
@@ -103,7 +109,7 @@ public class SimpleChunk : Chunk
                             continue;
 
                         ChunkObject obstacleR = Instantiate(sideObstacleRPrefab, transform);
-                        obstacleR.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleR.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleR.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
@@ -111,7 +117,7 @@ public class SimpleChunk : Chunk
                     else
                     {
                         ChunkObject obstacleFloor = Instantiate(floorObstaclePrefab, transform);
-                        obstacleFloor.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                        obstacleFloor.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleFloor.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
@@ -126,14 +132,18 @@ public class SimpleChunk : Chunk
                 if (ChunkWidth * (i + highgroundPrefab.Length) + j > arr.Length)
                     continue;
 
+                if (arr[ChunkWidth * i + j] > 0)
+                    continue;
+
                 float r2 = Random.Range(0f, 1f);
 
                 if (r2 > 0.25f)
                     continue;
 
                 ChunkObject spawn = Instantiate(highgroundPrefab, transform);
-                spawn.transform.localPosition = new Vector3(minCellX + cellWidth * j, 0f, i);
+                spawn.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                 spawn.gameObject.SetActive(true);
+                _spawnedHighgrounds.Add(spawn);
 
                 for (int k = i; k < i + spawn.Length; k++)
                 {
@@ -141,6 +151,13 @@ public class SimpleChunk : Chunk
                 }
             }
         }
+
+        GameObject[] batchedObjects = _spawnedHighgrounds
+            .SelectMany(spawn => spawn.GetComponentsInChildren<MeshRenderer>())
+            .Select(spawn => spawn.gameObject)
+            .ToArray();
+
+        StaticBatchingUtility.Combine(batchedObjects, gameObject);
     }
 
 #if UNITY_EDITOR
@@ -148,9 +165,9 @@ public class SimpleChunk : Chunk
     {
         base.OnDrawGizmos();
 
-        foreach (var point in test_points)
+        foreach (var point in _testPoints)
         {
-            Gizmos.DrawSphere(transform.TransformPoint(new Vector3(minCellX + cellWidth * point.y, 0f, point.x + .5f)), .5f);
+            Gizmos.DrawSphere(transform.TransformPoint(new Vector3(MinCellX + CellWidth * point.y, 0f, point.x + .5f)), .5f);
         }
     }
 #endif

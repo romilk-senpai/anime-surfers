@@ -13,7 +13,7 @@ namespace Game
         [SerializeField] private int maxHp = 2;
         [SerializeField] private int hpRegenTime = 10;
         [SerializeField] private float defaultScoreMultiplier = 2f;
-        
+
         private PlayerObject _playerObject;
         private PlayerController _playerController;
         private IPlayerInputController _inputController;
@@ -22,14 +22,14 @@ namespace Game
         private int _gameScore;
         private int _scoreGlobalMultiplier = 1;
         private float _scoreRunMultiplier = 1f;
-        
+
         private bool _gameStarted;
         private float _hpRegenTimer;
         private bool _playerDead;
         private float _gameStartTime;
 
         public int MaxHp => maxHp;
-        
+
         public int CurrentHp
         {
             get => _currentHp;
@@ -40,7 +40,7 @@ namespace Game
                 OnPlayerHpUpdated?.Invoke(_currentHp);
             }
         }
-        
+
         public int GameScore
         {
             get => _gameScore;
@@ -53,7 +53,7 @@ namespace Game
         }
 
         public int ScoreGlobalMultiplier => _scoreGlobalMultiplier;
-        
+
         public event Action<int> OnPlayerHpUpdated;
         public event Action<int> OnPlayerScoreUpdated;
 
@@ -64,6 +64,11 @@ namespace Game
             _playerController = playerController;
             _playerObject = playerObject;
             _inputController = inputController;
+        }
+
+        private void Awake()
+        {
+            RenderSettings.fog = true;
         }
 
         private IEnumerator Start()
@@ -82,7 +87,7 @@ namespace Game
             _inputController.Activate();
 
             _playerController.StartRunning();
-            
+
             _gameStarted = true;
             _gameStartTime = Time.time;
         }
@@ -117,26 +122,67 @@ namespace Game
 
         private void OnPlayerHit(ControllerColliderHit hit)
         {
+            Vector3 hitPoint = hit.point;
+            Vector3 playerCenter = _playerObject.PlayerTransform.position + _playerObject.PlayerCharacterController.center;
+
+            var hitDirection = (hitPoint - playerCenter).normalized;
+            var dot = Vector3.Dot(_playerObject.PlayerTransform.forward, hitDirection);
+
             switch (hit.gameObject.tag)
             {
                 case "Obstacle":
-                {
-                    OnPlayerLost();
-
-                    break;
-                }
-                case "Wall":
-                {
-                    CurrentHp--;
-
-                    if (CurrentHp <= 0)
                     {
-                        OnPlayerLost();
-                    }
+                        Debug.Log($"{dot} {hit.gameObject.name}");
+                        Debug.DrawRay(playerCenter, _playerObject.PlayerTransform.forward, Color.blue, 5f);
+                        Debug.DrawRay(playerCenter, hitDirection, Color.red, 5f);
 
-                    break;
-                }
+                        if (dot > .5f)
+                        {
+                            OnPlayerLost();
+                        }
+                        else if (dot > .37f)
+                        {
+                            CurrentHp--;
+
+                            if (CurrentHp <= 0)
+                            {
+                                OnPlayerLost();
+                            }
+                        }
+
+                        break;
+                    }
+                case "Wall":
+                    {
+                        CurrentHp--;
+
+                        if (CurrentHp <= 0)
+                        {
+                            OnPlayerLost();
+                        }
+
+                        break;
+                    }
             }
+        }
+
+        [SerializeField] private Transform testObject;
+
+        private void OnDrawGizmos()
+        {
+            if (testObject == null)
+                return;
+
+            Vector3 hitPoint = testObject.position;
+            Vector3 playerCenter = _playerObject.PlayerTransform.position + _playerObject.PlayerCharacterController.center;
+
+            var hitDirection = (hitPoint - playerCenter).normalized;
+            var dot = Vector3.Dot(_playerObject.PlayerTransform.forward, hitDirection);
+
+            Debug.Log(dot);
+
+            Gizmos.DrawRay(playerCenter, _playerObject.PlayerTransform.forward);
+            Gizmos.DrawRay(playerCenter, hitDirection);
         }
 
         private async void OnPlayerLost()

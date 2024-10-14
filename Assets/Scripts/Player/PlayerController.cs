@@ -8,6 +8,7 @@ namespace Player
         [SerializeField] private float moveSpeed = 3f;
         [SerializeField] private float jumpHeight = 10f;
         [SerializeField] private float gravity = 20f;
+        [SerializeField] private float lineWidth = 1f;
         [SerializeField] private float groundDistance = 0.4f;
         [SerializeField] private LayerMask groundMask;
 
@@ -58,7 +59,7 @@ namespace Player
             if (_running)
             {
                 Vector3 moveVector = _playerObject.PlayerTransform.forward
-                                     + new Vector3(_playerLine - _playerObject.transform.position.x, 0f, 0f);
+                                     + new Vector3(_playerLine * lineWidth - _playerObject.transform.position.x, 0f, 0f);
                 _playerObject.PlayerCharacterController.Move(moveVector * (_runSpeedMultiplier * (moveSpeed * Time.deltaTime)));
             }
 
