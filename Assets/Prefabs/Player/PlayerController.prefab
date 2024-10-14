@@ -51,3 +51,4 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 1
+  lineWidth: 2
