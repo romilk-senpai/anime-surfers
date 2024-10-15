@@ -15,15 +15,15 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.58431375, g: 0.44313726, b: 0.57254905, a: 1}
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 22
   m_LinearFogEnd: 28
-  m_AmbientSkyColor: {r: 1.9999999, g: 1.9311707, b: 1.9632909, a: 1}
-  m_AmbientEquatorColor: {r: 0.19778818, g: 0.05998206, b: 0.11546173, a: 1}
-  m_AmbientGroundColor: {r: 0.8027794, g: 0.66987157, b: 0.71417415, a: 1}
-  m_AmbientIntensity: 1.2
+  m_AmbientSkyColor: {r: 0.3411818, g: 0.36645454, b: 0.417, a: 1}
+  m_AmbientEquatorColor: {r: 0.40495518, g: 0.45468652, b: 0.47599998, a: 1}
+  m_AmbientGroundColor: {r: 0.384, g: 0.36141178, b: 0.29364705, a: 1}
+  m_AmbientIntensity: 1
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 0}
@@ -867,11 +867,11 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.8392157, g: 0.9732199, b: 1, a: 1}
+  m_Color: {r: 0.8745098, g: 0.9882353, b: 1, a: 1}
   m_Intensity: 1.2
   m_Range: 10
   m_SpotAngle: 30
@@ -879,7 +879,7 @@ Light:
   m_CookieSize: 10
   m_Shadows:
     m_Type: 1
-    m_Resolution: 0
+    m_Resolution: 2
     m_CustomResolution: -1
     m_Strength: 0.665
     m_Bias: 0.05
@@ -2457,6 +2457,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1930818526879580985, guid: 8c19507058adad91cbc2cc6f38104279, type: 3}
       propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3092186079817513913, guid: 8c19507058adad91cbc2cc6f38104279, type: 3}
+      propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3474413393510234244, guid: 8c19507058adad91cbc2cc6f38104279, type: 3}

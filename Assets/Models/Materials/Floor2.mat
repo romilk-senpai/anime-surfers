@@ -17,7 +17,7 @@ Material:
   - _NORMALMAP
   - _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -47,7 +47,7 @@ Material:
         m_Scale: {x: 4, y: 4}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ae282d195d95e5c45a8fec50f615c407, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -56,6 +56,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _Normal:
         m_Texture: {fileID: 2800000, guid: 6b712331c591e4744a09c3ccc974bca4, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 46af69b8911aae34694f543ad0a50cc2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -77,6 +81,7 @@ Material:
     - _GlossyReflections: 0
     - _Metallic: 0
     - _Mode: 0
+    - _NormalPower: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
@@ -85,6 +90,6 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.93142986, g: 0.93142986, b: 0.93142986, a: 1}
+    - _Color: {r: 0.3165145, g: 0.3165145, b: 0.3165145, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

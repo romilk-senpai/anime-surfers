@@ -132,7 +132,6 @@ namespace Game
             {
                 case "Obstacle":
                     {
-                        Debug.Log($"{dot} {hit.gameObject.name}");
                         Debug.DrawRay(playerCenter, _playerObject.PlayerTransform.forward, Color.blue, 5f);
                         Debug.DrawRay(playerCenter, hitDirection, Color.red, 5f);
 
