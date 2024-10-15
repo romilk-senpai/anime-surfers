@@ -59,7 +59,7 @@ Shader "AnimeSurfers/Basic"
             o.Albedo = c.rgb;
 
             fixed4 normalTex = tex2D(_NormalMap, IN.uv_MainTex);
-            //o.Normal = UnpackNormal(normalTex * _NormalPower);
+            o.Normal = UnpackNormal(normalTex * _NormalPower);
 
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
