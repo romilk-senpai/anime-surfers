@@ -13,7 +13,6 @@ namespace Player
         [SerializeField] private LayerMask groundMask;
 
         private PlayerObject _playerObject;
-        private IPlayerCameraController _cameraController;
         private IPlayerAnimatorController _playerAnimatorController;
 
         private bool _running;
@@ -28,18 +27,14 @@ namespace Player
         public float JumpHeight => jumpHeight;
 
         [Inject]
-        private void Inject(PlayerObject playerObject, IPlayerCameraController cameraController,
-            IPlayerAnimatorController playerAnimatorController)
+        private void Inject(PlayerObject playerObject, IPlayerAnimatorController playerAnimatorController)
         {
             _playerObject = playerObject;
-            _cameraController = cameraController;
             _playerAnimatorController = playerAnimatorController;
         }
 
         private void Start()
         {
-            _cameraController.StartFollowing(_playerObject.LookAtTarget);
-
             _playerAnimatorController.SetSpeed(0f);
         }
 

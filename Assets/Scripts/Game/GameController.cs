@@ -23,6 +23,7 @@ namespace Game
         private IPlayerController _playerController;
         private IPlayerInputController _inputController;
         private ISoundController _soundController;
+        private IPlayerCameraController _cameraController;
 
         private int _currentHp;
         private int _gameScore;
@@ -65,12 +66,14 @@ namespace Game
 
         [Inject]
         private void Inject(IPlayerController playerController, PlayerObject playerObject,
-            IPlayerInputController inputController, ISoundController soundController)
+            IPlayerInputController inputController, ISoundController soundController,
+            IPlayerCameraController cameraController)
         {
             _playerController = playerController;
             _playerObject = playerObject;
             _inputController = inputController;
             _soundController = soundController;
+            _cameraController = cameraController;
         }
 
         private void Awake()
@@ -80,6 +83,8 @@ namespace Game
 
         private IEnumerator Start()
         {
+            _cameraController.StartFollowing(_playerObject.LookAtTarget);
+         
             yield return new WaitForSeconds(3f);
 
             StartGame();
@@ -192,6 +197,8 @@ namespace Game
 
             _inputController.Deactivate();
             _playerController.ProcessDeath();
+            
+            _cameraController.SetDeathCamera(_playerObject.PlayerTransform);
 
             _soundController.PlayClipAtPosition(deathSound, _playerObject.transform.position);
 
