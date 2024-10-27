@@ -68,6 +68,7 @@ MonoBehaviour:
   sideObstacleRPrefab: {fileID: 6626169738985091625}
   highgroundPrefab: {fileID: 1715793547228990142}
   entranceHighgroundPrefab: {fileID: 4174179149089971634}
+  useSeed: 0
   randomSpeed: 777
 --- !u!1 &2340795750767766662
 GameObject:
@@ -611,6 +612,10 @@ PrefabInstance:
       value: House_5 (1)
       objectReference: {fileID: 0}
     - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
@@ -695,6 +700,10 @@ PrefabInstance:
     - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
       propertyPath: m_Name
       value: House_4 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -862,6 +871,10 @@ PrefabInstance:
     - target: {fileID: 1308482107808716, guid: 6c8d046662436564eb5afcf4e9caaf9b, type: 3}
       propertyPath: m_Name
       value: House_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308482107808716, guid: 6c8d046662436564eb5afcf4e9caaf9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1308482107808716, guid: 6c8d046662436564eb5afcf4e9caaf9b, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -1045,6 +1058,10 @@ PrefabInstance:
     - target: {fileID: 1825706968152292, guid: 5ff647d15160e7e42917b3e338c66c66, type: 3}
       propertyPath: m_Name
       value: House_6 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1825706968152292, guid: 5ff647d15160e7e42917b3e338c66c66, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1825706968152292, guid: 5ff647d15160e7e42917b3e338c66c66, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -1343,6 +1360,10 @@ PrefabInstance:
       value: House_1
       objectReference: {fileID: 0}
     - target: {fileID: 1827270247712948, guid: f2b055ed15f48bd4793c0d0ef6185ee5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1827270247712948, guid: f2b055ed15f48bd4793c0d0ef6185ee5, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
@@ -1437,6 +1458,10 @@ PrefabInstance:
       value: House_5
       objectReference: {fileID: 0}
     - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
@@ -1519,6 +1544,10 @@ PrefabInstance:
       value: House_6
       objectReference: {fileID: 0}
     - target: {fileID: 1825706968152292, guid: 5ff647d15160e7e42917b3e338c66c66, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1825706968152292, guid: 5ff647d15160e7e42917b3e338c66c66, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
@@ -1599,6 +1628,10 @@ PrefabInstance:
     - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
       propertyPath: m_Name
       value: House_5 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1644558701149256, guid: 01db66142cb4c7543bba603ccfee344a, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -1685,6 +1718,10 @@ PrefabInstance:
     - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
       propertyPath: m_Name
       value: House_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1803457609799654, guid: 318f42008434d4f49aa6d43ae0a5c686, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -1779,6 +1816,10 @@ PrefabInstance:
     - target: {fileID: 1863549030409334, guid: 544cd25ee8b26f549b827a231b2faf0c, type: 3}
       propertyPath: m_Name
       value: House_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1863549030409334, guid: 544cd25ee8b26f549b827a231b2faf0c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1863549030409334, guid: 544cd25ee8b26f549b827a231b2faf0c, type: 3}
       propertyPath: m_StaticEditorFlags
