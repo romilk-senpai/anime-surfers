@@ -144,7 +144,7 @@ public class SimpleChunk : Chunk
                 if (r > 0.20f)
                     continue;
 
-                bool canSpawnEntrance = ChunkWidth * (i + entranceHighgroundPrefab.Length) + j >= arr.Length;
+                bool canSpawnEntrance = ChunkWidth * (i + entranceHighgroundPrefab.Length) + j < arr.Length;
                 r = Random.Range(0f, 1f);
                 ChunkObject spawnPrefab = canSpawnEntrance && r <= 0.05f ? entranceHighgroundPrefab : highgroundPrefab;
                 ChunkObject spawn = Instantiate(spawnPrefab, transform);

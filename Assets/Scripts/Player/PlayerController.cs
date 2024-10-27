@@ -11,6 +11,7 @@ namespace Player
         [SerializeField] private float lineWidth = 1f;
         [SerializeField] private float groundDistance = 0.4f;
         [SerializeField] private LayerMask groundMask;
+        [SerializeField] private float moveDelay = 0.3f;
 
         private PlayerObject _playerObject;
         private IPlayerAnimatorController _playerAnimatorController;
@@ -22,6 +23,7 @@ namespace Player
 
         private int _playerLine;
         private bool _isGrounded;
+        private float _moveTime;
 
         public float MoveSpeed => moveSpeed;
         public float JumpHeight => jumpHeight;
@@ -79,11 +81,18 @@ namespace Player
 
         public void ProcessLeft()
         {
+            if (Time.time - _moveTime < moveDelay)
+            {
+                return;
+            }
+
             if (_playerLine == -1)
             {
             }
             else
             {
+                _moveTime = Time.time;
+
                 _playerLine--;
 
                 if (_isGrounded)
@@ -95,11 +104,18 @@ namespace Player
 
         public void ProcessRight()
         {
+            if (Time.time - _moveTime < moveDelay)
+            {
+                return;
+            }
+
             if (_playerLine == 1)
             {
             }
             else
             {
+                _moveTime = Time.time;
+
                 _playerLine++;
 
                 if (_isGrounded)
@@ -111,6 +127,10 @@ namespace Player
 
         public void ProcessJump()
         {
+            if (Time.time - _moveTime < moveDelay) {
+                return;
+            }
+
             if (!_isGrounded)
             {
                 return;
