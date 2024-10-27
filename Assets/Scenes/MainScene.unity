@@ -1976,6 +1976,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2601940883865037410, guid: f471560d0f0b6e84e8b87d2b3eff234f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.size
+      value: 57
+      objectReference: {fileID: 0}
     - target: {fileID: 2601940883867728680, guid: f471560d0f0b6e84e8b87d2b3eff234f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
