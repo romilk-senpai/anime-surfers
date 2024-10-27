@@ -126,6 +126,16 @@ namespace Player
 
         public void ProcessHit(HitSide hitSide)
         {
+            switch (hitSide)
+            {
+                case HitSide.Left:
+                    _playerLine++;
+                    break;
+                case HitSide.Right:
+                    _playerLine--;
+                    break;
+            }
+
             _playerAnimatorController.PlayHit(hitSide);
         }
 

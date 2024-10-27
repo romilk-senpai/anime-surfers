@@ -15,6 +15,10 @@ namespace Game
         [SerializeField] private int hpRegenTime = 10;
         [SerializeField] private float defaultScoreMultiplier = 2f;
 
+        [SerializeField] private AudioClip hitSound;
+        [SerializeField] private AudioClip damageSound;
+        [SerializeField] private AudioClip deathSound;
+
         private PlayerObject _playerObject;
         private IPlayerController _playerController;
         private IPlayerInputController _inputController;
@@ -99,7 +103,12 @@ namespace Game
 
         private void Update()
         {
-            if (_gameStarted && !_playerDead)
+            if (_playerDead)
+            {
+                return;
+            }
+
+            if (_gameStarted)
             {
                 GameScore = Mathf.FloorToInt(defaultScoreMultiplier * _scoreGlobalMultiplier * _scoreRunMultiplier *
                                              (Time.time - _gameStartTime));
@@ -142,6 +151,8 @@ namespace Game
             Logger.DrawRay(playerCenter, _playerObject.PlayerTransform.right, Color.green, 5f);
             Logger.DrawRay(playerCenter, hitDirection, Color.red, 5f);
 
+            _soundController.PlayClipAtPosition(hitSound, col.contacts[0].point);
+
             if (dotZ > .5f)
             {
                 Logger.Log($"Hit frontal {dotZ}");
@@ -157,6 +168,7 @@ namespace Game
                 if (CurrentHp > 0)
                 {
                     _playerController.ProcessHit(dotX > 0 ? HitSide.Right : HitSide.Left);
+                    _soundController.PlayClipAtPosition(damageSound, playerCenter);
                 }
                 else
                 {
@@ -180,6 +192,8 @@ namespace Game
 
             _inputController.Deactivate();
             _playerController.ProcessDeath();
+
+            _soundController.PlayClipAtPosition(deathSound, _playerObject.transform.position);
 
             _soundController.StopMusic();
 

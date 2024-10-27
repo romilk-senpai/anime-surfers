@@ -1056,11 +1056,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400014, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
   m_PrefabInstance: {fileID: 2601940883868115394}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &2601940883867728728 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 400026, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
-  m_PrefabInstance: {fileID: 2601940883868115394}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2601940883868214984 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100106, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
@@ -1166,8 +1161,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_RootBones:
   - {fileID: 2601940883867728716}
-  m_EndBones:
-  - {fileID: 2601940883867728728}
+  m_EndBones: []
   m_Material: {fileID: 11400000, guid: 4e822de08598b1bb2bb12b72a9efe267, type: 2}
   m_StartDepth: 1
   m_SiblingConstraints: 0
