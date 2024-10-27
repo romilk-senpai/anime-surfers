@@ -47,3 +47,6 @@ MonoBehaviour:
   maxHp: 2
   hpRegenTime: 10
   defaultScoreMultiplier: 2
+  hitSound: {fileID: 8300000, guid: 27be8dd931da2fbd896016c3b159e5ff, type: 3}
+  damageSound: {fileID: 8300000, guid: 20bc28393eb9b566aae3fc6838c8fc8e, type: 3}
+  deathSound: {fileID: 8300000, guid: f71bb3dd8a22f1365b3d9a8bb08140eb, type: 3}

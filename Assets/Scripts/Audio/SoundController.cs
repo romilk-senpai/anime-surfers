@@ -30,7 +30,7 @@ namespace Game.Audio
 
             musicAudioSource.time = 1.2f; // this no good but not enough to cut it myself
             musicAudioSource.Play();
-            musicAudioSource.DOFade(.08f, .5f);
+            musicAudioSource.DOFade(.03f, .5f);
         }
 
         public async void StopMusic()
