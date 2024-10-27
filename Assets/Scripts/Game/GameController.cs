@@ -15,7 +15,7 @@ namespace Game
         [SerializeField] private float defaultScoreMultiplier = 2f;
 
         private PlayerObject _playerObject;
-        private PlayerController _playerController;
+        private IPlayerController _playerController;
         private IPlayerInputController _inputController;
 
         private int _currentHp;
@@ -58,7 +58,7 @@ namespace Game
         public event Action<int> OnPlayerScoreUpdated;
 
         [Inject]
-        private void Inject(PlayerController playerController, PlayerObject playerObject,
+        private void Inject(IPlayerController playerController, PlayerObject playerObject,
             IPlayerInputController inputController)
         {
             _playerController = playerController;
@@ -120,68 +120,44 @@ namespace Game
             }
         }
 
-        private void OnPlayerHit(ControllerColliderHit hit)
+        private void OnPlayerHit(Collision col)
         {
-            Vector3 hitPoint = hit.point;
             Vector3 playerCenter = _playerObject.PlayerTransform.position + _playerObject.PlayerCharacterController.center;
 
-            var hitDirection = (hitPoint - playerCenter).normalized;
-            var dot = Vector3.Dot(_playerObject.PlayerTransform.forward, hitDirection);
+            Vector3 hitDirection = (col.contacts[0].point - playerCenter).normalized;
+            float dotX = Vector3.Dot(_playerObject.PlayerTransform.right, hitDirection);
+            float dotZ = Vector3.Dot(_playerObject.PlayerTransform.forward, hitDirection);
 
-            switch (hit.gameObject.tag)
+            if (!col.collider.gameObject.CompareTag("Obstacle") &&
+                !col.collider.gameObject.CompareTag("Wall"))
             {
-                case "Obstacle":
-                    {
-                        Debug.DrawRay(playerCenter, _playerObject.PlayerTransform.forward, Color.blue, 5f);
-                        Debug.DrawRay(playerCenter, hitDirection, Color.red, 5f);
-
-                        if (dot > .5f)
-                        {
-                            OnPlayerLost();
-                        }
-                        else if (dot > .37f)
-                        {
-                            CurrentHp--;
-
-                            if (CurrentHp <= 0)
-                            {
-                                OnPlayerLost();
-                            }
-                        }
-
-                        break;
-                    }
-                case "Wall":
-                    {
-                        CurrentHp--;
-
-                        if (CurrentHp <= 0)
-                        {
-                            OnPlayerLost();
-                        }
-
-                        break;
-                    }
-            }
-        }
-
-        [SerializeField] private Transform testObject;
-
-        private void OnDrawGizmos()
-        {
-            if (testObject == null)
                 return;
+            }
+            Logger.DrawRay(playerCenter, _playerObject.PlayerTransform.forward, Color.blue, 5f);
+            Logger.DrawRay(playerCenter, _playerObject.PlayerTransform.right, Color.green, 5f);
+            Logger.DrawRay(playerCenter, hitDirection, Color.red, 5f);
 
-            Vector3 hitPoint = testObject.position;
-            Vector3 playerCenter = _playerObject.PlayerTransform.position + _playerObject.PlayerCharacterController.center;
+            if (dotZ > .5f)
+            {
+                Logger.Log($"Hit frontal {dotZ}");
 
-            var hitDirection = (hitPoint - playerCenter).normalized;
-            var dot = Vector3.Dot(_playerObject.PlayerTransform.forward, hitDirection);
+                CurrentHp = 0;
+                OnPlayerLost();
+            }
+            else if (Mathf.Abs(dotX) > .5f)
+            {
+                Logger.Log($"Hit {(dotX > 0 ? "Right" : "Left")} {dotX}");
 
-            Debug.Log(dot);
-
-            Gizmos.DrawRay(playerCenter, _playerObject.PlayerTransform.forward);
-            Gizmos.DrawRay(playerCenter, hitDirection);
+                CurrentHp--;
+                if (CurrentHp > 0)
+                {
+                    _playerController.ProcessHit(dotX > 0 ? HitSide.Right : HitSide.Left);
+                }
+                else
+                {
+                    OnPlayerLost();
+                }
+            }
         }
 
         private async void OnPlayerLost()

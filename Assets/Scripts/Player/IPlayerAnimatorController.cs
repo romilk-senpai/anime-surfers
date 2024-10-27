@@ -3,7 +3,8 @@
     public interface IPlayerAnimatorController
     {
         void SetSpeed(float speed);
-        void JumpAnimation();
+        void PlayJump();
         void PlayDeath();
+        void PlayHit(HitSide hitSide);
     }
 }

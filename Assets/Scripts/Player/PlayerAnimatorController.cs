@@ -14,6 +14,9 @@ namespace Player
         private readonly int _jumpProp = Animator.StringToHash("Jump");
         private readonly int _airborneProp = Animator.StringToHash("Airborne");
         private readonly int _deathProp = Animator.StringToHash("Death");
+        private readonly int _hitLeftProp = Animator.StringToHash("Left");
+        private readonly int _hitRightProp = Animator.StringToHash("Right");
+        private readonly int _hitLowProp = Animator.StringToHash("Low");
 
         [Inject]
         private void Inject(PlayerObject playerObject)
@@ -26,7 +29,7 @@ namespace Player
             _playerObject.PlayerAnimator.SetFloat(_speedProp, speed);
         }
 
-        public void JumpAnimation()
+        public void PlayJump()
         {
             StartCoroutine(JumpCoroutine());
         }
@@ -57,6 +60,19 @@ namespace Player
         public void PlayDeath()
         {
             _playerObject.PlayerAnimator.SetTrigger(_deathProp);
+        }
+
+        public void PlayHit(HitSide hitSide)
+        {
+            int prop = hitSide switch
+            {
+                HitSide.Left => _hitLeftProp,
+                HitSide.Right => _hitRightProp,
+                HitSide.Low => _hitLowProp,
+                _ => throw new System.NotImplementedException()
+            };
+
+            _playerObject.PlayerAnimator.SetTrigger(prop);
         }
     }
 }

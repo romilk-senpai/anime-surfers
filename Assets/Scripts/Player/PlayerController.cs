@@ -3,7 +3,7 @@ using Zenject;
 
 namespace Player
 {
-    public class PlayerController : MonoBehaviour, IPlayerInputHandler
+    public class PlayerController : MonoBehaviour, IPlayerController, IPlayerInputHandler
     {
         [SerializeField] private float moveSpeed = 3f;
         [SerializeField] private float jumpHeight = 10f;
@@ -73,7 +73,7 @@ namespace Player
 
                     _verticalVelocity = Mathf.Sqrt(jumpHeight * 2f * gravity);
 
-                    _playerAnimatorController.JumpAnimation();
+                    _playerAnimatorController.PlayJump();
                 }
             }
 
@@ -112,6 +112,11 @@ namespace Player
             }
 
             _jump = true;
+        }
+
+        public void ProcessHit(HitSide hitSide)
+        {
+            _playerAnimatorController.PlayHit(hitSide);
         }
 
         public void ProcessDeath()
