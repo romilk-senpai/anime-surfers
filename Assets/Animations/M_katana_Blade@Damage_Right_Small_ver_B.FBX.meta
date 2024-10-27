@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 133f831095087dd40815d6f4ce7c25a0
+guid: d0da433578fc21b4a80f20186d8b00a2
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable:
@@ -974,7 +974,7 @@ ModelImporter:
     second: Grru_Katana
   - first:
       74: 7400000
-    second: Damage_Front_Big_ver_A
+    second: Damage_Right_Small_ver_B
   - first:
       95: 9500000
     second: //RootNode
@@ -1000,10 +1000,10 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
       copied configuration does not match position in animation file:\n\t'thigh_l'
-      : position error = 19.810373 mm\n\t'calf_l' : position error = 5.017287 mm\n\t'foot_l'
-      : position error = 9.396323 mm\n\t'ball_l' : position error = 6.786921 mm\n\t'thigh_r'
-      : position error = 19.440453 mm\n\t'calf_r' : position error = 15.772450 mm\n\t'foot_r'
-      : position error = 13.162940 mm\n\t'ball_r' : position error = 8.922418 mm\n"
+      : position error = 19.810349 mm\n\t'calf_l' : position error = 5.017404 mm\n\t'foot_l'
+      : position error = 9.396298 mm\n\t'ball_l' : position error = 6.786993 mm\n\t'thigh_r'
+      : position error = 19.440426 mm\n\t'calf_r' : position error = 15.772376 mm\n\t'foot_r'
+      : position error = 13.162981 mm\n\t'ball_r' : position error = 8.922395 mm\n"
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
       might lower retargeting quality:\nNote: Activate translation DOF on avatar
@@ -1023,11 +1023,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Damage_Front_Big_ver_A
+      name: Damage_Right_Small_ver_B
       takeName: Take 001
       internalID: 0
       firstFrame: 0
-      lastFrame: 20
+      lastFrame: 21
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
