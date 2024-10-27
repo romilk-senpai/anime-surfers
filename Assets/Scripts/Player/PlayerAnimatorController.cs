@@ -14,9 +14,9 @@ namespace Player
         private readonly int _jumpProp = Animator.StringToHash("Jump");
         private readonly int _airborneProp = Animator.StringToHash("Airborne");
         private readonly int _deathProp = Animator.StringToHash("Death");
-        private readonly int _hitLeftProp = Animator.StringToHash("Left");
-        private readonly int _hitRightProp = Animator.StringToHash("Right");
-        private readonly int _hitLowProp = Animator.StringToHash("Low");
+        private readonly int _hitLeftProp = Animator.StringToHash("HitLeft");
+        private readonly int _hitRightProp = Animator.StringToHash("HitRight");
+        private readonly int _hitLowProp = Animator.StringToHash("HitLow");
 
         [Inject]
         private void Inject(PlayerObject playerObject)
