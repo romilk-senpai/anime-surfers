@@ -5,7 +5,9 @@ namespace Player
 {
     public class PlayerCameraController : MonoBehaviour, IPlayerCameraController
     {
-        [SerializeField] private CinemachineVirtualCamera cinemachineCamera;
+        [SerializeField] private CinemachineBrain cinemachineBrain;
+        [SerializeField] private CinemachineVirtualCamera followCamera;
+        [SerializeField] private CinemachineVirtualCamera deathCamera;
 
         private Transform _cameraTarget;
 
@@ -13,8 +15,19 @@ namespace Player
         {
             _cameraTarget = cameraTarget;
 
-            cinemachineCamera.Follow = _cameraTarget;
-            cinemachineCamera.LookAt = _cameraTarget;
+            followCamera.Follow = _cameraTarget;
+            followCamera.LookAt = _cameraTarget;
+
+            followCamera.gameObject.SetActive(true);
+        }
+
+        public void SetDeathCamera(Transform cameraTarget)
+        {
+            deathCamera.Follow = _cameraTarget;
+            deathCamera.LookAt = _cameraTarget;
+
+            followCamera.gameObject.SetActive(false);
+            deathCamera.gameObject.SetActive(true);
         }
     }
 }
