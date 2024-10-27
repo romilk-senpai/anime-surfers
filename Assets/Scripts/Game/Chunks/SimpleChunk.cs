@@ -133,18 +133,21 @@ public class SimpleChunk : Chunk
                 if (i + highgroundPrefab.Length > points[targetPointIndex].x)
                     continue;
 
-                if (ChunkWidth * (i + highgroundPrefab.Length) + j > arr.Length)
+                if (ChunkWidth * (i + highgroundPrefab.Length) + j >= arr.Length)
                     continue;
 
                 if (arr[ChunkWidth * i + j] > 0)
                     continue;
 
-                float r2 = Random.Range(0f, 1f);
+                float r = Random.Range(0f, 1f);
 
-                if (r2 > 0.25f)
+                if (r > 0.20f)
                     continue;
 
-                ChunkObject spawn = Instantiate(highgroundPrefab, transform);
+                bool canSpawnEntrance = ChunkWidth * (i + entranceHighgroundPrefab.Length) + j >= arr.Length;
+                r = Random.Range(0f, 1f);
+                ChunkObject spawnPrefab = canSpawnEntrance && r <= 0.05f ? entranceHighgroundPrefab : highgroundPrefab;
+                ChunkObject spawn = Instantiate(spawnPrefab, transform);
                 spawn.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                 spawn.gameObject.SetActive(true);
                 _spawnedHighgrounds.Add(spawn);
