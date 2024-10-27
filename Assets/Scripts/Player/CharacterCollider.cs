@@ -5,11 +5,10 @@ namespace Player
 {
     public class CharacterCollider : MonoBehaviour
     {
-        public event Action<ControllerColliderHit> OnCollisionHit;
+        public event Action<Collision> OnCollisionHit;
 
-        private void OnControllerColliderHit(ControllerColliderHit hit)
-        {            
-            OnCollisionHit?.Invoke(hit);
+        private void OnCollisionEnter(Collision col) {
+            OnCollisionHit?.Invoke(col);
         }
     }
 }

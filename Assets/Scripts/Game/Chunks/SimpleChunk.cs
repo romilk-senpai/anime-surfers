@@ -11,6 +11,7 @@ public class SimpleChunk : Chunk
     [SerializeField] private ChunkObject highgroundPrefab;
     [SerializeField] private ChunkObject entranceHighgroundPrefab;
 
+    [SerializeField] private bool useSeed = true;
     [SerializeField] private int randomSpeed = 777;
 
     private Vector2Int[] _testPoints = new Vector2Int[] { };
@@ -25,7 +26,10 @@ public class SimpleChunk : Chunk
 
     public override void Generate(Vector2Int start, Vector2Int dest)
     {
-        //Random.InitState(randomSpeed);
+        if (useSeed)
+        {
+            Random.InitState(randomSpeed);
+        }
 
         _spawnedHighgrounds = new List<ChunkObject>();
 
