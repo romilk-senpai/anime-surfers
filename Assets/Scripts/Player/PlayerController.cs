@@ -90,6 +90,11 @@ namespace Player
             else
             {
                 _playerLine--;
+
+                if (_isGrounded)
+                {
+                    _playerAnimatorController.PlayDodgeLeft();
+                }
             }
         }
 
@@ -101,6 +106,11 @@ namespace Player
             else
             {
                 _playerLine++;
+
+                if (_isGrounded)
+                {
+                    _playerAnimatorController.PlayDodgeRight();
+                }
             }
         }
 

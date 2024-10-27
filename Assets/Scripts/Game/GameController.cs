@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using Cysharp.Threading.Tasks;
+using Game.Audio;
 using Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,6 +18,7 @@ namespace Game
         private PlayerObject _playerObject;
         private IPlayerController _playerController;
         private IPlayerInputController _inputController;
+        private ISoundController _soundController;
 
         private int _currentHp;
         private int _gameScore;
@@ -59,11 +61,12 @@ namespace Game
 
         [Inject]
         private void Inject(IPlayerController playerController, PlayerObject playerObject,
-            IPlayerInputController inputController)
+            IPlayerInputController inputController, ISoundController soundController)
         {
             _playerController = playerController;
             _playerObject = playerObject;
             _inputController = inputController;
+            _soundController = soundController;
         }
 
         private void Awake()
@@ -90,6 +93,8 @@ namespace Game
 
             _gameStarted = true;
             _gameStartTime = Time.time;
+
+            _soundController.StartMusic();
         }
 
         private void Update()
@@ -175,6 +180,8 @@ namespace Game
 
             _inputController.Deactivate();
             _playerController.ProcessDeath();
+
+            _soundController.StopMusic();
 
             await UniTask.WaitForSeconds(3f);
 

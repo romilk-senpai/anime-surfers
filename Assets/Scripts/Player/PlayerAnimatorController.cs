@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -17,6 +15,8 @@ namespace Player
         private readonly int _hitLeftProp = Animator.StringToHash("HitLeft");
         private readonly int _hitRightProp = Animator.StringToHash("HitRight");
         private readonly int _hitLowProp = Animator.StringToHash("HitLow");
+        private readonly int _dodgeLeftProp = Animator.StringToHash("DodgeLeft");
+        private readonly int _dodgeRightProp = Animator.StringToHash("DodgeRight");
 
         [Inject]
         private void Inject(PlayerObject playerObject)
@@ -73,6 +73,16 @@ namespace Player
             };
 
             _playerObject.PlayerAnimator.SetTrigger(prop);
+        }
+
+        public void PlayDodgeLeft()
+        {
+            _playerObject.PlayerAnimator.SetTrigger(_dodgeLeftProp);
+        }
+
+        public void PlayDodgeRight()
+        {
+            _playerObject.PlayerAnimator.SetTrigger(_dodgeRightProp);
         }
     }
 }

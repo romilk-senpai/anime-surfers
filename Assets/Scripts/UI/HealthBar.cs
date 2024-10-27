@@ -21,7 +21,7 @@ namespace UI
             _gameController = gameController;
         }
 
-        private void Start()
+        private void OnEnable()
         {
             _gameController.OnPlayerHpUpdated += OnPlayerHpUpdated;
 
@@ -36,6 +36,15 @@ namespace UI
                 _spawnedLives[i] = lifeImage;
 
                 lifeImage.color = Color.white;
+            }
+        }
+
+        private void OnDisable()
+        {
+            _gameController.OnPlayerHpUpdated -= OnPlayerHpUpdated;
+            foreach (var spawn in _spawnedLives)
+            {
+                Destroy(spawn.gameObject);
             }
         }
 

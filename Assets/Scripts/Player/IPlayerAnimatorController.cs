@@ -6,5 +6,7 @@
         void PlayJump();
         void PlayDeath();
         void PlayHit(HitSide hitSide);
+        void PlayDodgeLeft();
+        void PlayDodgeRight();
     }
 }
