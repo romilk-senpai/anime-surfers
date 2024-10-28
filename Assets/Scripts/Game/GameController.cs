@@ -84,7 +84,7 @@ namespace Game
         private IEnumerator Start()
         {
             _cameraController.StartFollowing(_playerObject.LookAtTarget);
-         
+
             yield return new WaitForSeconds(3f);
 
             StartGame();
@@ -197,14 +197,20 @@ namespace Game
 
             _inputController.Deactivate();
             _playerController.ProcessDeath();
-            
+
             _cameraController.SetDeathCamera(_playerObject.PlayerTransform);
 
             _soundController.PlayClipAtPosition(deathSound, _playerObject.transform.position);
 
             _soundController.StopMusic();
 
-            await UniTask.WaitForSeconds(3f);
+            bool isCancelled = await UniTask.WaitForSeconds(3f, cancellationToken: destroyCancellationToken)
+                .SuppressCancellationThrow();
+
+            if (isCancelled)
+            {
+                return;
+            }
 
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
