@@ -6,6 +6,7 @@ using UnityEngine;
 public class SimpleChunk : Chunk
 {
     [SerializeField] private ChunkObject floorObstaclePrefab;
+    [SerializeField] private ChunkObject floorTallObstaclePrefab;
     [SerializeField] private ChunkObject sideObstacleLPrefab;
     [SerializeField] private ChunkObject sideObstacleRPrefab;
     [SerializeField] private ChunkObject highgroundPrefab;
@@ -14,7 +15,7 @@ public class SimpleChunk : Chunk
     [SerializeField] private bool useSeed = true;
     [SerializeField] private int randomSpeed = 777;
 
-    private Vector2Int[] _testPoints = new Vector2Int[] { };
+    [SerializeField] private Vector2Int[] _testPoints = new Vector2Int[] { };
     private List<ChunkObject> _spawnedHighgrounds;
 
     private const int MinSegmentLength = 10;
@@ -33,7 +34,9 @@ public class SimpleChunk : Chunk
 
         _spawnedHighgrounds = new List<ChunkObject>();
 
-        int pointsCount = 2 + Random.Range(1, Mathf.RoundToInt(ChunkLength / (1.5f * MinSegmentLength)));
+        int maxPointCount = Mathf.RoundToInt(ChunkLength / MinSegmentLength);
+
+        int pointsCount = 2 + Random.Range(maxPointCount / 2, maxPointCount);
         var points = new Vector2Int[pointsCount];
 
         int currentX = 0;
@@ -41,14 +44,14 @@ public class SimpleChunk : Chunk
 
         for (int i = 1; i < points.Length - 1; i++)
         {
-            int x = Random.Range(currentX + MinSegmentLength, ChunkLength - MinSegmentLength * (points.Length - i - 1) + 1);
+            currentX += ChunkLength / pointsCount;
             int y = lastY;
             while (y == lastY)
             {
                 y = Random.Range(0, ChunkWidth);
             }
-            points[i] = new Vector2Int(x, y);
-            currentX = x;
+            points[i] = new Vector2Int(currentX, y);
+            lastY = y;
         }
 
         points[0] = start;
@@ -79,7 +82,7 @@ public class SimpleChunk : Chunk
 
         for (int i = 0; i < ChunkLength; i++)
         {
-            if (i >= points[targetPointIndex].x && targetPointIndex < points.Length - 1)
+            while (i >= points[targetPointIndex].x && targetPointIndex < points.Length - 1)
             {
                 targetPointIndex++;
             }
@@ -92,26 +95,21 @@ public class SimpleChunk : Chunk
                 if (arr[ChunkWidth * i + j] == PathCell)
                 {
                     float r1 = Random.Range(0f, 1f);
+                    float r2 = Random.Range(0f, 1f);
 
-                    if (r1 > .025f)
+                    if (r1 > 0.02f)
                         continue;
 
-                    if (j == 0)
+                    if (j == 0 && r2 > 0.5f && arr[ChunkWidth * i + j + 1] != ObstacleCell)
                     {
-                        if (arr[ChunkWidth * i + j + 1] == ObstacleCell)
-                            continue;
-
                         ChunkObject obstacleL = Instantiate(sideObstacleLPrefab, transform);
                         obstacleL.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleL.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
                     }
-                    else if (j == ChunkWidth - 1)
+                    else if (j == ChunkWidth - 1 && r2 > 0.5f && arr[ChunkWidth * i + j - 1] != ObstacleCell)
                     {
-                        if (arr[ChunkWidth * i + j - 1] == ObstacleCell)
-                            continue;
-
                         ChunkObject obstacleR = Instantiate(sideObstacleRPrefab, transform);
                         obstacleR.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleR.gameObject.SetActive(true);
@@ -120,7 +118,19 @@ public class SimpleChunk : Chunk
                     }
                     else
                     {
-                        ChunkObject obstacleFloor = Instantiate(floorObstaclePrefab, transform);
+                        float r3 = Random.Range(0f, 1f);
+
+                        bool canSpawnTall = false;
+
+                        if (r3 < .25f)
+                        {
+                            bool lFree = j > 0 || arr[ChunkWidth * i + j - 1] != ObstacleCell;
+                            bool rFree = j < ChunkWidth - 1 || arr[ChunkWidth * i + j + 1] != ObstacleCell;
+
+                            canSpawnTall = lFree && rFree;
+                        }
+
+                        ChunkObject obstacleFloor = Instantiate(canSpawnTall ? floorTallObstaclePrefab : floorObstaclePrefab, transform);
                         obstacleFloor.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleFloor.gameObject.SetActive(true);
 
@@ -130,7 +140,7 @@ public class SimpleChunk : Chunk
                     continue;
                 }
 
-                if (i + highgroundPrefab.Length > points[targetPointIndex].x)
+                if (i + highgroundPrefab.Length >= points[targetPointIndex].x)
                     continue;
 
                 if (ChunkWidth * (i + highgroundPrefab.Length) + j >= arr.Length)
@@ -141,12 +151,13 @@ public class SimpleChunk : Chunk
 
                 float r = Random.Range(0f, 1f);
 
-                if (r > 0.20f)
+                if (r > 0.5f)
                     continue;
 
-                bool canSpawnEntrance = ChunkWidth * (i + entranceHighgroundPrefab.Length) + j < arr.Length;
+                bool canSpawnEntrance = ChunkWidth * (i + entranceHighgroundPrefab.Length) + j < arr.Length
+                    && i + entranceHighgroundPrefab.Length < points[targetPointIndex].x;
                 r = Random.Range(0f, 1f);
-                ChunkObject spawnPrefab = canSpawnEntrance && r <= 0.05f ? entranceHighgroundPrefab : highgroundPrefab;
+                ChunkObject spawnPrefab = canSpawnEntrance && r < 0.25f ? entranceHighgroundPrefab : highgroundPrefab;
                 ChunkObject spawn = Instantiate(spawnPrefab, transform);
                 spawn.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                 spawn.gameObject.SetActive(true);

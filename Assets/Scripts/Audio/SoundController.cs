@@ -36,7 +36,7 @@ namespace Game.Audio
         public async void StopMusic()
         {
             await musicAudioSource.DOFade(0f, .5f);
-            
+
             musicAudioSource.Stop();
         }
 
@@ -56,7 +56,13 @@ namespace Game.Audio
 
             pointSource.PlayOneShot(clip);
 
-            await UniTask.WaitForSeconds(clip.length);
+            bool isCancelled = await UniTask.WaitForSeconds(clip.length, cancellationToken: destroyCancellationToken)
+                .SuppressCancellationThrow();
+
+            if (isCancelled)
+            {
+                return;
+            }
 
             pointSource.gameObject.SetActive(false);
             _spawnedAudioSources.Enqueue(pointSource);
