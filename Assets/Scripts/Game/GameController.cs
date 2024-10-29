@@ -158,14 +158,14 @@ namespace Game
 
             _soundController.PlayClipAtPosition(hitSound, col.contacts[0].point);
 
-            if (dotZ > .5f)
+            if (dotZ > .8f)
             {
                 Logger.Log($"Hit frontal {dotZ}");
 
                 CurrentHp = 0;
                 OnPlayerLost();
             }
-            else if (Mathf.Abs(dotX) > .5f)
+            else if (Mathf.Abs(dotX) > .2f)
             {
                 Logger.Log($"Hit {(dotX > 0 ? "Right" : "Left")} {dotX}");
 
