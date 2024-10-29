@@ -21,6 +21,7 @@ public class SimpleChunk : Chunk
     private const int MinSegmentLength = 10;
     private const int FreeCellsAfterPoint = 3;
 
+    private const int UnsetCell = 0;
     private const int ObstacleCell = 1;
     private const int ReservedFreeCell = 2;
     private const int PathCell = 3;
@@ -80,7 +81,7 @@ public class SimpleChunk : Chunk
 
         int targetPointIndex = 1;
 
-        for (int i = 0; i < ChunkLength; i++)
+        for (int i = FreeCellsAfterPoint; i < ChunkLength - 1; i++)
         {
             while (i >= points[targetPointIndex].x && targetPointIndex < points.Length - 1)
             {
@@ -107,6 +108,9 @@ public class SimpleChunk : Chunk
                         obstacleL.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
+                        arr[ChunkWidth * (i - 1) + j + 1] = ObstacleCell;
+                        arr[ChunkWidth * i + j + 1] = ObstacleCell;
+                        arr[ChunkWidth * (i + 1) + j + 1] = ObstacleCell;
                     }
                     else if (j == ChunkWidth - 1 && r2 > 0.5f && arr[ChunkWidth * i + j - 1] != ObstacleCell)
                     {
@@ -115,30 +119,47 @@ public class SimpleChunk : Chunk
                         obstacleR.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
+                        arr[ChunkWidth * (i - 1) + j - 1] = ObstacleCell;
+                        arr[ChunkWidth * i + j - 1] = ObstacleCell;
+                        arr[ChunkWidth * (i + 1) + j - 1] = ObstacleCell;
                     }
                     else
                     {
                         float r3 = Random.Range(0f, 1f);
 
-                        bool canSpawnTall = false;
+                        bool spawnTall = false;
 
                         if (r3 < .25f)
                         {
-                            bool lFree = j > 0 || arr[ChunkWidth * i + j - 1] != ObstacleCell;
-                            bool rFree = j < ChunkWidth - 1 || arr[ChunkWidth * i + j + 1] != ObstacleCell;
+                            bool lFree = j > 0
+                                && arr[ChunkWidth * i + j - 1] != ObstacleCell
+                                && arr[ChunkWidth * (i - 1) + j - 1] != ObstacleCell;
+                            bool rFree = j < ChunkWidth - 1
+                                && arr[ChunkWidth * i + j + 1] != ObstacleCell
+                                && arr[ChunkWidth * (i - 1) + j + 1] != ObstacleCell;
 
-                            canSpawnTall = lFree && rFree;
+                            spawnTall = lFree || rFree;
                         }
 
-                        ChunkObject obstacleFloor = Instantiate(canSpawnTall ? floorTallObstaclePrefab : floorObstaclePrefab, transform);
+                        ChunkObject obstacleFloor = Instantiate(spawnTall ? floorTallObstaclePrefab : floorObstaclePrefab, transform);
                         obstacleFloor.transform.localPosition = new Vector3(MinCellX + CellWidth * j, 0f, i);
                         obstacleFloor.gameObject.SetActive(true);
 
                         arr[ChunkWidth * i + j] = ObstacleCell;
+
+                        if (spawnTall)
+                        {
+                            arr[ChunkWidth * (i - 1) + j + 1] = ObstacleCell;
+                            arr[ChunkWidth * i + j + 1] = ObstacleCell;
+                            arr[ChunkWidth * (i + 1) + j + 1] = ObstacleCell;
+                        }
                     }
 
                     continue;
                 }
+
+                if (arr[ChunkWidth * i + j] != UnsetCell)
+                    continue;
 
                 if (i + highgroundPrefab.Length >= points[targetPointIndex].x)
                     continue;
