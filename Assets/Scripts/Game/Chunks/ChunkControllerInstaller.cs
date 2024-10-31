@@ -6,7 +6,7 @@ namespace Game.Chunks
     public class ChunkControllerInstaller : MonoInstaller
     {
         [SerializeField] private ChunkController chunkControllerPrefab;
-        
+
         public override void InstallBindings()
         {
             Container.Bind<ChunkController>()
