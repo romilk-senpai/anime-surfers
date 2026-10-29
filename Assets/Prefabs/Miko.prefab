@@ -58,6 +58,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -79,9 +84,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1389420270853319533
 GameObject:
@@ -157,10 +164,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1389420270853319533}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -1007,6 +1014,10 @@ PrefabInstance:
       propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 13700000, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ab9f8ca1f4af7754e944c5b346f04c9b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -1032,6 +1043,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 100106, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5840851570656579753}
+    - targetCorrespondingSourceObject: {fileID: 100106, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8670684931884224942}
     - targetCorrespondingSourceObject: {fileID: 100014, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3266225345008390788}
@@ -1039,6 +1053,11 @@ PrefabInstance:
 --- !u!95 &2601940883860788386 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9500000, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
+  m_PrefabInstance: {fileID: 2601940883868115394}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &2601940883865037410 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 13700000, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
   m_PrefabInstance: {fileID: 2601940883868115394}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2601940883867728680 stripped
@@ -1054,6 +1073,11 @@ Transform:
 --- !u!4 &2601940883867728716 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400014, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
+  m_PrefabInstance: {fileID: 2601940883868115394}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2601940883867728752 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400050, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}
   m_PrefabInstance: {fileID: 2601940883868115394}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &2601940883868214984 stripped
@@ -1094,7 +1118,6 @@ CharacterController:
     serializedVersion: 2
     m_Bits: 16384
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1142,6 +1165,21 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1f080a1e65d584c4ca3e3c75fbb406b3, type: 3}
   - {fileID: 8300000, guid: 45bc125cb8cb195408490bec63fde615, type: 3}
   - {fileID: 8300000, guid: c2e0d3f88cb48f240af40a1f1bac7e8c, type: 3}
+--- !u!114 &8670684931884224942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2601940883868214984}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 245a4427343444e4fa8427167c15c082, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Rendering.ToonFaceDirection
+  faceRenderer: {fileID: 2601940883865037410}
+  head: {fileID: 2601940883867728752}
+  centerOffset: {x: 0, y: 0.06, z: 0}
 --- !u!1 &2601940883868215148 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100014, guid: dc9a421f281d3bf44bbb6fa4ad105c14, type: 3}

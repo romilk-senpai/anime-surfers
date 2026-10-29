@@ -5,7 +5,7 @@ using Game.Audio;
 using Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Zenject;
+using VContainer;
 
 namespace Game
 {

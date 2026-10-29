@@ -8,7 +8,6 @@ public class ModelCustomizer : MonoBehaviour {
     private GameObject[] parts;
     [SerializeField]
     private bool[] bools;
-    [SerializeField]
 
     void Reset()
     {

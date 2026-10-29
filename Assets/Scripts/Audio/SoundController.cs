@@ -45,7 +45,7 @@ namespace Game.Audio
             globalAudioSource.PlayOneShot(clip);
         }
 
-        public async void PlayClipAtPosition(AudioClip clip, Vector3 position)
+        public async void PlayClipAtPosition(AudioClip clip, Vector3 position, float volume = 1f)
         {
             if (!_spawnedAudioSources.TryDequeue(out AudioSource pointSource))
             {
@@ -54,7 +54,7 @@ namespace Game.Audio
             pointSource.transform.position = position;
             pointSource.gameObject.SetActive(true);
 
-            pointSource.PlayOneShot(clip);
+            pointSource.PlayOneShot(clip, volume);
 
             bool isCancelled = await UniTask.WaitForSeconds(clip.length, cancellationToken: destroyCancellationToken)
                 .SuppressCancellationThrow();

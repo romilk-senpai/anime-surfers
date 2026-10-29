@@ -1,13 +1,13 @@
-using Cinemachine;
+
 using UnityEngine;
 
 namespace Player
 {
     public class PlayerCameraController : MonoBehaviour, IPlayerCameraController
     {
-        [SerializeField] private CinemachineBrain cinemachineBrain;
-        [SerializeField] private CinemachineVirtualCamera followCamera;
-        [SerializeField] private CinemachineVirtualCamera deathCamera;
+        [SerializeField] private Unity.Cinemachine.CinemachineBrain cinemachineBrain;
+        [SerializeField] private Unity.Cinemachine.CinemachineVirtualCamera followCamera;
+        [SerializeField] private Unity.Cinemachine.CinemachineVirtualCamera deathCamera;
 
         private Transform _cameraTarget;
 

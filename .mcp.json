@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "UnityMCP": {
+      "type": "stdio",
+      "command": "C:/Users/rpakh/.local/bin/uvx.exe",
+      "args": ["--from", "mcpforunityserver==10.3.0", "mcp-for-unity", "--transport", "stdio"]
+    },
+    "blender": {
+      "type": "stdio",
+      "command": "C:/Users/rpakh/.local/bin/uvx.exe",
+      "args": ["--from", "mcp-for-blender==2.2.6", "mcp-for-blender"]
+    }
+  }
+}

@@ -1,7 +1,7 @@
 using Game;
 using TMPro;
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace UI
 {

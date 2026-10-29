@@ -2,7 +2,7 @@ using DG.Tweening;
 using Game;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
+using VContainer;
 
 namespace UI
 {

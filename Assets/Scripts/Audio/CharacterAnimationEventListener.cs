@@ -1,10 +1,11 @@
 using UnityEngine;
-using Zenject;
+using VContainer;
 
 namespace Game.Audio
 {
     public class CharacterAnimationEventListener : MonoBehaviour
     {
+        // Not registered in every scene; the events are then ignored.
         [Inject]
         private ISoundController _soundController;
 
@@ -16,6 +17,11 @@ namespace Game.Audio
 
         private void OnFootstepEvent(int foot)
         {
+            if (_soundController == null)
+            {
+                return;
+            }
+
             int rand = _lastRandFootstep;
 
             while (rand == _lastRandFootstep && footstepClips.Length > 1)
@@ -32,6 +38,11 @@ namespace Game.Audio
 
         private void OnJumpEvent()
         {
+            if (_soundController == null)
+            {
+                return;
+            }
+
             int rand = Random.Range(0, jumpClips.Length);
 
             _soundController.PlayClipAtPosition(jumpClips[rand], transform.position);
@@ -39,6 +50,11 @@ namespace Game.Audio
 
         private void OnLandEvent()
         {
+            if (_soundController == null)
+            {
+                return;
+            }
+
             int rand = Random.Range(0, landClips.Length);
 
             _soundController.PlayClipAtPosition(landClips[rand], transform.position);
