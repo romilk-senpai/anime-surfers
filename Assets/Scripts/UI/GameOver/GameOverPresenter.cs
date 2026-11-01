@@ -138,7 +138,9 @@ namespace Game.UI
 			// The sound effect is lettering, not copy: it stays Japanese in every language.
 			_soundEffect.text = barrier ? "ガツン!" : "ドカン!";
 			_screen.Q<Label>("crash-title").SetBinding("text", new LocalizedString(Table, crash + ".title"));
-			_screen.Q<Label>("crash-tip").SetBinding("text", new LocalizedString(Table, crash + ".tip"));
+			// The desktop tips name keys; the touch ones name swipes.
+			string tip = crash + (_ui.IsMobile ? ".tip.touch" : ".tip");
+			_screen.Q<Label>("crash-tip").SetBinding("text", new LocalizedString(Table, tip));
 
 			_screen.Q<Label>("score").text = Format(_run.Score);
 			_screen.Q<Label>("distance").text = Format(Mathf.FloorToInt(_board.Distance)) + " m";

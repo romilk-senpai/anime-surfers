@@ -244,6 +244,11 @@ Button:focus {
     font-size: 17px;
 }
 
+/* Keyboard hints mean nothing on a touch screen. */
+.mobile .key-hint {
+    display: none;
+}
+
 /* ---- Icons ---- */
 
 /* Single-colour icons are drawn white and tinted with -unity-background-image-tint-color. */
@@ -260,6 +265,7 @@ Button:focus {
 .icon--magnet { background-image: url("../Icons/magnet.svg"); }
 .icon--shield { background-image: url("../Icons/shield.svg"); }
 .icon--super-jump { background-image: url("../Icons/super-jump.svg"); }
+.icon--nitro { background-image: url("../Icons/nitro.svg"); }
 
 /* The coin keeps its own colours; the on-ink variant has a white rim for dark panels. */
 .coin-icon {

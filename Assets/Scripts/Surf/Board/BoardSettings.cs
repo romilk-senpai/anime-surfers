@@ -58,6 +58,8 @@ namespace Game.Surf
 		[Tooltip("Sideways speed of the bounce, toward the middle of the passage.")]
 		[SerializeField] private float wallBounceSideSpeed = 4.5f;
 		[SerializeField] private float wallBounceHeight = 1.5f;
+		[Tooltip("Hitting an obstacle no further than this past its side edge glances off instead of crashing.")]
+		[SerializeField] private float edgeForgiveness = 0.4f;
 
 		public float StartSpeed => startSpeed;
 		public float MaxSpeed => maxSpeed;
@@ -94,6 +96,7 @@ namespace Game.Surf
 		public float WallBounceSpeed => wallBounceSpeed;
 		public float WallBounceSideSpeed => wallBounceSideSpeed;
 		public float WallBounceHeight => wallBounceHeight;
+		public float EdgeForgiveness => edgeForgiveness;
 
 		public float PassageHalfWidth => laneCount * laneWidth * 0.5f;
 

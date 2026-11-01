@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e5b1d08da9c0fe4ab592a2b66d8b646, type: 3}
+  m_Name: WeatherSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.WeatherSettings
+  calmDistance: {x: 600, y: 1800}
+  stormDistance: {x: 300, y: 700}
+  rampDistance: 120
+  calmWaveScale: 1.5
+  stormWaveScale: 2.8

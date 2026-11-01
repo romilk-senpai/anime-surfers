@@ -1,0 +1,74 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="menu" picking-mode="Ignore">
+        <ui:Style src="../../Styles/Mobile/MainMenu.uss" />
+
+        <ui:VisualElement class="menu__strip" picking-mode="Ignore">
+            <ui:Label text="ア" class="strip__char display" />
+            <ui:Label text="ニ" class="strip__char display" />
+            <ui:Label text="メ" class="strip__char display" />
+            <ui:Label text="サ" class="strip__char display" />
+            <ui:Label text="ー" class="strip__char strip__char--long display" />
+            <ui:Label text="フ" class="strip__char display" />
+            <ui:Label text="ァ" class="strip__char strip__char--small display" />
+            <ui:Label text="ー" class="strip__char strip__char--long display" />
+            <ui:Label text="ズ" class="strip__char display" />
+        </ui:VisualElement>
+
+        <!-- Margins come from the screen's safe area (GameUi). -->
+        <ui:VisualElement class="menu__safe safe-area" picking-mode="Ignore">
+            <ui:VisualElement class="menu__top" picking-mode="Ignore">
+                <ui:VisualElement class="menu__corner" picking-mode="Ignore">
+                    <ui:Button name="settings-button" class="round-button">
+                        <ui:VisualElement class="icon icon--gear round-button__icon" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="sound-button" class="round-button">
+                        <ui:VisualElement name="sound-icon" class="icon icon--speaker round-button__icon" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement class="menu__stats" picking-mode="Ignore">
+                    <e:InkPanel class="stat panel panel--slant">
+                        <ui:Label class="stat__label">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="menu.best" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:Label name="best-score" class="stat__value display" text="0" />
+                    </e:InkPanel>
+                    <e:InkPanel class="stat panel panel--slant panel--ink stat--coins">
+                        <ui:VisualElement class="icon coin-icon coin-icon--on-ink stat__coin" picking-mode="Ignore" />
+                        <ui:Label name="total-coins" class="stat__value stat__value--coins display" text="0" />
+                    </e:InkPanel>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="menu__center" picking-mode="Ignore">
+                <ui:VisualElement name="title" class="menu__title" picking-mode="Ignore">
+                    <ui:Label text="Anime" class="title-line display" />
+                    <ui:Label text="Surfers" class="title-line title-line--offset display" />
+                </ui:VisualElement>
+                <ui:Button name="surf-button" class="cta menu__surf">
+                    <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                    <ui:VisualElement class="button-content" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--play cta__icon menu__surf-icon" picking-mode="Ignore" />
+                        <ui:Label class="cta__label menu__surf-label display" picking-mode="Ignore">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="menu.surf" />
+                            </Bindings>
+                        </ui:Label>
+                    </ui:VisualElement>
+                </ui:Button>
+                <ui:Button name="shop-button" class="secondary menu__shop">
+                    <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                    <ui:VisualElement class="button-content" picking-mode="Ignore">
+                        <ui:VisualElement class="icon coin-icon menu__shop-coin" picking-mode="Ignore" />
+                        <ui:Label class="secondary__label" picking-mode="Ignore">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="menu.shop" />
+                            </Bindings>
+                        </ui:Label>
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

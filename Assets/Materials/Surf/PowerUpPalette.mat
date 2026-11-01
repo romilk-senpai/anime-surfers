@@ -53,6 +53,8 @@ Material:
     - _RimSoftness: 0.05
     - _RimStrength: 0.5
     - _RimWidth: 0.3
+    - _NightGlow: 1
+    - _SelfGlow: 0.3
     - _ShadowSoftness: 0.03
     - _ShadowThreshold: 0.45
     - _SpecularSize: 0.08

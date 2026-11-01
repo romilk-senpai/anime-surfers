@@ -6,8 +6,9 @@ using VContainer;
 namespace Game.Surf
 {
 	/// <summary>
-	/// Time of day driven by run distance: blends the sky, fog, sun, ambient light and water tint through presets.
-	/// The sky shader takes its horizon from the fog color, so both always match.
+	/// Time of day driven by run distance: blends the sky, fog, sun, ambient light and water tint through presets,
+	/// starting at a random point of the cycle, and darkens them into overcast while a <see cref="Weather"/> storm
+	/// passes. The sky shader takes its horizon from the fog color, so both always match.
 	/// </summary>
 	public class SkyCycle : MonoBehaviour
 	{
@@ -62,6 +63,7 @@ namespace Game.Surf
 		private static readonly int WaterTroughId = Shader.PropertyToID("_TroughColor");
 		private static readonly int NightLightsId = Shader.PropertyToID("_NightLights");
 		private static readonly int SkySunDirectionId = Shader.PropertyToID("_SkySunDirection");
+		private static readonly int CloudCoverageId = Shader.PropertyToID("_CloudCoverage");
 
 		[SerializeField] private Light sun;
 		[Tooltip("Lowest elevation of the sun light. The sky still draws the sun at the preset angle; this only keeps " +
@@ -77,6 +79,22 @@ namespace Game.Surf
 		[SerializeField, Min(0f)] private float transitionLength = 350f;
 		[Tooltip("Shifts the cycle, e.g. presetLength * 2 starts the run at the third preset.")]
 		[SerializeField] private float distanceOffset;
+		[Tooltip("Adds a random shift to the offset, so each run starts at a random time of day.")]
+		[SerializeField] private bool randomStart = true;
+
+		[Header("Storm")]
+		[Tooltip("How far colors fade to grey at full storm.")]
+		[SerializeField, Range(0f, 1f)] private float stormDesaturation = 0.85f;
+		[Tooltip("Multiplies the sky, fog, cloud and island colors at full storm.")]
+		[SerializeField] private Color stormSkyTint = new Color(0.55f, 0.6f, 0.66f);
+		[Tooltip("Multiplies the ambient light at full storm.")]
+		[SerializeField] private Color stormAmbientTint = new Color(0.75f, 0.78f, 0.85f);
+		[Tooltip("Multiplies the water's tint at full storm.")]
+		[SerializeField] private Color stormWaterTint = new Color(0.6f, 0.66f, 0.72f);
+		[SerializeField, Range(0f, 1f)] private float stormSunIntensity = 0.4f;
+		[SerializeField, Range(0f, 1f)] private float stormCloudCoverage = 0.85f;
+		[Tooltip("Lamps and windows come on at least this much at full storm.")]
+		[SerializeField, Range(0f, 1f)] private float stormLights = 0.5f;
 
 		[SerializeField] private Preset[] presets =
 		{
@@ -134,21 +152,25 @@ namespace Game.Surf
 		};
 
 		private BoardState _board;
+		private Weather _weather;
 		private Renderer _water;
 		private MaterialPropertyBlock _waterProperties;
 		private Color _waterCrest;
 		private Color _waterTrough;
 		private Material _originalSky;
 		private Material _sky;
+		private float _cloudCoverage;
 		private int _appliedIndex = -1;
 		private float _appliedBlend = -1f;
+		private float _appliedStorm = -1f;
 		private bool _probeDirty;
 		private float _nextProbeRefresh;
 
 		[Inject]
-		public void Construct(BoardState board, WaterSurface water)
+		public void Construct(BoardState board, Weather weather, WaterSurface water)
 		{
 			_board = board;
+			_weather = weather;
 			_water = water.GetComponent<Renderer>();
 		}
 
@@ -158,10 +180,16 @@ namespace Game.Surf
 			_originalSky = RenderSettings.skybox;
 			_sky = new Material(_originalSky);
 			RenderSettings.skybox = _sky;
+			_cloudCoverage = _sky.GetFloat(CloudCoverageId);
 			RenderSettings.ambientMode = AmbientMode.Trilight;
 			_waterProperties = new MaterialPropertyBlock();
 			_waterCrest = _water.sharedMaterial.GetColor(WaterCrestId);
 			_waterTrough = _water.sharedMaterial.GetColor(WaterTroughId);
+
+			if (randomStart)
+			{
+				distanceOffset += UnityEngine.Random.Range(0f, presetLength * presets.Length);
+			}
 		}
 
 		private void OnDestroy()
@@ -191,11 +219,16 @@ namespace Game.Surf
 			float blend = Mathf.SmoothStep(0f, 1f,
 				Mathf.InverseLerp(presetLength - transitionLength, presetLength, local));
 
-			if (index != _appliedIndex || Mathf.Abs(blend - _appliedBlend) > 0.001f)
+			float storm = _weather.Storm;
+
+			if (index != _appliedIndex || Mathf.Abs(blend - _appliedBlend) > 0.001f ||
+			    Mathf.Abs(storm - _appliedStorm) > 0.001f)
 			{
 				_appliedIndex = index;
 				_appliedBlend = blend;
-				Apply(Lerp(presets[index], presets[(index + 1) % presets.Length], blend));
+				_appliedStorm = storm;
+				Apply(Overcast(Lerp(presets[index], presets[(index + 1) % presets.Length], blend), storm));
+				_sky.SetFloat(CloudCoverageId, Mathf.Lerp(_cloudCoverage, stormCloudCoverage, storm));
 				_probeDirty = true;
 			}
 
@@ -253,6 +286,46 @@ namespace Game.Surf
 				_nextProbeRefresh = Time.time + probeRefreshInterval;
 				skyProbe.RenderProbe();
 			}
+		}
+
+		/// <summary>
+		/// Greys out and darkens the time of day by the storm's strength. Works from the preset's own colors, so a
+		/// night storm stays dark.
+		/// </summary>
+		private Preset Overcast(Preset preset, float storm)
+		{
+			if (storm <= 0f)
+			{
+				return preset;
+			}
+
+			preset.zenith = Overcast(preset.zenith, stormSkyTint, storm);
+			preset.sky = Overcast(preset.sky, stormSkyTint, storm);
+			preset.fog = Overcast(preset.fog, stormSkyTint, storm);
+			preset.cloudLit = Overcast(preset.cloudLit, stormSkyTint, storm);
+			preset.cloudShadow = Overcast(preset.cloudShadow, stormSkyTint, storm);
+			preset.islands = Overcast(preset.islands, stormSkyTint, storm);
+			preset.stars *= 1f - storm;
+
+			preset.sunColor = Overcast(preset.sunColor, Color.white, storm);
+			preset.sunIntensity *= Mathf.Lerp(1f, stormSunIntensity, storm);
+			preset.sunDisc *= 1f - storm;
+			preset.sunGlow *= 1f - storm;
+
+			preset.ambientSky = Overcast(preset.ambientSky, stormAmbientTint, storm);
+			preset.ambientEquator = Overcast(preset.ambientEquator, stormAmbientTint, storm);
+			preset.ambientGround = Overcast(preset.ambientGround, stormAmbientTint, storm);
+
+			preset.waterTint = Overcast(preset.waterTint, stormWaterTint, storm);
+			preset.lights = Mathf.Max(preset.lights, stormLights * storm);
+			return preset;
+		}
+
+		private Color Overcast(Color color, Color tint, float storm)
+		{
+			float grey = color.grayscale;
+			Color stormy = Color.Lerp(color, new Color(grey, grey, grey), stormDesaturation) * tint;
+			return Color.Lerp(color, stormy, storm);
 		}
 
 		private static Preset Lerp(Preset a, Preset b, float t)

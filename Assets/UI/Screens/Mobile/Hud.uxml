@@ -1,0 +1,53 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="hud" picking-mode="Ignore">
+        <ui:Style src="../../Styles/Mobile/Hud.uss" />
+        <e:FocusLines name="speed-lines" class="speed-lines" center-x="0.5" center-y="0.45" inner-radius="200" count="72" />
+        <!-- Under the rest of the HUD, so the buttons keep their own touches. -->
+        <e:SwipeArea name="swipe-area" class="swipe-area" />
+
+        <ui:VisualElement class="hud__safe safe-area" picking-mode="Ignore">
+            <ui:VisualElement class="hud__left" picking-mode="Ignore">
+                <ui:Button name="pause-button" class="round-button pause-button">
+                    <ui:VisualElement class="pause-button__bar" picking-mode="Ignore" />
+                    <ui:VisualElement class="pause-button__bar" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:VisualElement class="power-ups" picking-mode="Ignore">
+                    <e:RadialProgress name="magnet-timer" class="power-up power-up--magnet" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--magnet power-up__icon" picking-mode="Ignore" />
+                    </e:RadialProgress>
+                    <e:RadialProgress name="multiplier-timer" class="power-up power-up--multiplier" picking-mode="Ignore">
+                        <ui:Label text="x2" class="power-up__text display" />
+                    </e:RadialProgress>
+                    <e:RadialProgress name="shield-timer" class="power-up power-up--shield" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--shield power-up__icon" picking-mode="Ignore" />
+                    </e:RadialProgress>
+                    <e:RadialProgress name="super-jump-timer" class="power-up power-up--super-jump" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--super-jump power-up__icon" picking-mode="Ignore" />
+                    </e:RadialProgress>
+                    <e:RadialProgress name="coin-doubler-timer" class="power-up power-up--coin-doubler" picking-mode="Ignore">
+                        <ui:VisualElement class="icon coin-icon power-up__coin" picking-mode="Ignore" />
+                    </e:RadialProgress>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="hud__right" picking-mode="Ignore">
+                <e:InkPanel class="score-panel panel panel--ink panel--slant" picking-mode="Ignore">
+                    <ui:Label name="score" class="score display" text="000000" />
+                    <ui:Label name="multiplier-sticker" class="multiplier-sticker display" text="x2" />
+                </e:InkPanel>
+                <e:InkPanel class="coins-panel panel panel--ink panel--slant" picking-mode="Ignore">
+                    <ui:VisualElement class="icon coin-icon coin-icon--on-ink coins-panel__icon" picking-mode="Ignore" />
+                    <ui:Label name="coins" class="coins display" text="0" />
+                </e:InkPanel>
+                <e:InkPanel class="distance-panel panel panel--slant" picking-mode="Ignore">
+                    <ui:Label name="distance" class="distance heavy" text="0 m" />
+                </e:InkPanel>
+            </ui:VisualElement>
+
+            <!-- Hold to boost; the ring is the nitro tank. -->
+            <e:RadialProgress name="nitro-button" class="nitro-button">
+                <ui:VisualElement class="icon icon--nitro nitro-button__icon" picking-mode="Ignore" />
+            </e:RadialProgress>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

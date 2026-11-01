@@ -12,6 +12,10 @@
     --lines-color: rgba(255, 255, 255, 0.9);
 }
 
+.game-over__content {
+    flex-grow: 1;
+}
+
 /* The one loud moment: a manga sound effect bursting out of the focus lines. */
 .sound-effect {
     position: absolute;
@@ -132,4 +136,40 @@
     align-items: center;
     justify-content: space-between;
     margin-top: 24px;
+}
+
+/* ---- Portrait: sound effect, results and crash card stacked down the screen ---- */
+
+.portrait .sound-effect {
+    left: 28px;
+    top: 48px;
+    font-size: 112px;
+}
+
+.portrait .results {
+    left: 20px;
+    right: 20px;
+    top: 230px;
+    width: auto;
+    padding: 26px 26px 28px;
+}
+
+.portrait .results__score-value {
+    font-size: 76px;
+}
+
+.portrait .results__stat-value {
+    font-size: 24px;
+}
+
+.portrait .results__stat--divided {
+    padding-left: 12px;
+}
+
+.portrait .crash {
+    left: 28px;
+    right: 28px;
+    top: auto;
+    bottom: 40px;
+    width: auto;
 }

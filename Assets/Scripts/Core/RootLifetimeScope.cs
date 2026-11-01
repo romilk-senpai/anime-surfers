@@ -11,7 +11,7 @@ namespace Game.Core
 	{
 		protected override void Configure(IContainerBuilder builder)
 		{
-			builder.Register<IInputService, InputService>(Lifetime.Singleton);
+			builder.Register<InputService>(Lifetime.Singleton).As<IInputService, ITouchInput>();
 			builder.Register<ISceneLoader, SceneLoader>(Lifetime.Singleton);
 			builder.Register<IPlayerProgress, PlayerProgress>(Lifetime.Singleton);
 			builder.Register<IVolumeSettings, VolumeSettings>(Lifetime.Singleton);

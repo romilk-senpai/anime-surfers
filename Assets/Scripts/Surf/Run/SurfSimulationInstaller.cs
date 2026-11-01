@@ -5,8 +5,9 @@ using VContainer.Unity;
 namespace Game.Surf
 {
 	/// <summary>
-	/// The run's plain C# simulation: the path, obstacle and pickup fields, the board systems and the run flow.
-	/// Needs the settings assets and an <see cref="IWaterHeight"/> registered next to it.
+	/// The run's plain C# simulation: the path, obstacle and pickup fields, the board systems, the run flow and the
+	/// weather. Needs the settings assets, an <see cref="IWaterHeight"/> and the <see cref="WaterSurface"/>
+	/// registered next to it.
 	/// </summary>
 	public sealed class SurfSimulationInstaller : IInstaller
 	{
@@ -38,6 +39,7 @@ namespace Game.Surf
 			// RunLoop first: it initializes the board before the run starts.
 			builder.RegisterEntryPoint<RunLoop>();
 			builder.RegisterEntryPoint<RunStateMachine>();
+			builder.RegisterEntryPoint<Weather>().AsSelf();
 		}
 	}
 }

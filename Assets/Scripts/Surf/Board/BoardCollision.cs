@@ -42,7 +42,11 @@ namespace Game.Surf
 				return;
 			}
 
-			if (hit.OverlapsLateral(_state.PreviousLateral, halfWidth))
+			bool fromLeft = _state.Lateral < (hit.Left + hit.Right) * 0.5f;
+			float depth = fromLeft ? _state.Lateral + halfWidth - hit.Left : hit.Right - (_state.Lateral - halfWidth);
+
+			// Only clipping its edge mid lane change glances off like hitting its side.
+			if (hit.OverlapsLateral(_state.PreviousLateral, halfWidth) && depth > _settings.EdgeForgiveness)
 			{
 				if (_powerUps.TryAbsorbHit())
 				{
@@ -57,11 +61,10 @@ namespace Game.Surf
 			}
 
 			// Changed lanes into its side: bounce back out.
-			bool movingRight = _state.Lateral > _state.PreviousLateral;
-			_state.Lateral = movingRight ? hit.Left - halfWidth : hit.Right + halfWidth;
+			_state.Lateral = fromLeft ? hit.Left - halfWidth : hit.Right + halfWidth;
 			_state.LateralVelocity = 0f;
 			_state.Lane = _settings.NearestLane(_state.Lateral);
-			_state.NotifySideHit(movingRight ? 1 : -1);
+			_state.NotifySideHit(fromLeft ? 1 : -1);
 		}
 
 		/// <summary>Only the deck collides, so the board passes under the barrier that knocked her off.</summary>

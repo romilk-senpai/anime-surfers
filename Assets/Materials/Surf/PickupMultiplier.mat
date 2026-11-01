@@ -122,6 +122,8 @@ Material:
     - _RimWidth: 0.3
     - _ScreenSpaceReflections: 1
     - _ScreenSpaceReflectionsContributeTransparent: 1
+    - _NightGlow: 1
+    - _SelfGlow: 0.3
     - _ShadowSoftness: 0.03
     - _ShadowThreshold: 0.45
     - _Smoothness: 0.6

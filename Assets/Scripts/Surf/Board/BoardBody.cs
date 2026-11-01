@@ -122,7 +122,14 @@ namespace Game.Surf
 			if (height < lowest)
 			{
 				height = lowest;
-				verticalVelocity = Mathf.Max(verticalVelocity, waterVelocity);
+				// Sliding, a rising wave doesn't throw the board up toward the barrier past it.
+				verticalVelocity = Mathf.Max(verticalVelocity, _state.IsSliding ? 0f : waterVelocity);
+			}
+
+			// Launched off a crest mid-slide: drop back down to stay under the barrier.
+			if (_state.IsSliding && height > floatLine)
+			{
+				verticalVelocity = Mathf.Min(verticalVelocity, -_settings.SlideDropSpeed);
 			}
 
 			bool onSurface = hasSupport && height <= support;

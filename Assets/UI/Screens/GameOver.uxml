@@ -3,90 +3,93 @@
         <ui:Style src="../Styles/GameOver.uss" />
         <e:FocusLines class="game-over__lines" center-x="0.26" center-y="0.32" />
 
-        <ui:Label name="sound-effect" text="ドカン!" class="sound-effect display" picking-mode="Ignore" />
+        <!-- Margins come from the screen's safe area (GameUi); the focus lines stay full-bleed. -->
+        <ui:VisualElement class="game-over__content safe-area" picking-mode="Ignore">
+            <ui:Label name="sound-effect" text="ドカン!" class="sound-effect display" picking-mode="Ignore" />
 
-        <e:InkPanel class="crash panel" picking-mode="Ignore">
-            <ui:Label name="crash-title" class="crash__title display" text="You hit a wall" />
-            <ui:Label name="crash-tip" class="crash__tip" text="" />
-        </e:InkPanel>
+            <e:InkPanel class="crash panel" picking-mode="Ignore">
+                <ui:Label name="crash-title" class="crash__title display" text="You hit a wall" />
+                <ui:Label name="crash-tip" class="crash__tip" text="" />
+            </e:InkPanel>
 
-        <e:InkPanel class="results modal">
-            <ui:VisualElement class="results__score">
-                <ui:Label class="results__label">
-                    <Bindings>
-                        <l:LocalizedString property="text" table="UI" entry="gameover.score" />
-                    </Bindings>
-                </ui:Label>
-                <ui:Label name="score" class="results__score-value display" text="0" />
-                <ui:Label name="new-best" class="new-best display">
-                    <Bindings>
-                        <l:LocalizedString property="text" table="UI" entry="gameover.new_best" />
-                    </Bindings>
-                </ui:Label>
-            </ui:VisualElement>
-
-            <ui:VisualElement class="results__stats">
-                <ui:VisualElement class="results__stat">
-                    <ui:Label class="results__stat-label">
+            <e:InkPanel class="results modal">
+                <ui:VisualElement class="results__score">
+                    <ui:Label class="results__label">
                         <Bindings>
-                            <l:LocalizedString property="text" table="UI" entry="gameover.distance" />
+                            <l:LocalizedString property="text" table="UI" entry="gameover.score" />
                         </Bindings>
                     </ui:Label>
-                    <ui:Label name="distance" class="results__stat-value display" text="0 m" />
+                    <ui:Label name="score" class="results__score-value display" text="0" />
+                    <ui:Label name="new-best" class="new-best display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="gameover.new_best" />
+                        </Bindings>
+                    </ui:Label>
                 </ui:VisualElement>
-                <ui:VisualElement class="results__stat results__stat--divided">
-                    <ui:Label class="results__stat-label">
-                        <Bindings>
-                            <l:LocalizedString property="text" table="UI" entry="gameover.coins" />
-                        </Bindings>
-                    </ui:Label>
-                    <ui:VisualElement class="results__coins">
-                        <ui:VisualElement class="icon coin-icon results__coin" picking-mode="Ignore" />
-                        <ui:Label name="coins" class="results__stat-value display" text="0" />
+
+                <ui:VisualElement class="results__stats">
+                    <ui:VisualElement class="results__stat">
+                        <ui:Label class="results__stat-label">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="gameover.distance" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:Label name="distance" class="results__stat-value display" text="0 m" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="results__stat results__stat--divided">
+                        <ui:Label class="results__stat-label">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="gameover.coins" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="results__coins">
+                            <ui:VisualElement class="icon coin-icon results__coin" picking-mode="Ignore" />
+                            <ui:Label name="coins" class="results__stat-value display" text="0" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="results__stat results__stat--divided">
+                        <ui:Label class="results__stat-label">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="gameover.best" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:Label name="best" class="results__stat-value display" text="0" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="results__stat results__stat--divided">
-                    <ui:Label class="results__stat-label">
-                        <Bindings>
-                            <l:LocalizedString property="text" table="UI" entry="gameover.best" />
-                        </Bindings>
-                    </ui:Label>
-                    <ui:Label name="best" class="results__stat-value display" text="0" />
-                </ui:VisualElement>
-            </ui:VisualElement>
 
-            <ui:Button name="surf-again-button" class="cta results__surf-again">
-                <e:InkPanel class="button-shape" picking-mode="Ignore" />
-                <ui:VisualElement class="button-content" picking-mode="Ignore">
-                    <ui:VisualElement class="icon icon--restart cta__icon" picking-mode="Ignore" />
-                    <ui:Label class="cta__label display" picking-mode="Ignore">
-                        <Bindings>
-                            <l:LocalizedString property="text" table="UI" entry="gameover.surf_again" />
-                        </Bindings>
-                    </ui:Label>
-                </ui:VisualElement>
-            </ui:Button>
-
-            <ui:VisualElement class="results__footer">
-                <ui:Button name="menu-button" class="secondary">
+                <ui:Button name="surf-again-button" class="cta results__surf-again">
                     <e:InkPanel class="button-shape" picking-mode="Ignore" />
                     <ui:VisualElement class="button-content" picking-mode="Ignore">
-                        <ui:Label class="secondary__label" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--restart cta__icon" picking-mode="Ignore" />
+                        <ui:Label class="cta__label display" picking-mode="Ignore">
                             <Bindings>
-                                <l:LocalizedString property="text" table="UI" entry="gameover.menu" />
+                                <l:LocalizedString property="text" table="UI" entry="gameover.surf_again" />
                             </Bindings>
                         </ui:Label>
                     </ui:VisualElement>
                 </ui:Button>
-                <ui:VisualElement class="key-hint">
-                    <ui:Label text="Space" class="keycap" />
-                    <ui:Label class="key-hint__text">
-                        <Bindings>
-                            <l:LocalizedString property="text" table="UI" entry="gameover.space_hint" />
-                        </Bindings>
-                    </ui:Label>
+
+                <ui:VisualElement class="results__footer">
+                    <ui:Button name="menu-button" class="secondary">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:Label class="secondary__label" picking-mode="Ignore">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="gameover.menu" />
+                                </Bindings>
+                            </ui:Label>
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:VisualElement class="key-hint">
+                        <ui:Label text="Space" class="keycap" />
+                        <ui:Label class="key-hint__text">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="gameover.space_hint" />
+                            </Bindings>
+                        </ui:Label>
+                    </ui:VisualElement>
                 </ui:VisualElement>
-            </ui:VisualElement>
-        </e:InkPanel>
+            </e:InkPanel>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

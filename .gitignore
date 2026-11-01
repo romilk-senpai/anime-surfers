@@ -85,3 +85,6 @@ crashlytics-build.properties
 # OS files
 .DS_Store
 Thumbs.db
+
+# Reference repos (not part of the project)
+/BoatAttack/

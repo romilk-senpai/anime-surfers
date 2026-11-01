@@ -226,6 +226,14 @@ MonoBehaviour:
     m_Localized: MAX
     m_Metadata:
       m_Items: []
+  - m_Id: 375960218099712
+    m_Localized: Walls block the whole lane. Swipe left or right early when you see one coming.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 375960281014272
+    m_Localized: Barriers with a gap underneath can be slid under. Swipe down just before you reach one.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -93,6 +93,7 @@ namespace Game.Surf
 		private readonly Dictionary<long, int> _vertexLookup = new Dictionary<long, int>();
 		private readonly List<int> _polygon = new List<int>(5);
 		private float _amplitudeSum;
+		private float _waveScale = 1f;
 		private float _time;
 		private Mesh _mesh;
 		private bool _meshDirty;
@@ -107,6 +108,25 @@ namespace Game.Surf
 
 		public float WaveTime => _time;
 		public float BaseHeight => transform.position.y;
+
+		/// <summary>
+		/// Multiplies every wave's height, e.g. 2 in a storm. Gameplay queries see the change right away. Keep the
+		/// summed steepness times this below 1.
+		/// </summary>
+		public float WaveScale
+		{
+			get => _waveScale;
+			set
+			{
+				if (Mathf.Approximately(value, _waveScale))
+				{
+					return;
+				}
+
+				_waveScale = value;
+				PackWaves();
+			}
+		}
 
 		// The mesh is snapped up to half a coarse cell away from the fade center on each axis.
 		private float SnapMargin => _coarseCell * 0.5f;
@@ -300,10 +320,11 @@ namespace Game.Surf
 				float angle = wave.direction * Mathf.Deg2Rad;
 				// Deep-water dispersion keeps long waves fast and short ones slow.
 				float omega = Mathf.Sqrt(Gravity * k) * wave.speed;
-				float amplitude = wave.steepness / k;
+				float steepness = wave.steepness * _waveScale;
+				float amplitude = steepness / k;
 
 				_packedWaves[i] = new Vector4(Mathf.Sin(angle), Mathf.Cos(angle), k, omega);
-				_packedShapes[i] = new Vector4(wave.steepness, amplitude, wavelength, 0f);
+				_packedShapes[i] = new Vector4(steepness, amplitude, wavelength, 0f);
 				_amplitudeSum += amplitude;
 			}
 

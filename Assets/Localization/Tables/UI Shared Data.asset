@@ -223,6 +223,14 @@ MonoBehaviour:
     m_Key: shop.max
     m_Metadata:
       m_Items: []
+  - m_Id: 375960218099712
+    m_Key: crash.wall.tip.touch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 375960281014272
+    m_Key: crash.barrier.tip.touch
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

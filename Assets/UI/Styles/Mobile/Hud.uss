@@ -1,0 +1,199 @@
+/* Touch HUD: pause and power-ups on the left, score stack on the right, nitro button in the bottom corner. */
+
+.hud {
+    flex-grow: 1;
+}
+
+/* Manga speed lines while the nitro boost is on; opacity follows the boost. */
+.speed-lines {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    --lines-color: rgba(255, 255, 255, 0.5);
+}
+
+.swipe-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Margins come from the screen's safe area (GameUi). */
+.hud__safe {
+    flex-grow: 1;
+}
+
+.hud__left {
+    position: absolute;
+    left: 18px;
+    top: 18px;
+    align-items: flex-start;
+}
+
+.pause-button {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+}
+
+.pause-button__bar {
+    width: 7px;
+    height: 22px;
+    margin: 0 3px;
+    border-radius: 2px;
+    background-color: var(--ink);
+}
+
+.power-ups {
+    margin-top: 18px;
+    margin-left: 5px;
+}
+
+.power-up {
+    width: 54px;
+    height: 54px;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-content: center;
+    --ring-track: #FFFFFF;
+    --ring-border: #1C1B4D;
+    --ring-thickness: 8;
+}
+
+.power-up--magnet {
+    --ring-color: #3FA9F5;
+}
+
+.power-up--multiplier {
+    --ring-color: #FF3D6E;
+}
+
+.power-up--shield {
+    --ring-color: #8C5CFF;
+}
+
+.power-up--super-jump {
+    --ring-color: #3DDC84;
+}
+
+.power-up--coin-doubler {
+    --ring-color: #FFD23F;
+}
+
+.power-up__icon {
+    width: 20px;
+    height: 20px;
+    -unity-background-image-tint-color: var(--ink);
+}
+
+.power-up__coin {
+    width: 24px;
+    height: 24px;
+}
+
+.power-up__text {
+    font-size: 15px;
+}
+
+.hud__right {
+    position: absolute;
+    right: 22px;
+    top: 18px;
+    align-items: flex-end;
+}
+
+.score-panel {
+    padding: 2px 20px 4px;
+    --panel-shadow: #FFFFFF;
+}
+
+/* Dela Gothic digits are proportional: a fixed width (widest score, "444444", is 260px at 46px) keeps it still. */
+.score {
+    width: 196px;
+    font-size: 34px;
+    color: var(--paper);
+    letter-spacing: 2px;
+    -unity-text-align: middle-right;
+}
+
+/* On the left: the panel sits against the screen edge. */
+.multiplier-sticker {
+    position: absolute;
+    left: -38px;
+    top: -14px;
+    rotate: -10deg;
+    padding: 5px 9px;
+    font-size: 22px;
+    color: var(--ink);
+    background-color: var(--alarm);
+    border-width: 3px;
+    border-color: var(--ink);
+}
+
+.coins-panel {
+    flex-direction: row;
+    align-items: center;
+    height: 42px;
+    margin-top: 12px;
+    padding: 0 18px;
+    --panel-shadow: #FFD23F;
+    --panel-shadow-x: 4;
+    --panel-shadow-y: 4;
+}
+
+.coins-panel__icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+}
+
+.coins {
+    font-size: 22px;
+    color: var(--coin);
+}
+
+.distance-panel {
+    margin-top: 10px;
+    padding: 2px 14px;
+    --panel-shadow-x: 0;
+    --panel-shadow-y: 0;
+}
+
+.distance {
+    font-size: 17px;
+}
+
+.nitro-button {
+    position: absolute;
+    right: 24px;
+    bottom: 32px;
+    width: 128px;
+    height: 128px;
+    align-items: center;
+    justify-content: center;
+    --ring-color: #FF8A1F;
+    --ring-track: #FFFFFF;
+    --ring-border: #1C1B4D;
+    --ring-thickness: 16;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.nitro-button--active {
+    --ring-color: #FF3D6E;
+}
+
+.nitro-button--pressed {
+    scale: 0.92 0.92;
+}
+
+.nitro-button__icon {
+    width: 52px;
+    height: 52px;
+    -unity-background-image-tint-color: var(--ink);
+}

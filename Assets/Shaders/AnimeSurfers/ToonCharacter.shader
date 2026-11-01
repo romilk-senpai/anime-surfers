@@ -39,6 +39,10 @@ Shader "AnimeSurfers/ToonCharacter"
         _RimSoftness ("Rim Softness", Range(0.001, 0.5)) = 0.05
         _RimLitSideOnly ("Rim Only On Lit Side", Range(0, 1)) = 0.7
 
+        [Header(Glow)]
+        _SelfGlow ("Glow (base color, always on)", Range(0, 1)) = 0
+        _NightGlow ("Extra Glow (HDR, scaled by SkyCycle night lights)", Range(0, 3)) = 0
+
         [Header(Night Lights)]
         [Toggle(_EMISSION)] _Emission ("Emission (scaled by SkyCycle)", Float) = 0
         [NoScaleOffset] _EmissionMap ("Emission Map", 2D) = "black" {}
@@ -90,6 +94,8 @@ Shader "AnimeSurfers/ToonCharacter"
             half _RimWidth;
             half _RimSoftness;
             half _RimLitSideOnly;
+            half _SelfGlow;
+            half _NightGlow;
             half4 _EmissionColor;
             half4 _OutlineColor;
             float _OutlineWidth;
@@ -239,6 +245,10 @@ Shader "AnimeSurfers/ToonCharacter"
                 half rimMask = smoothstep(1.0 - _RimWidth - _RimSoftness, 1.0 - _RimWidth + _RimSoftness, rim);
                 rimMask *= lerp(1.0, mainLit, _RimLitSideOnly);
                 color += _RimColor.rgb * rimMask * _RimStrength * mainLight.color;
+
+                // Self glow, e.g. pickups standing out from the scenery whatever the light. The night part goes HDR so
+                // bloom still catches it once the sun is too weak to push the lit side past the threshold.
+                color += base.rgb * (_SelfGlow + _NightGlow * _NightLights);
 
                 #if defined(_EMISSION)
                     // Lamps and lit windows, faded in as night falls. Shares the base map's point sampler.

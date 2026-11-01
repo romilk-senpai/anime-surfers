@@ -1,0 +1,4 @@
+# Only the WebGL build and its server config go into the image.
+*
+!docs/
+!deploy/nginx.conf

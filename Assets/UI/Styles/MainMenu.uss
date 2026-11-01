@@ -115,7 +115,7 @@
 .menu__play {
     position: absolute;
     right: 172px;
-    top: 482px;
+    bottom: 52px;
     align-items: flex-end;
 }
 

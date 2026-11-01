@@ -6,21 +6,23 @@ namespace Game.Surf
 {
 	/// <summary>
 	/// Power-up visuals around the rider. A bubble surrounds her while the shield is up: it pops in when picked up,
-	/// blinks before running out and bursts when it breaks. Super jumps leave a shockwave ring on the water at the
-	/// take-off and a glowing trail through the air. The nitro boost streams two exhaust trails from the board's tail.
-	/// Built from primitives at runtime; the materials are meant for the PowerUpGlow shader, whose colour is faded
-	/// through a property block.
+	/// blinks before running out and bursts when it breaks. Super jumps leave a shockwave ring on the water at the take-off and a glowing trail through the air. The nitro
+	/// boost streams two exhaust trails, billowing smoke and sparks from the board's tail, with a puff as it kicks in.
+	/// Built from primitives and particle systems at runtime; the bubble, ring and trail materials are meant for the
+	/// PowerUpGlow shader, whose colour is faded through a property block.
 	/// </summary>
 	public class PowerUpEffects : MonoBehaviour
 	{
 		private static readonly int ColorId = Shader.PropertyToID("_Color");
+		private static readonly int BaseMapStId = Shader.PropertyToID("_BaseMap_ST");
 
 		[Header("Shield")]
 		[SerializeField] private Material shieldMaterial;
-		[Tooltip("Bubble size around the standing rider: width, height, length. Squashed with her while sliding.")]
-		[SerializeField] private Vector3 shieldSize = new Vector3(1.7f, 2.3f, 2.1f);
+		[Tooltip("Bubble diameter, about her standing height. It rests on the board, so it covers her standing or sliding.")]
+		[SerializeField] private float shieldDiameter = 1.8f;
+		[Tooltip("How far the bubble dips below the board, as a fraction of its radius.")]
+		[SerializeField, Range(0f, 0.5f)] private float shieldSink;
 		[SerializeField] private float shieldPopTime = 0.25f;
-		[SerializeField] private float shieldSquashSharpness = 20f;
 		[SerializeField] private float shieldPulseRate = 1.5f;
 		[SerializeField, Range(0f, 0.3f)] private float shieldPulse = 0.04f;
 		[Tooltip("Blinks for this long before running out.")]
@@ -44,22 +46,41 @@ namespace Game.Surf
 		[Header("Nitro")]
 		[SerializeField] private Material nitroTrailMaterial;
 		[SerializeField] private float nitroTrailTime = 0.3f;
-		[Tooltip("Trail width at full boost; thinner while the boost blends in.")]
+		[Tooltip("Trail width at full boost, glow included; thinner while the boost blends in.")]
 		[SerializeField] private float nitroTrailWidth = 0.22f;
 		[Tooltip("Side offset of each trail from the board's centerline.")]
 		[SerializeField] private float nitroTrailSpacing = 0.2f;
 		[SerializeField] private float nitroTrailHeight = 0.15f;
+		[Tooltip("White-hot at the board, cooling to orange and red along the trail.")]
+		[SerializeField] private Gradient nitroTrailGradient = DefaultNitroTrailGradient();
+		[Tooltip("How many times the streak texture repeats along a trail.")]
+		[SerializeField] private float nitroTrailTiling = 3f;
+		[Tooltip("How fast the streaks flow back along the trail, in texture lengths per second.")]
+		[SerializeField] private float nitroTrailScroll = 4f;
+		[Tooltip("Width jitter, as a fraction of the width.")]
+		[SerializeField, Range(0f, 0.5f)] private float nitroTrailFlicker = 0.15f;
+		[SerializeField] private float nitroTrailFlickerRate = 18f;
+		[Tooltip("Flipbook smoke billowing behind the board.")]
+		[SerializeField] private Material nitroSmokeMaterial;
+		[Tooltip("Additive glint sprite, stretched into sparks.")]
+		[SerializeField] private Material sparkleMaterial;
+		[SerializeField] private float nitroSmokeRate = 40f;
+		[SerializeField] private float nitroSparkRate = 45f;
+		[Tooltip("Smoke puffs thrown out at once as the boost kicks in; twice as many sparks.")]
+		[SerializeField] private int nitroKickPuffs = 14;
+		[SerializeField] private Color nitroSmokeColor = new Color(1f, 0.92f, 0.82f, 0.55f);
+		[SerializeField] private Color nitroSparkColor = new Color(1f, 0.7f, 0.25f, 1f);
 
 		private BoardState _board;
 		private BoardSettings _settings;
 		private PowerUps _powerUps;
 		private Nitro _nitro;
 		private MaterialPropertyBlock _block;
+		private MaterialPropertyBlock _nitroTrailBlock;
 
 		private Renderer _shield;
 		private Color _shieldColor;
 		private float _shieldVisibility;
-		private float _shieldSquash = 1f;
 		private float _burstAge = float.PositiveInfinity;
 
 		private Renderer _ring;
@@ -68,6 +89,10 @@ namespace Game.Surf
 
 		private TrailRenderer _trail;
 		private readonly TrailRenderer[] _nitroTrails = new TrailRenderer[2];
+
+		private ParticleSystem _nitroSmoke;
+		private ParticleSystem _nitroSparks;
+		private bool _wasBoosting;
 
 		[Inject]
 		public void Construct(BoardState board, BoardSettings settings, PowerUps powerUps, Nitro nitro)
@@ -91,8 +116,18 @@ namespace Game.Surf
 
 			for (int i = 0; i < _nitroTrails.Length; i++)
 			{
-				_nitroTrails[i] = CreateTrail("NitroTrail", nitroTrailMaterial, nitroTrailTime, nitroTrailWidth);
+				TrailRenderer trail = CreateTrail("NitroTrail", nitroTrailMaterial, nitroTrailTime, nitroTrailWidth);
+				// The streak texture spans the trail and scrolls along it.
+				trail.textureMode = LineTextureMode.Stretch;
+				trail.colorGradient = nitroTrailGradient;
+				trail.widthCurve = new AnimationCurve(
+					new Keyframe(0f, 1f), new Keyframe(0.2f, 0.75f), new Keyframe(1f, 0f));
+				_nitroTrails[i] = trail;
 			}
+
+			_nitroTrailBlock = new MaterialPropertyBlock();
+
+			CreateNitroParticles();
 		}
 
 		private void OnDestroy()
@@ -145,9 +180,6 @@ namespace Game.Surf
 			_shieldVisibility = Mathf.MoveTowards(_shieldVisibility, active ? 1f : 0f, popRate);
 			_burstAge += dt;
 
-			float squash = _board.IsSliding ? _settings.SlideBodyHeight / _settings.BodyHeight : 1f;
-			_shieldSquash = Mathf.Lerp(_shieldSquash, squash, 1f - Mathf.Exp(-shieldSquashSharpness * dt));
-
 			float scale;
 			float alpha;
 			Color color = _shieldColor;
@@ -179,12 +211,13 @@ namespace Game.Surf
 				return;
 			}
 
-			float bodyHeight = _settings.BodyHeight * _shieldSquash;
+			// Centred at its full size, so it grows and bursts around her rather than from the board.
+			float radius = shieldDiameter * 0.5f;
 			Transform bubble = _shield.transform;
 			bubble.SetPositionAndRotation(
-				_board.PlanarPosition + Vector3.up * (_board.Height + bodyHeight * 0.5f),
+				_board.PlanarPosition + Vector3.up * (_board.Height + radius * (1f - shieldSink)),
 				Quaternion.LookRotation(_board.PathForward));
-			bubble.localScale = new Vector3(shieldSize.x, shieldSize.y * _shieldSquash, shieldSize.z) * scale;
+			bubble.localScale = Vector3.one * (shieldDiameter * scale);
 
 			_shield.enabled = true;
 			SetColor(_shield, color, alpha);
@@ -219,14 +252,87 @@ namespace Game.Surf
 			Vector3 tail = _board.PlanarPosition - _board.PathForward * (_settings.BoardLength * 0.5f);
 			tail.y = _board.Height + nitroTrailHeight;
 
+			// Each trail flickers on its own; the streaks flow back towards the end.
+			_nitroTrailBlock.SetVector(BaseMapStId,
+				new Vector4(nitroTrailTiling, 1f, -Time.time * nitroTrailScroll, 0f));
+
 			for (int i = 0; i < _nitroTrails.Length; i++)
 			{
 				TrailRenderer trail = _nitroTrails[i];
 				float side = i == 0 ? -1f : 1f;
+				float flicker = 1f + (Mathf.PerlinNoise(Time.time * nitroTrailFlickerRate, i * 7.3f) * 2f - 1f) *
+					nitroTrailFlicker;
 				trail.transform.position = tail + _board.PathRight * (side * nitroTrailSpacing);
-				trail.widthMultiplier = nitroTrailWidth * blend;
+				trail.widthMultiplier = nitroTrailWidth * blend * flicker;
 				trail.emitting = blend > 0f && !_board.IsCrashed;
+				trail.SetPropertyBlock(_nitroTrailBlock);
 			}
+
+			bool boosting = blend > 0f && !_board.IsCrashed;
+			Quaternion backward = Quaternion.LookRotation(-_board.PathForward);
+			_nitroSmoke.transform.SetPositionAndRotation(tail, backward);
+			_nitroSparks.transform.SetPositionAndRotation(tail, backward);
+			RuntimeParticles.SetRate(_nitroSmoke, boosting ? nitroSmokeRate * blend : 0f);
+			RuntimeParticles.SetRate(_nitroSparks, boosting ? nitroSparkRate * blend : 0f);
+
+			if (boosting && !_wasBoosting)
+			{
+				_nitroSmoke.Emit(nitroKickPuffs);
+				_nitroSparks.Emit(nitroKickPuffs * 2);
+			}
+
+			_wasBoosting = boosting;
+		}
+
+		private void CreateNitroParticles()
+		{
+			// Left behind in the world as the board speeds away, rising and spreading.
+			_nitroSmoke = RuntimeParticles.Create("NitroSmoke", transform, nitroSmokeMaterial,
+				ParticleSystemSimulationSpace.World, 96);
+			ParticleSystem.MainModule main = _nitroSmoke.main;
+			main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.8f);
+			main.startSize = new ParticleSystem.MinMaxCurve(0.5f, 0.9f);
+			main.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 2f);
+			main.startRotation = new ParticleSystem.MinMaxCurve(0f, 2f * Mathf.PI);
+			main.startColor = nitroSmokeColor;
+			ParticleSystem.ShapeModule shape = _nitroSmoke.shape;
+			shape.enabled = true;
+			shape.shapeType = ParticleSystemShapeType.Cone;
+			shape.angle = 35f;
+			shape.radius = 0.15f;
+			ParticleSystem.VelocityOverLifetimeModule rise = _nitroSmoke.velocityOverLifetime;
+			rise.enabled = true;
+			rise.space = ParticleSystemSimulationSpace.World;
+			rise.x = 0f;
+			rise.y = 0.8f;
+			rise.z = 0f;
+			ParticleSystem.TextureSheetAnimationModule sheet = _nitroSmoke.textureSheetAnimation;
+			sheet.enabled = true;
+			sheet.numTilesX = 8;
+			sheet.numTilesY = 8;
+			sheet.frameOverTime = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 0f, 1f, 1f));
+			RuntimeParticles.SetSizeOverLifetime(_nitroSmoke, AnimationCurve.Linear(0f, 0.5f, 1f, 1.6f));
+			RuntimeParticles.SetFadeOut(_nitroSmoke, 0.3f);
+
+			// Hot streaks thrown back off the tail.
+			_nitroSparks = RuntimeParticles.Create("NitroSparks", transform, sparkleMaterial,
+				ParticleSystemSimulationSpace.World, 96);
+			main = _nitroSparks.main;
+			main.startLifetime = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
+			main.startSize = new ParticleSystem.MinMaxCurve(0.08f, 0.16f);
+			main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 8f);
+			main.startColor = new ParticleSystem.MinMaxGradient(nitroSparkColor, Color.white);
+			main.gravityModifier = 1f;
+			shape = _nitroSparks.shape;
+			shape.enabled = true;
+			shape.shapeType = ParticleSystemShapeType.Cone;
+			shape.angle = 25f;
+			shape.radius = 0.1f;
+			var renderer = _nitroSparks.GetComponent<ParticleSystemRenderer>();
+			renderer.renderMode = ParticleSystemRenderMode.Stretch;
+			renderer.velocityScale = 0.06f;
+			renderer.lengthScale = 1f;
+			RuntimeParticles.SetFadeOut(_nitroSparks, 0.5f);
 		}
 
 		private void SetColor(Renderer target, Color color, float alpha)
@@ -274,6 +380,20 @@ namespace Game.Surf
 				new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
 			trail.colorGradient = gradient;
 			return trail;
+		}
+
+		private static Gradient DefaultNitroTrailGradient()
+		{
+			var gradient = new Gradient();
+			gradient.SetKeys(
+				new[]
+				{
+					new GradientColorKey(new Color(1f, 0.97f, 0.85f), 0f),
+					new GradientColorKey(new Color(1f, 0.62f, 0.18f), 0.3f),
+					new GradientColorKey(new Color(1f, 0.25f, 0.08f), 1f)
+				},
+				new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0.85f, 0.4f), new GradientAlphaKey(0f, 1f) });
+			return gradient;
 		}
 
 		private static float EaseOutBack(float t)

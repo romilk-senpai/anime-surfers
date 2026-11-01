@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using Game.Core;
 using Game.Surf;
 using Game.UI.Elements;
 using UnityEngine;
@@ -10,7 +11,8 @@ namespace Game.UI
 {
 	/// <summary>
 	/// In-run HUD: score, distance, coins, nitro, power-up timers and the pause button, plus speed lines that
-	/// flicker while the nitro boost is on.
+	/// flicker while the nitro boost is on. The desktop HUD shows the nitro tank as a bar; the mobile one has swipe
+	/// controls and a hold-to-boost nitro button whose ring is the tank.
 	/// </summary>
 	public sealed class HudPresenter : IScreen, IStartable, ITickable, IDisposable
 	{
@@ -32,22 +34,26 @@ namespace Game.UI
 		private readonly IRunFlow _runFlow;
 		private readonly ScreenStack _screens;
 		private readonly GameUi _ui;
+		private readonly ITouchInput _touch;
 
 		private VisualElement _screen;
 		private Label _score;
 		private Label _distance;
 		private Label _coins;
-		private VisualElement _nitroPanel;
-		private VisualElement _nitroFill;
+		private VisualElement _nitroPanel; // desktop only
+		private VisualElement _nitroFill; // desktop only
 		private VisualElement _multiplierSticker;
 		private FocusLines _speedLines;
 		private float _nextSpeedLinesFlicker;
 		private readonly RadialProgress[] _timers = new RadialProgress[TimerElements.Length];
 		private Button _pauseButton;
+		private SwipeArea _swipeArea; // mobile only
+		private RadialProgress _nitroButton; // mobile only
+		private int _nitroPointerId = -1;
 		private int _meters = -1;
 
 		public HudPresenter(RunState run, PowerUps powerUps, Nitro nitro, BoardState board, IRunFlow runFlow,
-			ScreenStack screens, GameUi ui)
+			ScreenStack screens, GameUi ui, ITouchInput touch)
 		{
 			_run = run;
 			_powerUps = powerUps;
@@ -56,6 +62,7 @@ namespace Game.UI
 			_runFlow = runFlow;
 			_screens = screens;
 			_ui = ui;
+			_touch = touch;
 		}
 
 		public void Start()
@@ -82,8 +89,17 @@ namespace Game.UI
 				_distance.text = meters.ToString("N0", CultureInfo.InvariantCulture) + " m";
 			}
 
-			_nitroFill.style.width = Length.Percent(_nitro.Fill * 100f);
-			_nitroPanel.EnableInClassList("nitro-panel--active", _nitro.IsActive);
+			if (_nitroPanel != null)
+			{
+				_nitroFill.style.width = Length.Percent(_nitro.Fill * 100f);
+				_nitroPanel.EnableInClassList("nitro-panel--active", _nitro.IsActive);
+			}
+
+			if (_nitroButton != null)
+			{
+				_nitroButton.Value = _nitro.Fill;
+				_nitroButton.EnableInClassList("nitro-button--active", _nitro.IsActive);
+			}
 			UpdateSpeedLines();
 
 			for (int i = 0; i < _timers.Length; i++)
@@ -127,6 +143,21 @@ namespace Game.UI
 			_speedLines = _screen.Q<FocusLines>("speed-lines");
 			_pauseButton = _screen.Q<Button>("pause-button");
 			_pauseButton.clicked += _runFlow.Pause;
+			_swipeArea = _screen.Q<SwipeArea>("swipe-area");
+			_nitroButton = _screen.Q<RadialProgress>("nitro-button");
+
+			if (_swipeArea != null)
+			{
+				_swipeArea.Swiped += _touch.PushSwipe;
+			}
+
+			if (_nitroButton != null)
+			{
+				_nitroButton.RegisterCallback<PointerDownEvent>(OnNitroDown);
+				_nitroButton.RegisterCallback<PointerUpEvent>(OnNitroUp);
+				_nitroButton.RegisterCallback<PointerCancelEvent>(OnNitroCancel);
+				_nitroButton.RegisterCallback<PointerCaptureOutEvent>(OnNitroCaptureOut);
+			}
 
 			for (int i = 0; i < _timers.Length; i++)
 			{
@@ -145,6 +176,21 @@ namespace Game.UI
 			{
 				_pauseButton.clicked -= _runFlow.Pause;
 			}
+
+			if (_swipeArea != null)
+			{
+				_swipeArea.Swiped -= _touch.PushSwipe;
+			}
+
+			if (_nitroButton != null)
+			{
+				_nitroButton.UnregisterCallback<PointerDownEvent>(OnNitroDown);
+				_nitroButton.UnregisterCallback<PointerUpEvent>(OnNitroUp);
+				_nitroButton.UnregisterCallback<PointerCancelEvent>(OnNitroCancel);
+				_nitroButton.UnregisterCallback<PointerCaptureOutEvent>(OnNitroCaptureOut);
+			}
+
+			ReleaseNitro();
 		}
 
 		private void OnPhaseChanged(RunPhase phase)
@@ -167,6 +213,61 @@ namespace Game.UI
 
 			GameUi.SetVisible(_screen, visible);
 			GameUi.SetVisible(_pauseButton, phase == RunPhase.Running);
+
+			// The button can be hidden under a finger (pause, crash), which then never sends its pointer up.
+			if (phase != RunPhase.Running)
+			{
+				ReleaseNitro();
+			}
+		}
+
+		private void OnNitroDown(PointerDownEvent evt)
+		{
+			if (_nitroPointerId != -1)
+			{
+				return;
+			}
+
+			_nitroPointerId = evt.pointerId;
+			_nitroButton.CapturePointer(_nitroPointerId);
+			_nitroButton.AddToClassList("nitro-button--pressed");
+			_touch.SetBoostHeld(true);
+		}
+
+		private void OnNitroUp(PointerUpEvent evt)
+		{
+			if (evt.pointerId == _nitroPointerId)
+			{
+				ReleaseNitro();
+			}
+		}
+
+		private void OnNitroCancel(PointerCancelEvent evt)
+		{
+			if (evt.pointerId == _nitroPointerId)
+			{
+				ReleaseNitro();
+			}
+		}
+
+		private void OnNitroCaptureOut(PointerCaptureOutEvent evt)
+		{
+			ReleaseNitro();
+		}
+
+		private void ReleaseNitro()
+		{
+			_touch.SetBoostHeld(false);
+
+			if (_nitroPointerId == -1)
+			{
+				return;
+			}
+
+			int pointerId = _nitroPointerId;
+			_nitroPointerId = -1;
+			_nitroButton.RemoveFromClassList("nitro-button--pressed");
+			_nitroButton.ReleasePointer(pointerId);
 		}
 
 		private void SetScore(int score)
