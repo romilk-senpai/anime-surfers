@@ -1,0 +1,73 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="overlay">
+        <ui:Style src="../Styles/Modal.uss" />
+        <e:InkPanel class="modal settings-modal">
+            <ui:Label class="modal__title settings__title display">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="settings.title" />
+                </Bindings>
+            </ui:Label>
+
+            <ui:VisualElement class="settings__section">
+                <ui:Label class="settings__heading heavy">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.volume" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="volume-row">
+                    <ui:Label class="volume-row__label">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.music" />
+                        </Bindings>
+                    </ui:Label>
+                    <ui:SliderInt name="music-volume" class="volume-slider" low-value="0" high-value="100" value="100" page-size="5" fill="true" />
+                    <ui:Label name="music-value" class="volume-row__value display" text="100" />
+                </ui:VisualElement>
+                <ui:VisualElement class="volume-row">
+                    <ui:Label class="volume-row__label">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.sfx" />
+                        </Bindings>
+                    </ui:Label>
+                    <ui:SliderInt name="effects-volume" class="volume-slider" low-value="0" high-value="100" value="100" page-size="5" fill="true" />
+                    <ui:Label name="effects-value" class="volume-row__value display" text="100" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="settings__section">
+                <ui:Label class="settings__heading heavy">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.language" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="languages">
+                    <!-- Language names are written in their own language and not localized. -->
+                    <ui:Button name="language-en" text="English" class="language-button" />
+                    <ui:Button name="language-ja" text="日本語" class="language-button" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button name="graphics-button" class="secondary settings__graphics">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="secondary__label" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.graphics" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+
+            <ui:Button name="done-button" class="cta modal__cta">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="cta__label modal__cta-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.done" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

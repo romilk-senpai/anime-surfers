@@ -1,0 +1,204 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="overlay">
+        <ui:Style src="../Styles/Modal.uss" />
+        <ui:Style src="../Styles/Shop.uss" />
+        <e:InkPanel class="modal settings-modal shop-modal">
+            <ui:VisualElement class="shop__header">
+                <ui:Label class="modal__title shop__title display">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="shop.title" />
+                    </Bindings>
+                </ui:Label>
+                <e:InkPanel class="shop__balance panel panel--ink panel--slant" picking-mode="Ignore">
+                    <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop__balance-coin" picking-mode="Ignore" />
+                    <ui:Label name="balance" class="shop__balance-value display" text="0" />
+                </e:InkPanel>
+            </ui:VisualElement>
+
+            <!-- Rows are named like the HUD timers; ShopPresenter fills the pips and the prices. -->
+            <ui:VisualElement class="shop__rows">
+                <ui:VisualElement name="magnet" class="shop-row shop-row--magnet">
+                    <ui:VisualElement class="shop-badge" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--magnet shop-badge__icon" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="shop-row__info" picking-mode="Ignore">
+                        <ui:Label class="shop-row__name heavy">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="shop.magnet" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="shop-row__duration" picking-mode="Ignore">
+                            <ui:Label class="shop-row__duration-label">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="shop.duration" />
+                                </Bindings>
+                            </ui:Label>
+                            <ui:Label name="magnet-value" class="shop-row__value" text="100%" />
+                            <ui:Label name="magnet-next" class="shop-row__next" text="→ 120%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="magnet-pips" class="shop-pips" picking-mode="Ignore" />
+                    <ui:Button name="magnet-buy" class="shop-buy">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop-buy__coin" picking-mode="Ignore" />
+                            <ui:Label name="magnet-cost" class="shop-buy__cost display" text="500" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label class="shop-max display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="shop.max" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+                <ui:VisualElement name="multiplier" class="shop-row shop-row--multiplier">
+                    <ui:VisualElement class="shop-badge" picking-mode="Ignore">
+                        <ui:Label text="x2" class="shop-badge__text display" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="shop-row__info" picking-mode="Ignore">
+                        <ui:Label class="shop-row__name heavy">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="shop.multiplier" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="shop-row__duration" picking-mode="Ignore">
+                            <ui:Label class="shop-row__duration-label">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="shop.duration" />
+                                </Bindings>
+                            </ui:Label>
+                            <ui:Label name="multiplier-value" class="shop-row__value" text="100%" />
+                            <ui:Label name="multiplier-next" class="shop-row__next" text="→ 120%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="multiplier-pips" class="shop-pips" picking-mode="Ignore" />
+                    <ui:Button name="multiplier-buy" class="shop-buy">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop-buy__coin" picking-mode="Ignore" />
+                            <ui:Label name="multiplier-cost" class="shop-buy__cost display" text="500" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label class="shop-max display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="shop.max" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+                <ui:VisualElement name="shield" class="shop-row shop-row--shield">
+                    <ui:VisualElement class="shop-badge" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--shield shop-badge__icon" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="shop-row__info" picking-mode="Ignore">
+                        <ui:Label class="shop-row__name heavy">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="shop.shield" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="shop-row__duration" picking-mode="Ignore">
+                            <ui:Label class="shop-row__duration-label">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="shop.duration" />
+                                </Bindings>
+                            </ui:Label>
+                            <ui:Label name="shield-value" class="shop-row__value" text="100%" />
+                            <ui:Label name="shield-next" class="shop-row__next" text="→ 120%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="shield-pips" class="shop-pips" picking-mode="Ignore" />
+                    <ui:Button name="shield-buy" class="shop-buy">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop-buy__coin" picking-mode="Ignore" />
+                            <ui:Label name="shield-cost" class="shop-buy__cost display" text="500" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label class="shop-max display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="shop.max" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+                <ui:VisualElement name="super-jump" class="shop-row shop-row--super-jump">
+                    <ui:VisualElement class="shop-badge" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--super-jump shop-badge__icon" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="shop-row__info" picking-mode="Ignore">
+                        <ui:Label class="shop-row__name heavy">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="shop.super_jump" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="shop-row__duration" picking-mode="Ignore">
+                            <ui:Label class="shop-row__duration-label">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="shop.duration" />
+                                </Bindings>
+                            </ui:Label>
+                            <ui:Label name="super-jump-value" class="shop-row__value" text="100%" />
+                            <ui:Label name="super-jump-next" class="shop-row__next" text="→ 120%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="super-jump-pips" class="shop-pips" picking-mode="Ignore" />
+                    <ui:Button name="super-jump-buy" class="shop-buy">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop-buy__coin" picking-mode="Ignore" />
+                            <ui:Label name="super-jump-cost" class="shop-buy__cost display" text="500" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label class="shop-max display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="shop.max" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+                <ui:VisualElement name="coin-doubler" class="shop-row shop-row--coin-doubler">
+                    <ui:VisualElement class="shop-badge" picking-mode="Ignore">
+                        <ui:VisualElement class="icon coin-icon shop-badge__coin" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="shop-row__info" picking-mode="Ignore">
+                        <ui:Label class="shop-row__name heavy">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="shop.coin_doubler" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement class="shop-row__duration" picking-mode="Ignore">
+                            <ui:Label class="shop-row__duration-label">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="shop.duration" />
+                                </Bindings>
+                            </ui:Label>
+                            <ui:Label name="coin-doubler-value" class="shop-row__value" text="100%" />
+                            <ui:Label name="coin-doubler-next" class="shop-row__next" text="→ 120%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="coin-doubler-pips" class="shop-pips" picking-mode="Ignore" />
+                    <ui:Button name="coin-doubler-buy" class="shop-buy">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon coin-icon coin-icon--on-ink shop-buy__coin" picking-mode="Ignore" />
+                            <ui:Label name="coin-doubler-cost" class="shop-buy__cost display" text="500" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label class="shop-max display">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="shop.max" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button name="done-button" class="cta modal__cta">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="cta__label modal__cta-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.done" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

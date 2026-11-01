@@ -7,6 +7,8 @@
 /[Mm]emoryCaptures/
 /[Aa]ssets/EMX/
 /[Uu]serSettings/*
+/[Rr]ecordings/
+.utmp/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Ll]ibrary/**/*.asset
@@ -35,6 +37,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -58,6 +61,8 @@ sysinfo.txt
 
 # Builds
 *.apk
+*.aab
+*.app
 *.unitypackage
 
 # Crashlytics generated file
@@ -66,3 +71,17 @@ crashlytics-build.properties
 .idea/
 /[Ll]ibrary/**/InspectorExpandedItems.asset
 /[Ll]ibrary/**/SceneVisibilityState.asset
+
+# Addressables build output
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+/ServerData/
+
+# Claude Code local settings
+.claude
+.mcp.json
+
+# OS files
+.DS_Store
+Thumbs.db

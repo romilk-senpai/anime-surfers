@@ -1,0 +1,135 @@
+.game-over {
+    align-items: stretch;
+    justify-content: flex-start;
+}
+
+.game-over__lines {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    --lines-color: rgba(255, 255, 255, 0.9);
+}
+
+/* The one loud moment: a manga sound effect bursting out of the focus lines. */
+.sound-effect {
+    position: absolute;
+    left: 64px;
+    top: 112px;
+    font-size: 156px;
+    color: var(--alarm);
+    -unity-text-outline-width: 8px;
+    -unity-text-outline-color: var(--ink);
+    text-shadow: 11px 11px 0 var(--paper);
+    rotate: -8deg;
+    transition-property: scale;
+    transition-duration: 0.45s;
+    transition-timing-function: ease-in-out-sine;
+}
+
+/* Toggled by GameOverPresenter to make the sound effect throb. */
+.sound-effect--big {
+    scale: 1.12 1.12;
+}
+
+.crash {
+    position: absolute;
+    left: 80px;
+    top: 420px;
+    width: 480px;
+    padding: 24px 28px;
+    --panel-border-width: 4;
+    --panel-shadow: #FF3D6E;
+    --panel-shadow-x: 8;
+    --panel-shadow-y: 8;
+}
+
+.crash__title {
+    font-size: 36px;
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.crash__tip {
+    font-size: 18px;
+    white-space: normal;
+}
+
+.results {
+    position: absolute;
+    right: 80px;
+    top: 72px;
+    width: 520px;
+    padding: 30px 36px 32px;
+}
+
+.results__label {
+    font-size: 18px;
+}
+
+.results__score-value {
+    font-size: 92px;
+}
+
+.new-best {
+    position: absolute;
+    right: -6px;
+    top: -6px;
+    rotate: 8deg;
+    padding: 6px 14px;
+    font-size: 22px;
+    background-color: var(--coin);
+    border-width: 3px;
+    border-color: var(--ink);
+}
+
+.results__stats {
+    flex-direction: row;
+    margin-top: 18px;
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-color: var(--ink);
+}
+
+.results__stat {
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: 14px 0;
+}
+
+.results__stat--divided {
+    padding-left: 18px;
+    border-left-width: 3px;
+    border-color: var(--ink);
+}
+
+.results__stat-label {
+    font-size: 15px;
+}
+
+.results__stat-value {
+    font-size: 28px;
+}
+
+.results__coins {
+    flex-direction: row;
+    align-items: center;
+}
+
+.results__coin {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+.results__surf-again {
+    margin: 26px 8px 0;
+}
+
+.results__footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24px;
+}

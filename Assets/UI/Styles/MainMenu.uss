@@ -1,0 +1,193 @@
+.menu {
+    flex-grow: 1;
+}
+
+.menu__corner {
+    position: absolute;
+    left: 40px;
+    top: 36px;
+    flex-direction: row;
+}
+
+.menu__corner .round-button {
+    margin-right: 16px;
+}
+
+.menu__stats {
+    position: absolute;
+    right: 148px;
+    top: 38px;
+    flex-direction: row;
+}
+
+.stat {
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+    padding: 0 26px;
+    margin-left: 18px;
+}
+
+.stat--coins {
+    --panel-shadow: #FFD23F;
+}
+
+.stat__label {
+    font-size: 15px;
+    margin-right: 10px;
+}
+
+.stat__value {
+    font-size: 26px;
+}
+
+.stat__value--coins {
+    color: var(--coin);
+}
+
+.stat__coin {
+    margin-right: 10px;
+}
+
+/* Vertical katakana down the right edge, one cell per character. */
+.menu__strip {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 104px;
+    background-color: var(--coin);
+    border-left-width: 4px;
+    border-color: var(--ink);
+    align-items: center;
+    justify-content: center;
+}
+
+.strip__char {
+    font-size: 52px;
+    height: 60px;
+    width: 60px;
+    -unity-text-align: middle-center;
+    color: var(--ink);
+}
+
+/* Long-vowel marks turn upright in vertical text. */
+.strip__char--long {
+    rotate: 90deg;
+}
+
+/* Small kana sit in the top-right of their cell. */
+.strip__char--small {
+    font-size: 38px;
+    translate: 6px -6px;
+}
+
+.menu__title {
+    position: absolute;
+    right: 156px;
+    top: 96px;
+    align-items: flex-end;
+    rotate: -5deg;
+    transform-origin: right;
+    transition-property: scale;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out-sine;
+}
+
+/* Toggled by MenuPresenter; grows from the right edge so it never crosses the katakana strip. */
+.menu__title--big {
+    scale: 1.06 1.06;
+}
+
+.title-line {
+    font-size: 116px;
+    color: var(--paper);
+    -unity-text-outline-width: 6px;
+    -unity-text-outline-color: var(--ink);
+    text-shadow: 9px 9px 0 var(--ink);
+}
+
+.title-line--offset {
+    margin-top: -18px;
+    margin-right: 56px;
+}
+
+.menu__play {
+    position: absolute;
+    right: 172px;
+    top: 482px;
+    align-items: flex-end;
+}
+
+.menu__surf {
+    width: 380px;
+    height: 108px;
+}
+
+.menu__surf-label {
+    font-size: 66px;
+}
+
+.menu__surf-icon {
+    width: 40px;
+    height: 44px;
+    margin-right: 22px;
+}
+
+/* Shop on the left, the Space hint on the right, as wide as the Surf button. */
+.menu__below-surf {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 380px;
+    margin-top: 20px;
+}
+
+.menu__shop {
+    padding: 0 26px 0 22px;
+}
+
+.menu__shop-coin {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.menu__hint {
+    margin-right: 18px;
+}
+
+.controls {
+    position: absolute;
+    left: 40px;
+    bottom: 40px;
+    padding: 18px 22px 10px;
+    --panel-shadow-x: 6;
+    --panel-shadow-y: 6;
+}
+
+.controls__row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.controls__keys {
+    flex-direction: row;
+    align-items: center;
+    width: 212px;
+}
+
+.controls__keys .keycap {
+    margin-right: 6px;
+}
+
+.controls__or {
+    font-size: 14px;
+    margin: 0 8px 0 2px;
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Bold-SDF.asset");
+}
+
+.controls__action {
+    font-size: 16px;
+}

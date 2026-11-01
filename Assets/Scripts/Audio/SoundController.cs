@@ -1,71 +1,113 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Game.Core;
 using UnityEngine;
+using VContainer;
 
 namespace Game.Audio
 {
-    public class SoundController : MonoBehaviour, ISoundController
-    {
-        [SerializeField] private AudioSource globalAudioSource;
-        [SerializeField] private AudioSource musicAudioSource;
+	public class SoundController : MonoBehaviour, ISoundController
+	{
+		/// <summary>
+		/// Music volume at full music setting; the track is mastered loud. Balanced to sit a little above the water
+		/// loop and the footsteps.
+		/// </summary>
+		private const float MusicLevel = .1f;
 
-        [SerializeField] private AudioSource pointAudioSourcePrefab;
+		[SerializeField] private AudioSource globalAudioSource;
+		[SerializeField] private AudioSource musicAudioSource;
 
-        [SerializeField] private AudioClip musicClip;
+		[SerializeField] private AudioSource pointAudioSourcePrefab;
 
-        private Queue<AudioSource> _spawnedAudioSources;
+		[SerializeField] private AudioClip musicClip;
 
-        private void Start()
-        {
-            _spawnedAudioSources = new Queue<AudioSource>();
-        }
+		private Queue<AudioSource> _spawnedAudioSources;
+		private IVolumeSettings _volume;
 
-        public void StartMusic()
-        {
-            if (musicAudioSource.isPlaying)
-            {
-                return;
-            }
+		[Inject]
+		public void Construct(IVolumeSettings volume)
+		{
+			_volume = volume;
+			_volume.Changed += ApplyVolume;
+			ApplyVolume();
+		}
 
-            musicAudioSource.time = 1.2f; // this no good but not enough to cut it myself
-            musicAudioSource.Play();
-            musicAudioSource.DOFade(.03f, .5f);
-        }
+		private void Start()
+		{
+			_spawnedAudioSources = new Queue<AudioSource>();
+		}
 
-        public async void StopMusic()
-        {
-            await musicAudioSource.DOFade(0f, .5f);
+		private void OnDestroy()
+		{
+			if (_volume != null)
+			{
+				_volume.Changed -= ApplyVolume;
+			}
+		}
 
-            musicAudioSource.Stop();
-        }
+		public void StartMusic()
+		{
+			if (musicAudioSource.isPlaying)
+			{
+				return;
+			}
 
-        public void PlayOneShot(AudioClip clip)
-        {
-            globalAudioSource.PlayOneShot(clip);
-        }
+			musicAudioSource.time = 1.2f; // this no good but not enough to cut it myself
+			musicAudioSource.Play();
+			musicAudioSource.DOFade(MusicVolume, .5f);
+		}
 
-        public async void PlayClipAtPosition(AudioClip clip, Vector3 position, float volume = 1f)
-        {
-            if (!_spawnedAudioSources.TryDequeue(out AudioSource pointSource))
-            {
-                pointSource = Instantiate(pointAudioSourcePrefab);
-            }
-            pointSource.transform.position = position;
-            pointSource.gameObject.SetActive(true);
+		public async void StopMusic()
+		{
+			await musicAudioSource.DOFade(0f, .5f);
 
-            pointSource.PlayOneShot(clip, volume);
+			musicAudioSource.Stop();
+		}
 
-            bool isCancelled = await UniTask.WaitForSeconds(clip.length, cancellationToken: destroyCancellationToken)
-                .SuppressCancellationThrow();
+		public float EffectsVolume => _volume.Effects;
 
-            if (isCancelled)
-            {
-                return;
-            }
+		public void PlayOneShot(AudioClip clip)
+		{
+			globalAudioSource.PlayOneShot(clip);
+		}
 
-            pointSource.gameObject.SetActive(false);
-            _spawnedAudioSources.Enqueue(pointSource);
-        }
-    }
+		public async void PlayClipAtPosition(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f)
+		{
+			if (!_spawnedAudioSources.TryDequeue(out AudioSource pointSource))
+			{
+				pointSource = Instantiate(pointAudioSourcePrefab);
+			}
+			pointSource.transform.position = position;
+			pointSource.gameObject.SetActive(true);
+
+			pointSource.pitch = pitch;
+			pointSource.PlayOneShot(clip, volume * _volume.Effects);
+
+			bool isCancelled = await UniTask.WaitForSeconds(clip.length / pitch, cancellationToken: destroyCancellationToken)
+				.SuppressCancellationThrow();
+
+			if (isCancelled)
+			{
+				return;
+			}
+
+			pointSource.gameObject.SetActive(false);
+			_spawnedAudioSources.Enqueue(pointSource);
+		}
+
+		private float MusicVolume => MusicLevel * _volume.Music;
+
+		private void ApplyVolume()
+		{
+			AudioListener.volume = _volume.Muted ? 0f : 1f;
+			globalAudioSource.volume = _volume.Effects;
+
+			if (musicAudioSource.isPlaying)
+			{
+				musicAudioSource.DOKill();
+				musicAudioSource.volume = MusicVolume;
+			}
+		}
+	}
 }

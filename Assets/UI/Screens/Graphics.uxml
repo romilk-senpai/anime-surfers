@@ -1,0 +1,118 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="overlay">
+        <ui:Style src="../Styles/Modal.uss" />
+        <e:InkPanel class="modal settings-modal">
+            <ui:Label class="modal__title settings__title display">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="settings.graphics" />
+                </Bindings>
+            </ui:Label>
+
+            <!-- Buttons are numbered in the order of the IGraphicsSettings enums; fog-0 is off. -->
+            <ui:VisualElement class="settings__section">
+            <ui:VisualElement class="option-row">
+                <ui:Label class="option-row__label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.quality" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="options">
+                    <ui:Button name="quality-0" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.low" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="quality-1" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.medium" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="quality-2" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.high" />
+                        </Bindings>
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="option-row">
+                <ui:Label class="option-row__label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.distance" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="options">
+                    <ui:Button name="distance-0" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.near" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="distance-1" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.medium" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="distance-2" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.far" />
+                        </Bindings>
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="option-row">
+                <ui:Label class="option-row__label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.shadows" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="options">
+                    <ui:Button name="shadows-0" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.off" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="shadows-1" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.low" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="shadows-2" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.high" />
+                        </Bindings>
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="option-row">
+                <ui:Label class="option-row__label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="settings.fog" />
+                    </Bindings>
+                </ui:Label>
+                <ui:VisualElement class="options">
+                    <ui:Button name="fog-0" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.off" />
+                        </Bindings>
+                    </ui:Button>
+                    <ui:Button name="fog-1" class="option-button">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.on" />
+                        </Bindings>
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button name="done-button" class="cta modal__cta">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="cta__label modal__cta-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.done" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

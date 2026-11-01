@@ -59,12 +59,17 @@ Shader "AnimeSurfers/StylizedWater"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fog
+            // Low graphics quality (Core.GraphicsApplier): the long waves' shading is interpolated from the vertices.
+            #pragma multi_compile _ _WATER_LOW
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareOpaqueTexture.hlsl"
             #include "WaterWaves.hlsl"
+
+            // Waves this long are smooth enough across the mesh cells to shade from the vertices on low quality.
+            #define WATER_LONG_WAVES 4
 
             TEXTURE2D(_NormalMap);
             SAMPLER(sampler_NormalMap);
@@ -100,9 +105,13 @@ Shader "AnimeSurfers/StylizedWater"
 
             // Board interaction, pushed by Surf.WaterWake.
             #define WAKE_MAX_POINTS 48
+            #define WAKE_GROUP_SEGMENTS 8
+            #define WAKE_GROUPS 6                // ceil((WAKE_MAX_POINTS - 1) / WAKE_GROUP_SEGMENTS)
             #define SPLASH_MAX 8
             float4 _WakePoints[WAKE_MAX_POINTS]; // xy = xz, z = spawn time, w = strength
             float4 _WakeBounds;                  // xy = min xz, zw = max xz
+            float4 _WakeGroupBounds[WAKE_GROUPS]; // per run of segments: xy = min xz, zw = max xz of the live points
+            float4 _WakeGroupWidths[WAKE_GROUPS]; // x = widest age-widened wake of the run's live segments (0 = none)
             float4 _WakeParams;                  // width, spread, lifetime, edge width
             float4 _SplashPoints[SPLASH_MAX];    // xy = xz, z = spawn time, w = strength
             float4 _RippleParams;                // speed, frequency, lifetime, strength
@@ -126,6 +135,10 @@ Shader "AnimeSurfers/StylizedWater"
                 float4 screenPos : TEXCOORD2;
                 float eyeDepth : TEXCOORD3;
                 half fogFactor : TEXCOORD4;
+            #if defined(_WATER_LOW)
+                float4 longWavesA : TEXCOORD5; // long waves' sums: xyz = tangent, w = height
+                float3 longWavesB : TEXCOORD6; // xyz = binormal
+            #endif
             };
 
             void EvaluateWake(float2 xz, inout half foam, inout float2 gradient)
@@ -148,31 +161,48 @@ Shader "AnimeSurfers/StylizedWater"
                 float bestStrength = 0;
                 float2 bestDir = 0;
 
+                // Segments come in runs with conservative bounds: a run is skipped when even its nearest possible
+                // segment, at its widest, can't beat the best ratio so far. Same result, far fewer segments.
                 [loop]
-                for (int i = 0; i < WAKE_MAX_POINTS - 1; i++)
+                for (int group = 0; group < WAKE_GROUPS; group++)
                 {
-                    float4 a = _WakePoints[i];
-                    float4 b = _WakePoints[i + 1];
-                    float strength = min(a.w, b.w);
-                    if (strength <= 0)
+                    float4 box = _WakeGroupBounds[group];
+                    float maxWidth = _WakeGroupWidths[group].x;
+                    float2 outside = max(max(box.xy - xz, xz - box.zw), 0);
+                    if (maxWidth <= 0 || length(outside) >= bestRatio * maxWidth)
                     {
                         continue;
                     }
 
-                    float2 ab = b.xy - a.xy;
-                    float t = saturate(dot(xz - a.xy, ab) / max(dot(ab, ab), 1e-4));
-                    float2 toPixel = xz - (a.xy + ab * t);
-                    float d = length(toPixel);
-                    float age = _WaterWaveTime - lerp(a.z, b.z, t);
-                    float ratio = d / (width + age * spread);
+                    int first = group * WAKE_GROUP_SEGMENTS;
+                    int last = min(first + WAKE_GROUP_SEGMENTS, WAKE_MAX_POINTS - 1);
 
-                    if (ratio < bestRatio)
+                    [loop]
+                    for (int i = first; i < last; i++)
                     {
-                        bestRatio = ratio;
-                        bestDistance = d;
-                        bestAge = age;
-                        bestStrength = strength;
-                        bestDir = toPixel / max(d, 1e-4);
+                        float4 a = _WakePoints[i];
+                        float4 b = _WakePoints[i + 1];
+                        float strength = min(a.w, b.w);
+                        if (strength <= 0)
+                        {
+                            continue;
+                        }
+
+                        float2 ab = b.xy - a.xy;
+                        float t = saturate(dot(xz - a.xy, ab) / max(dot(ab, ab), 1e-4));
+                        float2 toPixel = xz - (a.xy + ab * t);
+                        float d = length(toPixel);
+                        float age = _WaterWaveTime - lerp(a.z, b.z, t);
+                        float ratio = d / (width + age * spread);
+
+                        if (ratio < bestRatio)
+                        {
+                            bestRatio = ratio;
+                            bestDistance = d;
+                            bestAge = age;
+                            bestStrength = strength;
+                            bestDir = toPixel / max(d, 1e-4);
+                        }
                     }
                 }
 
@@ -248,12 +278,12 @@ Shader "AnimeSurfers/StylizedWater"
                 float2 edgeDistance = min(uv, 1.0 - uv);
                 half edge = saturate(min(edgeDistance.x, edgeDistance.y) * 8.0);
 
+                // Forward differences off the center sample: 3 taps instead of 5, doubled to match the central
+                // difference's two-texel span.
                 float2 texel = float2(_WaterFXParams.w, 0);
                 half4 fx = SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv);
-                float dx = SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv + texel.xy).g
-                         - SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv - texel.xy).g;
-                float dz = SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv + texel.yx).g
-                         - SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv - texel.yx).g;
+                float dx = (SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv + texel.xy).g - fx.g) * 2.0;
+                float dz = (SAMPLE_TEXTURE2D(_WaterFXMap, sampler_WaterFXMap, uv + texel.yx).g - fx.g) * 2.0;
 
                 foam = max(foam, fx.r * edge);
                 gradient += float2(dx, dz) * (_WaterFXNormalStrength * edge);
@@ -290,11 +320,20 @@ Shader "AnimeSurfers/StylizedWater"
                 Varyings output;
 
                 float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                float3 offset, tangent, binormal;
-                EvaluateWaterWaves(positionWS.xz, offset, tangent, binormal);
+                float3 offset = EvaluateWaterWavesLod(positionWS.xz);
 
                 output.gridXZ = positionWS.xz;
-                positionWS += offset;
+            #if defined(_WATER_LOW)
+                float3 longOffset = 0;
+                float3 longTangent = 0;
+                float3 longBinormal = 0;
+                AddWaterWaves(positionWS.xz, 0, WATER_LONG_WAVES, longOffset, longTangent, longBinormal);
+                output.longWavesA = float4(longTangent, longOffset.y);
+                output.longWavesB = longBinormal;
+            #endif
+                // Only the geometry flattens on coarse cells and toward the far water; shading keeps the full waves
+                // (see frag).
+                positionWS += offset * WaterEdgeFade(positionWS.xz);
                 positionWS.y += _WaterBaseHeight;
 
                 output.positionWS = positionWS;
@@ -311,7 +350,15 @@ Shader "AnimeSurfers/StylizedWater"
 
                 // Recompute the waves per pixel at the undisplaced grid position for crisp normals.
                 float3 offset, tangent, binormal;
+            #if defined(_WATER_LOW)
+                // Only the height of the offset is used below.
+                offset = float3(0, input.longWavesA.w, 0);
+                tangent = float3(1, 0, 0) + input.longWavesA.xyz;
+                binormal = float3(0, 0, 1) + input.longWavesB;
+                AddWaterWaves(input.gridXZ, WATER_LONG_WAVES, WATER_MAX_WAVES, offset, tangent, binormal);
+            #else
                 EvaluateWaterWaves(input.gridXZ, offset, tangent, binormal);
+            #endif
                 float3 waveNormal = normalize(cross(binormal, tangent));
                 float3 waveTangent = normalize(tangent);
                 float3 waveBinormal = normalize(cross(waveTangent, waveNormal));
@@ -328,8 +375,19 @@ Shader "AnimeSurfers/StylizedWater"
                 normalWS = normalize(normalWS + float3(-interactionGradient.x, 0.0, -interactionGradient.y));
 
                 float3 viewDirWS = normalize(GetWorldSpaceViewDir(input.positionWS));
-                Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
-                half shadow = lerp(0.6, 1.0, mainLight.shadowAttenuation);
+                Light mainLight = GetMainLight();
+                // URP filters the shadow map on every pixel; skip it past the shadow distance, where the water covers
+                // much of the screen, and fade out toward it.
+                half shadowFade = GetMainLightShadowFade(input.positionWS);
+                half realtimeShadow = 1.0;
+                UNITY_BRANCH
+                if (shadowFade < 1.0)
+                {
+                    realtimeShadow = lerp(MainLightRealtimeShadow(TransformWorldToShadowCoord(input.positionWS)), 1.0,
+                        shadowFade);
+                }
+
+                half shadow = lerp(0.6, 1.0, realtimeShadow);
                 float3 lightDir = mainLight.direction;
                 half3 ambient = SampleSH(float3(0, 1, 0));
 
@@ -383,7 +441,7 @@ Shader "AnimeSurfers/StylizedWater"
                 half sunFresnel = 0.02 + 0.98 * pow(1.0 - saturate(dot(viewDirWS, halfDir)), 5.0);
                 half glint = min(ggx * sunFresnel * nl * _SunIntensity, 40.0);
                 glint = lerp(glint, step(0.6, glint) * 1.5, _Stylize);
-                color += mainLight.color * glint * mainLight.shadowAttenuation;
+                color += mainLight.color * glint * realtimeShadow;
 
                 // Foam: whitecaps where Gerstner waves compress, contact foam, and the board's wake.
                 float jacobian = tangent.x * binormal.z - tangent.z * binormal.x;

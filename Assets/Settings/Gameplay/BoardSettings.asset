@@ -33,6 +33,10 @@ MonoBehaviour:
   slideBodyHeight: 0.8
   bodyHalfLength: 0.5
   stepHeight: 0.5
+  nitroCapacity: 20
+  nitroStartFill: 1
+  nitroSpeedMultiplier: 1.4
+  nitroBlendTime: 0.25
   crashDrag: 1.5
   wallBounceSpeed: 3
   wallBounceSideSpeed: 4.5

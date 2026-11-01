@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="overlay">
+        <ui:Style src="../Styles/Modal.uss" />
+        <e:InkPanel class="modal pause-modal">
+            <ui:Label class="modal__title display">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="pause.title" />
+                </Bindings>
+            </ui:Label>
+            <ui:Button name="resume-button" class="cta modal__cta">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="cta__label modal__cta-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="pause.resume" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+            <ui:Button name="quit-button" class="secondary modal__secondary">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="secondary__label" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="pause.quit" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+            <ui:Label class="modal__note">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="pause.quit_note" />
+                </Bindings>
+            </ui:Label>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

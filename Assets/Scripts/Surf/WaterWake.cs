@@ -3,136 +3,184 @@ using UnityEngine;
 
 namespace Game.Surf
 {
-    /// <summary>
-    /// Collects board trail points and splash events and pushes them to the water shader,
-    /// which draws the foam wake and ripple rings directly on the surface.
-    /// </summary>
-    public class WaterWake : MonoBehaviour
-    {
-        public const int MaxTrailPoints = 48;
-        public const int MaxSplashes = 8;
+	/// <summary>
+	/// Collects board trail points and splash events and pushes them to the water shader,
+	/// which draws the foam wake and ripple rings directly on the surface.
+	/// </summary>
+	public class WaterWake : MonoBehaviour
+	{
+		public const int MaxTrailPoints = 48;
+		public const int MaxSplashes = 8;
+		// Runs of segments the shader can skip at once; must match WAKE_GROUP_SEGMENTS and WAKE_GROUPS.
+		private const int GroupSegments = 8;
+		private const int Groups = (MaxTrailPoints - 1 + GroupSegments - 1) / GroupSegments;
 
-        private static readonly int TrailPointsId = Shader.PropertyToID("_WakePoints");
-        private static readonly int TrailBoundsId = Shader.PropertyToID("_WakeBounds");
-        private static readonly int TrailParamsId = Shader.PropertyToID("_WakeParams");
-        private static readonly int SplashPointsId = Shader.PropertyToID("_SplashPoints");
-        private static readonly int RippleParamsId = Shader.PropertyToID("_RippleParams");
+		private static readonly int TrailPointsId = Shader.PropertyToID("_WakePoints");
+		private static readonly int TrailBoundsId = Shader.PropertyToID("_WakeBounds");
+		private static readonly int GroupBoundsId = Shader.PropertyToID("_WakeGroupBounds");
+		private static readonly int GroupWidthsId = Shader.PropertyToID("_WakeGroupWidths");
+		private static readonly int TrailParamsId = Shader.PropertyToID("_WakeParams");
+		private static readonly int SplashPointsId = Shader.PropertyToID("_SplashPoints");
+		private static readonly int RippleParamsId = Shader.PropertyToID("_RippleParams");
 
-        [SerializeField] private WaterSurface water;
+		[SerializeField] private WaterSurface water;
 
-        [Header("Wake")]
-        [SerializeField] private float wakeWidth = 0.3f;
-        [Tooltip("How fast the wake widens, in meters per second.")]
-        [SerializeField] private float wakeSpread = 0.7f;
-        [SerializeField] private float wakeLifetime = 2.5f;
-        [SerializeField] private float wakeEdgeWidth = 0.07f;
+		[Header("Wake")]
+		[SerializeField] private float wakeWidth = 0.3f;
+		[Tooltip("How fast the wake widens, in meters per second.")]
+		[SerializeField] private float wakeSpread = 0.7f;
+		[SerializeField] private float wakeLifetime = 2.5f;
+		[SerializeField] private float wakeEdgeWidth = 0.07f;
 
-        [Header("Ripples")]
-        [SerializeField] private float rippleSpeed = 3f;
-        [SerializeField] private float rippleFrequency = 7f;
-        [SerializeField] private float rippleLifetime = 1.6f;
-        [SerializeField] private float rippleStrength = 0.6f;
+		[Header("Ripples")]
+		[SerializeField] private float rippleSpeed = 3f;
+		[SerializeField] private float rippleFrequency = 7f;
+		[SerializeField] private float rippleLifetime = 1.6f;
+		[SerializeField] private float rippleStrength = 0.6f;
 
-        // xy = world xz, z = spawn time (water clock), w = strength (0 breaks the trail)
-        private readonly Vector4[] _trail = new Vector4[MaxTrailPoints];
-        private readonly Vector4[] _splashes = new Vector4[MaxSplashes];
-        private int _nextSplash;
+		// xy = world xz, z = spawn time (water clock), w = strength (0 breaks the trail)
+		private readonly Vector4[] _trail = new Vector4[MaxTrailPoints];
+		private readonly Vector4[] _splashes = new Vector4[MaxSplashes];
+		private readonly Vector4[] _groupBounds = new Vector4[Groups];
+		private readonly Vector4[] _groupWidths = new Vector4[Groups];
+		private int _nextSplash;
 
-        private void OnEnable()
-        {
-            Clear();
-        }
+		private void OnEnable()
+		{
+			Clear();
+		}
 
-        private void OnDisable()
-        {
-            // Shader globals outlive play mode, so don't leave a frozen wake behind.
-            Clear();
-        }
+		private void OnDisable()
+		{
+			// Shader globals outlive play mode, so don't leave a frozen wake behind.
+			Clear();
+		}
 
-        // Spaced so the buffer outlives the wake: the tail fades out fully before its points are dropped.
-        private float PointInterval => wakeLifetime / (MaxTrailPoints - 2);
+		// Spaced so the buffer outlives the wake: the tail fades out fully before its points are dropped.
+		private float PointInterval => wakeLifetime / (MaxTrailPoints - 2);
 
-        /// <summary>
-        /// Call every frame while on the water. The newest point follows the board, so the wake grows smoothly;
-        /// it's left behind as a fixed point once it's a full interval old.
-        /// </summary>
-        public void UpdateTrail(Vector3 position)
-        {
-            float now = water.WaveTime;
-            bool headIsLive = _trail[0].w > 0f && _trail[1].w > 0f && now - _trail[1].z < PointInterval;
-            if (!headIsLive)
-            {
-                Shift();
-            }
-            _trail[0] = new Vector4(position.x, position.z, now, 1f);
-        }
+		/// <summary>
+		/// Call every frame while on the water. The newest point follows the board, so the wake grows smoothly;
+		/// it's left behind as a fixed point once it's a full interval old.
+		/// </summary>
+		public void UpdateTrail(Vector3 position)
+		{
+			float now = water.WaveTime;
+			bool headIsLive = _trail[0].w > 0f && _trail[1].w > 0f && now - _trail[1].z < PointInterval;
+			if (!headIsLive)
+			{
+				Shift();
+			}
+			_trail[0] = new Vector4(position.x, position.z, now, 1f);
+		}
 
-        public void BreakTrail()
-        {
-            if (_trail[0].w > 0f)
-            {
-                Shift();
-                _trail[0] = new Vector4(_trail[1].x, _trail[1].y, water.WaveTime, 0f);
-            }
-        }
+		public void BreakTrail()
+		{
+			if (_trail[0].w > 0f)
+			{
+				Shift();
+				_trail[0] = new Vector4(_trail[1].x, _trail[1].y, water.WaveTime, 0f);
+			}
+		}
 
-        private void Shift()
-        {
-            Array.Copy(_trail, 0, _trail, 1, MaxTrailPoints - 1);
-        }
+		private void Shift()
+		{
+			Array.Copy(_trail, 0, _trail, 1, MaxTrailPoints - 1);
+		}
 
-        public void AddSplash(Vector3 position, float strength)
-        {
-            _splashes[_nextSplash] = new Vector4(position.x, position.z, water.WaveTime, strength);
-            _nextSplash = (_nextSplash + 1) % MaxSplashes;
-        }
+		public void AddSplash(Vector3 position, float strength)
+		{
+			_splashes[_nextSplash] = new Vector4(position.x, position.z, water.WaveTime, strength);
+			_nextSplash = (_nextSplash + 1) % MaxSplashes;
+		}
 
-        private void LateUpdate()
-        {
-            float now = water.WaveTime;
-            var min = new Vector2(float.MaxValue, float.MaxValue);
-            var max = new Vector2(float.MinValue, float.MinValue);
+		private void LateUpdate()
+		{
+			float now = water.WaveTime;
+			var min = new Vector2(float.MaxValue, float.MaxValue);
+			var max = new Vector2(float.MinValue, float.MinValue);
 
-            for (int i = 0; i < MaxTrailPoints; i++)
-            {
-                if (_trail[i].w <= 0f)
-                {
-                    continue;
-                }
+			for (int i = 0; i < MaxTrailPoints; i++)
+			{
+				if (_trail[i].w <= 0f)
+				{
+					continue;
+				}
 
-                if (now - _trail[i].z > wakeLifetime)
-                {
-                    _trail[i].w = 0f;
-                    continue;
-                }
+				if (now - _trail[i].z > wakeLifetime)
+				{
+					_trail[i].w = 0f;
+					continue;
+				}
 
-                min = Vector2.Min(min, new Vector2(_trail[i].x, _trail[i].y));
-                max = Vector2.Max(max, new Vector2(_trail[i].x, _trail[i].y));
-            }
+				min = Vector2.Min(min, new Vector2(_trail[i].x, _trail[i].y));
+				max = Vector2.Max(max, new Vector2(_trail[i].x, _trail[i].y));
+			}
 
-            // The shader skips every pixel outside these bounds; empty bounds skip everything.
-            float margin = wakeWidth + wakeSpread * wakeLifetime + wakeEdgeWidth + 0.5f;
-            Vector4 bounds = min.x <= max.x
-                ? new Vector4(min.x - margin, min.y - margin, max.x + margin, max.y + margin)
-                : new Vector4(1f, 1f, -1f, -1f);
+			UpdateGroups(now);
 
-            Push(bounds);
-        }
+			// The shader skips every pixel outside these bounds; empty bounds skip everything.
+			float margin = wakeWidth + wakeSpread * wakeLifetime + wakeEdgeWidth + 0.5f;
+			Vector4 bounds = min.x <= max.x
+				? new Vector4(min.x - margin, min.y - margin, max.x + margin, max.y + margin)
+				: new Vector4(1f, 1f, -1f, -1f);
 
-        private void Clear()
-        {
-            Array.Clear(_trail, 0, _trail.Length);
-            Array.Clear(_splashes, 0, _splashes.Length);
-            Push(new Vector4(1f, 1f, -1f, -1f));
-        }
+			Push(bounds);
+		}
 
-        private void Push(Vector4 bounds)
-        {
-            Shader.SetGlobalVectorArray(TrailPointsId, _trail);
-            Shader.SetGlobalVectorArray(SplashPointsId, _splashes);
-            Shader.SetGlobalVector(TrailBoundsId, bounds);
-            Shader.SetGlobalVector(TrailParamsId, new Vector4(wakeWidth, wakeSpread, wakeLifetime, wakeEdgeWidth));
-            Shader.SetGlobalVector(RippleParamsId, new Vector4(rippleSpeed, rippleFrequency, rippleLifetime, rippleStrength));
-        }
-    }
+		/// <summary>
+		/// Bounds of each run of segments for the shader to skip runs a pixel can't be in: the box around the live
+		/// segments' points and the widest their wake gets, at the oldest point's age.
+		/// </summary>
+		private void UpdateGroups(float now)
+		{
+			for (int group = 0; group < Groups; group++)
+			{
+				var min = new Vector2(float.MaxValue, float.MaxValue);
+				var max = new Vector2(float.MinValue, float.MinValue);
+				float oldest = float.MaxValue;
+				int first = group * GroupSegments;
+				int last = Mathf.Min(first + GroupSegments, MaxTrailPoints - 1);
+
+				for (int i = first; i < last; i++)
+				{
+					Vector4 a = _trail[i];
+					Vector4 b = _trail[i + 1];
+					if (a.w <= 0f || b.w <= 0f)
+					{
+						continue;
+					}
+
+					min = Vector2.Min(min, Vector2.Min(new Vector2(a.x, a.y), new Vector2(b.x, b.y)));
+					max = Vector2.Max(max, Vector2.Max(new Vector2(a.x, a.y), new Vector2(b.x, b.y)));
+					oldest = Mathf.Min(oldest, Mathf.Min(a.z, b.z));
+				}
+
+				bool live = oldest < float.MaxValue;
+				_groupBounds[group] = live ? new Vector4(min.x, min.y, max.x, max.y) : Vector4.zero;
+				float widest = live ? wakeWidth + Mathf.Max(0f, now - oldest) * wakeSpread : 0f;
+				_groupWidths[group] = new Vector4(widest, 0f, 0f, 0f);
+			}
+		}
+
+		private void Clear()
+		{
+			Array.Clear(_trail, 0, _trail.Length);
+			Array.Clear(_splashes, 0, _splashes.Length);
+			Array.Clear(_groupBounds, 0, _groupBounds.Length);
+			Array.Clear(_groupWidths, 0, _groupWidths.Length);
+			Push(new Vector4(1f, 1f, -1f, -1f));
+		}
+
+		private void Push(Vector4 bounds)
+		{
+			Shader.SetGlobalVectorArray(TrailPointsId, _trail);
+			Shader.SetGlobalVectorArray(SplashPointsId, _splashes);
+			Shader.SetGlobalVector(TrailBoundsId, bounds);
+			Shader.SetGlobalVectorArray(GroupBoundsId, _groupBounds);
+			Shader.SetGlobalVectorArray(GroupWidthsId, _groupWidths);
+			Shader.SetGlobalVector(TrailParamsId, new Vector4(wakeWidth, wakeSpread, wakeLifetime, wakeEdgeWidth));
+			Shader.SetGlobalVector(RippleParamsId, new Vector4(rippleSpeed, rippleFrequency, rippleLifetime, rippleStrength));
+		}
+	}
 }

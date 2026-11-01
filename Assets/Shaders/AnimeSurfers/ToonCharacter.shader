@@ -11,6 +11,8 @@ Shader "AnimeSurfers/ToonCharacter"
 
         [Header(Cel Shading)]
         _ShadowColor ("Shadow Color", Color) = (0.72, 0.62, 0.78, 1)
+        [Toggle(_SHADOW_MAP)] _UseShadowMap ("Shadow Color From Map", Float) = 0
+        [NoScaleOffset] _ShadowMap ("Shadow Color Map (times Shadow Color)", 2D) = "white" {}
         _ShadowThreshold ("Shadow Threshold", Range(0, 1)) = 0.5
         _ShadowSoftness ("Shadow Softness", Range(0.001, 0.5)) = 0.03
         _ReceiveShadows ("Received Shadow Strength", Range(0, 1)) = 1
@@ -37,6 +39,11 @@ Shader "AnimeSurfers/ToonCharacter"
         _RimSoftness ("Rim Softness", Range(0.001, 0.5)) = 0.05
         _RimLitSideOnly ("Rim Only On Lit Side", Range(0, 1)) = 0.7
 
+        [Header(Night Lights)]
+        [Toggle(_EMISSION)] _Emission ("Emission (scaled by SkyCycle)", Float) = 0
+        [NoScaleOffset] _EmissionMap ("Emission Map", 2D) = "black" {}
+        [HDR] _EmissionColor ("Emission Color", Color) = (1, 1, 1, 1)
+
         [Header(Outline)]
         _OutlineColor ("Outline Color", Color) = (0.08, 0.05, 0.08, 1)
         _OutlineWidth ("Outline Width (pixels)", Range(0, 8)) = 1.5
@@ -53,6 +60,11 @@ Shader "AnimeSurfers/ToonCharacter"
 
         TEXTURE2D(_BaseMap);
         SAMPLER(sampler_BaseMap);
+        TEXTURE2D(_EmissionMap);
+        TEXTURE2D(_ShadowMap);
+
+        // Global set by SkyCycle: 0 by day, 1 at night.
+        half _NightLights;
 
         // Shared by every pass so the material stays SRP Batcher compatible.
         CBUFFER_START(UnityPerMaterial)
@@ -78,6 +90,7 @@ Shader "AnimeSurfers/ToonCharacter"
             half _RimWidth;
             half _RimSoftness;
             half _RimLitSideOnly;
+            half4 _EmissionColor;
             half4 _OutlineColor;
             float _OutlineWidth;
             float _OutlineReferenceDistance;
@@ -105,6 +118,8 @@ Shader "AnimeSurfers/ToonCharacter"
             #pragma fragment frag
             #pragma shader_feature_local _ALPHATEST_ON
             #pragma shader_feature_local _FACE_SHADING
+            #pragma shader_feature_local_fragment _EMISSION
+            #pragma shader_feature_local_fragment _SHADOW_MAP
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
             #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
@@ -167,7 +182,8 @@ Shader "AnimeSurfers/ToonCharacter"
             }
 
             // Two-tone cel shading with a tinted shadow color and a hard-edged highlight.
-            half3 ShadeLight(half3 albedo, float3 positionWS, float3 normalWS, float3 viewDirWS, Light light, out half litAmount)
+            half3 ShadeLight(half3 albedo, half3 shadowColor, float3 positionWS, float3 normalWS, float3 viewDirWS, Light light,
+                out half litAmount)
             {
                 #if defined(_FACE_SHADING)
                     half lit = FaceLighting(positionWS, light.direction);
@@ -178,7 +194,7 @@ Shader "AnimeSurfers/ToonCharacter"
                 lit *= lerp(1.0, light.shadowAttenuation, _ReceiveShadows);
                 litAmount = lit;
 
-                half3 color = albedo * lerp(_ShadowColor.rgb, 1.0, lit);
+                half3 color = albedo * lerp(shadowColor, 1.0, lit);
 
                 float3 halfDir = normalize(light.direction + viewDirWS);
                 half nh = saturate(dot(normalWS, halfDir));
@@ -194,9 +210,15 @@ Shader "AnimeSurfers/ToonCharacter"
                 float3 normalWS = normalize(input.normalWS);
                 float3 viewDirWS = normalize(GetWorldSpaceViewDir(input.positionWS));
 
+                half3 shadowColor = _ShadowColor.rgb;
+                #if defined(_SHADOW_MAP)
+                    // Per-texel shadow tints, so palette-textured meshes can share one material.
+                    shadowColor *= SAMPLE_TEXTURE2D(_ShadowMap, sampler_BaseMap, input.uv).rgb;
+                #endif
+
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(input.positionWS));
                 half mainLit;
-                half3 color = ShadeLight(base.rgb, input.positionWS, normalWS, viewDirWS, mainLight, mainLit);
+                half3 color = ShadeLight(base.rgb, shadowColor, input.positionWS, normalWS, viewDirWS, mainLight, mainLit);
 
                 #if defined(_ADDITIONAL_LIGHTS)
                 InputData inputData = (InputData)0;
@@ -206,7 +228,7 @@ Shader "AnimeSurfers/ToonCharacter"
                 LIGHT_LOOP_BEGIN(lightCount)
                     Light light = GetAdditionalLight(lightIndex, input.positionWS);
                     half unused;
-                    color += ShadeLight(base.rgb, input.positionWS, normalWS, viewDirWS, light, unused);
+                    color += ShadeLight(base.rgb, shadowColor, input.positionWS, normalWS, viewDirWS, light, unused);
                 LIGHT_LOOP_END
                 #endif
 
@@ -218,6 +240,11 @@ Shader "AnimeSurfers/ToonCharacter"
                 rimMask *= lerp(1.0, mainLit, _RimLitSideOnly);
                 color += _RimColor.rgb * rimMask * _RimStrength * mainLight.color;
 
+                #if defined(_EMISSION)
+                    // Lamps and lit windows, faded in as night falls. Shares the base map's point sampler.
+                    color += SAMPLE_TEXTURE2D(_EmissionMap, sampler_BaseMap, input.uv).rgb * _EmissionColor.rgb * _NightLights;
+                #endif
+
                 color = MixFog(color, input.fogFactor);
                 return half4(color, 1.0);
             }
@@ -225,10 +252,12 @@ Shader "AnimeSurfers/ToonCharacter"
         }
 
         // Inverted hull outline, constant pixel width up close and thinning with distance.
+        // Drawn by the renderer's ToonOutlineFeature after all opaques: as a second forward pass
+        // (SRPDefaultUnlit) it would switch shaders on every object and break SRP batching.
         Pass
         {
             Name "Outline"
-            Tags { "LightMode" = "SRPDefaultUnlit" }
+            Tags { "LightMode" = "ToonOutline" }
             Cull Front
 
             HLSLPROGRAM

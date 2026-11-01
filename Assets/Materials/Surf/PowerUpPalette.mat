@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: PowerUpPalette
+  m_Shader: {fileID: 4800000, guid: f792ff787673c684e8df4d9b792fe7f6, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _SHADOW_MAP
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: f3c7561672ecee44b9416a7ad1c7705b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ShadowMap:
+        m_Texture: {fileID: 2800000, guid: 0e1e0a0d049401f4c99cbf13d726068a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AlphaClip: 0
+    - _AmbientStrength: 0.5
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _Emission: 0
+    - _FaceFlatten: 0.03
+    - _FaceShading: 0
+    - _OutlineBaseMix: 1
+    - _OutlineReferenceDistance: 6
+    - _OutlineWidth: 1.5
+    - _ReceiveShadows: 1
+    - _RimLitSideOnly: 0.7
+    - _RimSoftness: 0.05
+    - _RimStrength: 0.5
+    - _RimWidth: 0.3
+    - _ShadowSoftness: 0.03
+    - _ShadowThreshold: 0.45
+    - _SpecularSize: 0.08
+    - _SpecularSoftness: 0.01
+    - _SpecularStrength: 0.5
+    - _UseShadowMap: 1
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FaceCenter: {r: 0, g: 0, b: 0, a: 0}
+    - _FaceForward: {r: 0, g: 0, b: 1, a: 0}
+    - _FaceRight: {r: 1, g: 0, b: 0, a: 0}
+    - _FaceUp: {r: 0, g: 1, b: 0, a: 0}
+    - _OutlineColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+    - _RimColor: {r: 1, g: 0.97, b: 0.92, a: 1}
+    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

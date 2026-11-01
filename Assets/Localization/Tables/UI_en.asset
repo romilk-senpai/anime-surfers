@@ -1,0 +1,231 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: a8715cf6e2512dc42b823fa1c26222ca, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1207951360
+    m_Localized: Surf
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1279254528
+    m_Localized: Best
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1279254529
+    m_Localized: to surf
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448834
+    m_Localized: Switch lane
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448835
+    m_Localized: Jump
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448836
+    m_Localized: Slide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448837
+    m_Localized: or
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448839
+    m_Localized: Paused
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448840
+    m_Localized: Resume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448841
+    m_Localized: Quit to menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448842
+    m_Localized: Quitting ends this run.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448843
+    m_Localized: Score
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448844
+    m_Localized: New best
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448845
+    m_Localized: Distance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448846
+    m_Localized: Coins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448847
+    m_Localized: Best
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448848
+    m_Localized: Surf again
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448849
+    m_Localized: Menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448850
+    m_Localized: to surf again
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448851
+    m_Localized: You hit a wall
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448852
+    m_Localized: "Walls block the whole lane. Switch lanes early with A/D or \u2190/\u2192 when you see one coming."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448853
+    m_Localized: You hit a barrier
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448854
+    m_Localized: "Barriers with a gap underneath can be slid under. Press S or \u2193 just before you reach one."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448855
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448856
+    m_Localized: Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448857
+    m_Localized: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448858
+    m_Localized: Sound effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448859
+    m_Localized: Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1283448860
+    m_Localized: Done
+    m_Metadata:
+      m_Items: []
+  - m_Id: 39220424990720
+    m_Localized: NITRO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40291054641152
+    m_Localized: Nitro (hold)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605925236736
+    m_Localized: Graphics
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345600
+    m_Localized: Quality
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345601
+    m_Localized: View distance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345602
+    m_Localized: Shadows
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345603
+    m_Localized: Fog
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345604
+    m_Localized: Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345605
+    m_Localized: Medium
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345606
+    m_Localized: High
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345607
+    m_Localized: Near
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345608
+    m_Localized: Far
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345609
+    m_Localized: Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40605992345610
+    m_Localized: On
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536495996928
+    m_Localized: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105792
+    m_Localized: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105793
+    m_Localized: Magnet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105794
+    m_Localized: Score x2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105795
+    m_Localized: Shield
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105796
+    m_Localized: Super Jump
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105797
+    m_Localized: Coin x2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105798
+    m_Localized: Duration
+    m_Metadata:
+      m_Items: []
+  - m_Id: 106536563105799
+    m_Localized: MAX
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

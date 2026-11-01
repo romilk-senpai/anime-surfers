@@ -1,0 +1,225 @@
+/* Power-up duration upgrades. Each row sets --accent to its power-up's HUD ring colour. */
+
+.shop__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.shop__title {
+    margin-bottom: 0;
+}
+
+.shop__balance {
+    flex-direction: row;
+    align-items: center;
+    height: 48px;
+    padding: 0 24px;
+    margin-right: 6px;
+    --panel-shadow: #FFD23F;
+    --panel-shadow-x: 5;
+    --panel-shadow-y: 5;
+}
+
+.shop__balance-coin {
+    margin-right: 10px;
+}
+
+.shop__balance-value {
+    font-size: 26px;
+    color: var(--coin);
+}
+
+.shop__rows {
+    margin-bottom: 26px;
+    border-top-width: 2px;
+    border-color: rgba(28, 27, 77, 0.12);
+}
+
+.shop-row {
+    flex-direction: row;
+    align-items: center;
+    height: 70px;
+    border-bottom-width: 2px;
+    border-color: rgba(28, 27, 77, 0.12);
+}
+
+.shop-row--magnet { --accent: #3FA9F5; }
+.shop-row--multiplier { --accent: #FF3D6E; }
+.shop-row--shield { --accent: #8C5CFF; }
+.shop-row--super-jump { --accent: #3DDC84; }
+.shop-row--coin-doubler { --accent: #FFD23F; }
+
+.shop-badge {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    border-width: 3px;
+    border-color: var(--ink);
+    background-color: var(--accent);
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.shop-badge__icon {
+    width: 22px;
+    height: 22px;
+    -unity-background-image-tint-color: var(--ink);
+}
+
+.shop-badge__coin {
+    width: 26px;
+    height: 26px;
+}
+
+.shop-badge__text {
+    font-size: 16px;
+}
+
+/* Only the text column gives way when the row is tight. */
+.shop-row__info {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.shop-row__name {
+    font-size: 19px;
+}
+
+.shop-row__duration {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.shop-row__duration-label {
+    font-size: 14px;
+    opacity: 0.6;
+    margin-right: 6px;
+}
+
+.shop-row__value {
+    font-size: 15px;
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Black-SDF.asset");
+}
+
+.shop-row__next {
+    font-size: 15px;
+    margin-left: 6px;
+    color: var(--alarm);
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Black-SDF.asset");
+}
+
+/* One slanted cell per level, added by ShopPresenter. */
+.shop-pips {
+    flex-shrink: 0;
+    flex-direction: row;
+    margin: 0 14px 0 6px;
+}
+
+.shop-pip {
+    width: 12px;
+    height: 22px;
+    margin-left: 3px;
+    --panel-fill: #FFFFFF;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 2;
+    --panel-skew: -14;
+}
+
+/* InkPanel reads literal values only, so the fill can't use var(--accent). */
+.shop-row--magnet .shop-pip--filled { --panel-fill: #3FA9F5; }
+.shop-row--multiplier .shop-pip--filled { --panel-fill: #FF3D6E; }
+.shop-row--shield .shop-pip--filled { --panel-fill: #8C5CFF; }
+.shop-row--super-jump .shop-pip--filled { --panel-fill: #3DDC84; }
+.shop-row--coin-doubler .shop-pip--filled { --panel-fill: #FFD23F; }
+
+/* Buy: a small ink slab with the price in coin yellow, like the coin counters. */
+.shop-buy {
+    flex-shrink: 0;
+    width: 110px;
+    height: 46px;
+}
+
+.shop-buy .button-shape {
+    --panel-fill: #1C1B4D;
+    --panel-shadow: #FF3D6E;
+    --panel-shadow-x: 4;
+    --panel-shadow-y: 4;
+    --panel-skew: -12;
+}
+
+.shop-buy:hover .button-shape,
+.shop-buy:focus .button-shape {
+    --panel-fill: #33318A;
+}
+
+.shop-buy:active .button-shape {
+    --panel-shadow-x: 1;
+    --panel-shadow-y: 1;
+}
+
+.shop-buy__coin {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+.shop-buy__cost {
+    font-size: 18px;
+    color: var(--coin);
+}
+
+/* Not enough coins: paper slab, no shadow, faded price. */
+.shop-buy:disabled {
+    opacity: 1;
+}
+
+.shop-buy:disabled .button-shape {
+    --panel-fill: #FFFFFF;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 2;
+    --panel-shadow-x: 0;
+    --panel-shadow-y: 0;
+}
+
+.shop-buy:disabled .button-content {
+    opacity: 0.4;
+}
+
+.shop-buy:disabled .shop-buy__coin {
+    background-image: url("../Icons/coin.svg");
+}
+
+.shop-buy:disabled .shop-buy__cost {
+    color: var(--ink);
+}
+
+/* Maxed out: a pink sticker takes the button's place. */
+.shop-max {
+    display: none;
+    flex-shrink: 0;
+    width: 110px;
+    height: 46px;
+    -unity-text-align: middle-center;
+    font-size: 22px;
+    color: var(--ink);
+    background-color: var(--alarm);
+    border-width: 3px;
+    border-color: var(--ink);
+    rotate: -4deg;
+}
+
+.shop-row--maxed .shop-buy,
+.shop-row--maxed .shop-row__next {
+    display: none;
+}
+
+.shop-row--maxed .shop-max {
+    display: flex;
+}

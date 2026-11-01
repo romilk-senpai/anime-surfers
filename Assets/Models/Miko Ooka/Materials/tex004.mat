@@ -134,6 +134,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ShadowMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ShadowT:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -180,6 +184,7 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _DynamicNoisyOutline: 0
+    - _Emission: 0
     - _EnableTextureTransparent: 0
     - _EnvironmentReflections: 1
     - _EnvironmentalLightingIntensity: 1
@@ -241,7 +246,7 @@ Material:
     - _OutlineExtrudeMethod: 0
     - _OutlineMode: 1
     - _OutlineReferenceDistance: 6
-    - _OutlineWidth: 1.5
+    - _OutlineWidth: 1
     - _OutlineWidthAffectedByViewDistance: 0
     - _OutlineZPostionInCamera: 0
     - _OverallShadowColorPower: 1
@@ -309,6 +314,7 @@ Material:
     - _TexturePatternStyle: 0
     - _UVSec: 0
     - _UseSecondaryCutout: 0
+    - _UseShadowMap: 0
     - _VertexColorBlueAffectOutlineWitdh: 0
     - _VertexColorGreenControlSelfShadowThreshold: 0
     - _VertexColorRedControlSmoothObjectNormal: 0

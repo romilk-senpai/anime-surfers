@@ -1,113 +1,125 @@
+using System;
 using UnityEngine;
 
 namespace Game.Surf
 {
-    /// <summary>
-    /// Collects pickups the rider's body touches and pulls coins in while the magnet is active.
-    /// Water-following pickups are tested against the water height under the board, which is accurate enough
-    /// this close to it.
-    /// </summary>
-    public sealed class PickupCollector
-    {
-        private readonly PickupSettings _settings;
-        private readonly BoardSettings _boardSettings;
-        private readonly BoardState _board;
-        private readonly PickupField _field;
-        private readonly PowerUps _powerUps;
-        private readonly RunState _run;
+	/// <summary>
+	/// Collects pickups the rider's body touches and pulls coins in while the magnet is active.
+	/// Water-following pickups are tested against the water height under the board, which is accurate enough
+	/// this close to it.
+	/// </summary>
+	public sealed class PickupCollector
+	{
+		private readonly PickupSettings _settings;
+		private readonly BoardSettings _boardSettings;
+		private readonly BoardState _board;
+		private readonly PickupField _field;
+		private readonly PowerUps _powerUps;
+		private readonly RunState _run;
+		private readonly Nitro _nitro;
 
-        public PickupCollector(PickupSettings settings, BoardSettings boardSettings, BoardState board,
-            PickupField field, PowerUps powerUps, RunState run)
-        {
-            _settings = settings;
-            _boardSettings = boardSettings;
-            _board = board;
-            _field = field;
-            _powerUps = powerUps;
-            _run = run;
-        }
+		public PickupCollector(PickupSettings settings, BoardSettings boardSettings, BoardState board,
+			PickupField field, PowerUps powerUps, RunState run, Nitro nitro)
+		{
+			_settings = settings;
+			_boardSettings = boardSettings;
+			_board = board;
+			_field = field;
+			_powerUps = powerUps;
+			_run = run;
+			_nitro = nitro;
+		}
 
-        public void Tick(float dt)
-        {
-            if (_board.IsCrashed)
-            {
-                return;
-            }
+		/// <summary>Fired for each pickup collected.</summary>
+		public event Action<PickupKind> Collected;
 
-            float radius = _settings.PickupRadius;
-            float halfLength = _boardSettings.BodyHalfLength + radius;
-            float halfWidth = _boardSettings.BoardWidth * 0.5f + radius;
-            float bodyHeight = _board.IsSliding ? _boardSettings.SlideBodyHeight : _boardSettings.BodyHeight;
-            float bottom = _board.Height - radius;
-            float top = _board.Height + bodyHeight + radius;
-            bool magnet = _powerUps.IsMagnetActive;
+		public void Tick(float dt)
+		{
+			if (_board.IsCrashed)
+			{
+				return;
+			}
 
-            foreach (Pickup pickup in _field.Pickups)
-            {
-                if (pickup.Collected)
-                {
-                    continue;
-                }
+			float radius = _settings.PickupRadius;
+			float halfLength = _boardSettings.BodyHalfLength + radius;
+			float halfWidth = _boardSettings.BoardWidth * 0.5f + radius;
+			float bodyHeight = _board.IsSliding ? _boardSettings.SlideBodyHeight : _boardSettings.BodyHeight;
+			float bottom = _board.Height - radius;
+			float top = _board.Height + bodyHeight + radius;
+			bool magnet = _powerUps.IsMagnetActive;
 
-                float ahead = pickup.Distance - _board.Distance;
+			foreach (Pickup pickup in _field.Pickups)
+			{
+				if (pickup.Collected)
+				{
+					continue;
+				}
 
-                if (magnet && pickup.Kind == PickupKind.Coin && !pickup.Attracted && ahead > -halfLength &&
-                    ahead < _settings.MagnetRange)
-                {
-                    Attract(pickup);
-                }
+				float ahead = pickup.Distance - _board.Distance;
 
-                if (pickup.Attracted)
-                {
-                    Pull(pickup, bodyHeight * 0.5f, dt);
-                    ahead = pickup.Distance - _board.Distance;
-                }
+				if (magnet && pickup.Kind == PickupKind.Coin && !pickup.Attracted && ahead > -halfLength &&
+					ahead < _settings.MagnetRange)
+				{
+					Attract(pickup);
+				}
 
-                float height = pickup.FollowsWater ? _board.WaterHeight + pickup.Height : pickup.Height;
+				if (pickup.Attracted)
+				{
+					Pull(pickup, bodyHeight * 0.5f, dt);
+					ahead = pickup.Distance - _board.Distance;
+				}
 
-                if (Mathf.Abs(ahead) < halfLength && Mathf.Abs(pickup.Lateral - _board.Lateral) < halfWidth &&
-                    height > bottom && height < top)
-                {
-                    Collect(pickup);
-                }
-            }
-        }
+				float height = pickup.FollowsWater ? _board.WaterHeight + pickup.Height : pickup.Height;
 
-        private void Attract(Pickup pickup)
-        {
-            if (pickup.FollowsWater)
-            {
-                pickup.Height += _board.WaterHeight;
-                pickup.FollowsWater = false;
-            }
+				if (Mathf.Abs(ahead) < halfLength && Mathf.Abs(pickup.Lateral - _board.Lateral) < halfWidth &&
+					height > bottom && height < top)
+				{
+					Collect(pickup);
+				}
+			}
+		}
 
-            pickup.Attracted = true;
-        }
+		private void Attract(Pickup pickup)
+		{
+			if (pickup.FollowsWater)
+			{
+				pickup.Height += _board.WaterHeight;
+				pickup.FollowsWater = false;
+			}
 
-        private void Pull(Pickup pickup, float targetHeight, float dt)
-        {
-            var offset = new Vector3(_board.Distance - pickup.Distance, _board.Lateral - pickup.Lateral,
-                _board.Height + targetHeight - pickup.Height);
-            float step = (_settings.MagnetPullSpeed + _board.Speed) * dt;
-            Vector3 move = Vector3.ClampMagnitude(offset, step);
+			pickup.Attracted = true;
+		}
 
-            pickup.Distance += move.x;
-            pickup.Lateral += move.y;
-            pickup.Height += move.z;
-        }
+		private void Pull(Pickup pickup, float targetHeight, float dt)
+		{
+			var offset = new Vector3(_board.Distance - pickup.Distance, _board.Lateral - pickup.Lateral,
+				_board.Height + targetHeight - pickup.Height);
+			float step = (_settings.MagnetPullSpeed + _board.Speed) * dt;
+			Vector3 move = Vector3.ClampMagnitude(offset, step);
 
-        private void Collect(Pickup pickup)
-        {
-            pickup.Collected = true;
+			pickup.Distance += move.x;
+			pickup.Lateral += move.y;
+			pickup.Height += move.z;
+		}
 
-            if (pickup.Kind == PickupKind.Coin)
-            {
-                _run.AddCoins(1);
-            }
-            else
-            {
-                _powerUps.Activate(pickup.Kind);
-            }
-        }
-    }
+		private void Collect(Pickup pickup)
+		{
+			pickup.Collected = true;
+
+			if (pickup.Kind == PickupKind.Coin)
+			{
+				_run.AddCoins(_powerUps.CoinValue);
+			}
+			else if (pickup.Kind == PickupKind.Nitro)
+			{
+				_nitro.Refill();
+			}
+			else
+			{
+				_powerUps.Activate(pickup.Kind);
+			}
+
+			Collected?.Invoke(pickup.Kind);
+		}
+	}
 }

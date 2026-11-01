@@ -3,43 +3,51 @@ using UnityEngine.InputSystem;
 
 namespace Game.Core
 {
-    public sealed class InputService : IInputService, IDisposable
-    {
-        private readonly SurfersInputActions _actions = new SurfersInputActions();
+	public sealed class InputService : IInputService, IDisposable
+	{
+		private readonly SurfersInputActions _actions = new SurfersInputActions();
 
-        public bool IsEnabled => _actions.Player.enabled;
+		public InputService()
+		{
+			_actions.Menu.Enable();
+		}
 
-        public int LaneChange
-        {
-            get
-            {
-                InputAction move = _actions.Player.Move;
+		public bool IsEnabled => _actions.Player.enabled;
 
-                if (!move.triggered)
-                {
-                    return 0;
-                }
+		public int LaneChange
+		{
+			get
+			{
+				InputAction move = _actions.Player.Move;
 
-                return move.ReadValue<float>() > 0f ? 1 : -1;
-            }
-        }
+				if (!move.triggered)
+				{
+					return 0;
+				}
 
-        public bool JumpPressed => _actions.Player.Jump.WasPerformedThisFrame();
-        public bool SlidePressed => _actions.Player.Slide.WasPerformedThisFrame();
+				return move.ReadValue<float>() > 0f ? 1 : -1;
+			}
+		}
 
-        public void Enable()
-        {
-            _actions.Player.Enable();
-        }
+		public bool JumpPressed => _actions.Player.Jump.WasPerformedThisFrame();
+		public bool SlidePressed => _actions.Player.Slide.WasPerformedThisFrame();
+		public bool BoostHeld => _actions.Player.Boost.IsPressed();
+		public bool ConfirmPressed => _actions.Menu.Confirm.WasPerformedThisFrame();
+		public bool PausePressed => _actions.Menu.Pause.WasPerformedThisFrame();
 
-        public void Disable()
-        {
-            _actions.Player.Disable();
-        }
+		public void Enable()
+		{
+			_actions.Player.Enable();
+		}
 
-        public void Dispose()
-        {
-            _actions.Dispose();
-        }
-    }
+		public void Disable()
+		{
+			_actions.Player.Disable();
+		}
+
+		public void Dispose()
+		{
+			_actions.Dispose();
+		}
+	}
 }

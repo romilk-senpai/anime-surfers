@@ -51,6 +51,10 @@ Shader "AnimeSurfers/StylizedSky"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
+            // Global set by SkyCycle: direction to the drawn sun, which may sit lower than the shadow-casting light.
+            // Zero outside play mode, where the light's own direction is used.
+            float4 _SkySunDirection;
+
             CBUFFER_START(UnityPerMaterial)
                 half4 _ZenithColor;
                 half4 _SkyColor;
@@ -162,7 +166,9 @@ Shader "AnimeSurfers/StylizedSky"
                 color += Stars(direction);
 
                 // Crisp anime-style sun disc plus a soft glow, hidden below the horizon.
-                float3 sunDirection = _MainLightPosition.xyz;
+                float3 sunDirection = dot(_SkySunDirection.xyz, _SkySunDirection.xyz) > 0.5
+                    ? _SkySunDirection.xyz
+                    : _MainLightPosition.xyz;
                 float sunDot = dot(direction, sunDirection);
                 float sunEdge = cos(_SunSize);
                 half aboveHorizon = smoothstep(-0.01, 0.02, y);
@@ -178,24 +184,36 @@ Shader "AnimeSurfers/StylizedSky"
                 float threshold = 1.0 - _CloudCoverage;
                 half cloudMask = smoothstep(threshold, threshold + _CloudSoftness, density)
                                  * smoothstep(0.0, _CloudHorizonFade, y);
-                float sunwardDensity = Fbm(cloudUV + sunDirection.xz * _CloudShadeOffset);
-                half light = 0.6 + (density - sunwardDensity) * 8.0 - (density - threshold) * 1.5;
-                half lit = smoothstep(0.47, 0.53, light);
-                half3 cloud = lerp(_CloudShadowColor.rgb, _CloudColor.rgb, lit) + _SunColor.rgb * glow;
-                color = lerp(color, cloud, cloudMask);
+                // The shading noise only matters where there is a cloud.
+                [branch]
+                if (cloudMask > 0)
+                {
+                    float sunwardDensity = Fbm(cloudUV + sunDirection.xz * _CloudShadeOffset);
+                    half light = 0.6 + (density - sunwardDensity) * 8.0 - (density - threshold) * 1.5;
+                    half lit = smoothstep(0.47, 0.53, light);
+                    half3 cloud = lerp(_CloudShadowColor.rgb, _CloudColor.rgb, lit) + _SunColor.rgb * glow;
+                    color = lerp(color, cloud, cloudMask);
+                }
 
                 // Distant island silhouettes in two layers; the far layer and the bases fade into the haze.
                 float2 circle = normalize(direction.xz + 1e-5);
+                // Outside the branch: derivatives aren't defined in non-uniform control flow.
                 float aa = max(fwidth(y), 1e-4);
-                half3 haze = lerp(fogColor, _IslandColor.rgb, smoothstep(0.0, _IslandHeight * 0.5, y));
 
-                float farHeight = IslandProfile(circle, 31.7) * 0.6;
-                half farMask = smoothstep(farHeight + aa, farHeight - aa, y) * step(0.0001, farHeight);
-                color = lerp(color, lerp(fogColor, haze, 0.45), farMask);
+                // Islands never rise above _IslandHeight, so the sky above it skips their noise.
+                [branch]
+                if (y < _IslandHeight + aa)
+                {
+                    half3 haze = lerp(fogColor, _IslandColor.rgb, smoothstep(0.0, _IslandHeight * 0.5, y));
 
-                float nearHeight = IslandProfile(circle, 0.0);
-                half nearMask = smoothstep(nearHeight + aa, nearHeight - aa, y) * step(0.0001, nearHeight);
-                color = lerp(color, haze, nearMask);
+                    float farHeight = IslandProfile(circle, 31.7) * 0.6;
+                    half farMask = smoothstep(farHeight + aa, farHeight - aa, y) * step(0.0001, farHeight);
+                    color = lerp(color, lerp(fogColor, haze, 0.45), farMask);
+
+                    float nearHeight = IslandProfile(circle, 0.0);
+                    half nearMask = smoothstep(nearHeight + aa, nearHeight - aa, y) * step(0.0001, nearHeight);
+                    color = lerp(color, haze, nearMask);
+                }
 
                 return half4(color, 1.0);
             }

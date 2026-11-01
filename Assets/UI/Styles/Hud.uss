@@ -1,0 +1,185 @@
+.hud {
+    flex-grow: 1;
+}
+
+/* Manga speed lines while the nitro boost is on; opacity follows the boost. */
+.speed-lines {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    --lines-color: rgba(255, 255, 255, 0.5);
+}
+
+.hud__left {
+    position: absolute;
+    left: 36px;
+    top: 30px;
+    align-items: flex-start;
+}
+
+.score-panel {
+    padding: 4px 28px 6px;
+    --panel-shadow: #FFFFFF;
+}
+
+/* Dela Gothic digits are proportional: a fixed width (widest score, "444444", is 260px) keeps the panel still. */
+.score {
+    width: 264px;
+    font-size: 46px;
+    color: var(--paper);
+    letter-spacing: 2px;
+    -unity-text-align: middle-left;
+}
+
+.multiplier-sticker {
+    position: absolute;
+    right: -52px;
+    top: -16px;
+    rotate: 10deg;
+    padding: 6px 10px;
+    font-size: 26px;
+    color: var(--ink);
+    background-color: var(--alarm);
+    border-width: 3px;
+    border-color: var(--ink);
+}
+
+.distance-panel {
+    margin-top: 12px;
+    margin-left: 14px;
+    padding: 2px 18px;
+    --panel-shadow-x: 0;
+    --panel-shadow-y: 0;
+}
+
+.distance {
+    font-size: 20px;
+}
+
+.nitro-panel {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 12px;
+    margin-left: 6px;
+    padding: 6px 18px;
+    --panel-shadow: #FFFFFF;
+    --panel-shadow-x: 4;
+    --panel-shadow-y: 4;
+}
+
+.nitro-panel--active {
+    --panel-shadow: #FF8A1F;
+}
+
+.nitro-panel__label {
+    font-size: 16px;
+    color: var(--paper);
+    margin-right: 12px;
+}
+
+.nitro-bar {
+    width: 180px;
+    height: 14px;
+    background-color: var(--paper);
+    border-width: 2px;
+    border-color: var(--paper);
+}
+
+.nitro-bar__fill {
+    width: 100%;
+    height: 100%;
+    background-color: #FF8A1F;
+}
+
+.nitro-panel--active .nitro-bar__fill {
+    background-color: var(--alarm);
+}
+
+.power-ups {
+    margin-top: 18px;
+}
+
+.power-up {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 14px;
+    align-items: center;
+    justify-content: center;
+    --ring-track: #FFFFFF;
+    --ring-border: #1C1B4D;
+    --ring-thickness: 8;
+}
+
+.power-up--magnet {
+    --ring-color: #3FA9F5;
+}
+
+.power-up--multiplier {
+    --ring-color: #FF3D6E;
+}
+
+.power-up--shield {
+    --ring-color: #8C5CFF;
+}
+
+.power-up--super-jump {
+    --ring-color: #3DDC84;
+}
+
+.power-up--coin-doubler {
+    --ring-color: #FFD23F;
+}
+
+.power-up__icon {
+    width: 22px;
+    height: 22px;
+    -unity-background-image-tint-color: var(--ink);
+}
+
+.power-up__coin {
+    width: 26px;
+    height: 26px;
+}
+
+.power-up__text {
+    font-size: 16px;
+}
+
+.hud__right {
+    position: absolute;
+    right: 36px;
+    top: 32px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.coins-panel {
+    flex-direction: row;
+    align-items: center;
+    height: 52px;
+    padding: 0 26px;
+    margin-right: 22px;
+    --panel-shadow: #FFD23F;
+}
+
+.coins-panel__icon {
+    width: 26px;
+    height: 26px;
+    margin-right: 12px;
+}
+
+.coins {
+    font-size: 28px;
+    color: var(--coin);
+}
+
+.pause-button__bar {
+    width: 7px;
+    height: 22px;
+    margin: 0 3px;
+    border-radius: 2px;
+    background-color: var(--ink);
+}

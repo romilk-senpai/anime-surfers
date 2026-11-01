@@ -18,3 +18,11 @@ MonoBehaviour:
   magnetPullSpeed: 25
   multiplierDuration: 10
   scoreMultiplier: 2
+  shieldDuration: 20
+  shieldBreakGrace: 0.5
+  superJumpDuration: 10
+  superJumpHeight: 4.5
+  coinDoublerDuration: 10
+  coinMultiplier: 2
+  upgradeCosts: f401000020030000e8030000b0040000dc050000i
+  upgradeDurationStep: 0.2

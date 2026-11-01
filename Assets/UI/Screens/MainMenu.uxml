@@ -1,0 +1,144 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="menu" picking-mode="Ignore">
+        <ui:Style src="../Styles/MainMenu.uss" />
+
+        <ui:VisualElement class="menu__corner" picking-mode="Ignore">
+            <ui:Button name="settings-button" class="round-button">
+                <ui:VisualElement class="icon icon--gear round-button__icon" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="sound-button" class="round-button">
+                <ui:VisualElement name="sound-icon" class="icon icon--speaker round-button__icon" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="menu__stats" picking-mode="Ignore">
+            <e:InkPanel class="stat panel panel--slant">
+                <ui:Label class="stat__label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="menu.best" />
+                    </Bindings>
+                </ui:Label>
+                <ui:Label name="best-score" class="stat__value display" text="0" />
+            </e:InkPanel>
+            <e:InkPanel class="stat panel panel--slant panel--ink stat--coins">
+                <ui:VisualElement class="icon coin-icon coin-icon--on-ink stat__coin" picking-mode="Ignore" />
+                <ui:Label name="total-coins" class="stat__value stat__value--coins display" text="0" />
+            </e:InkPanel>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="menu__strip" picking-mode="Ignore">
+            <ui:Label text="ア" class="strip__char display" />
+            <ui:Label text="ニ" class="strip__char display" />
+            <ui:Label text="メ" class="strip__char display" />
+            <ui:Label text="サ" class="strip__char display" />
+            <ui:Label text="ー" class="strip__char strip__char--long display" />
+            <ui:Label text="フ" class="strip__char display" />
+            <ui:Label text="ァ" class="strip__char strip__char--small display" />
+            <ui:Label text="ー" class="strip__char strip__char--long display" />
+            <ui:Label text="ズ" class="strip__char display" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="title" class="menu__title" picking-mode="Ignore">
+            <ui:Label text="Anime" class="title-line display" />
+            <ui:Label text="Surfers" class="title-line title-line--offset display" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="menu__play" picking-mode="Ignore">
+            <ui:Button name="surf-button" class="cta menu__surf">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:VisualElement class="icon icon--play cta__icon menu__surf-icon" picking-mode="Ignore" />
+                    <ui:Label class="cta__label menu__surf-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="menu.surf" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+            <ui:VisualElement class="menu__below-surf" picking-mode="Ignore">
+                <ui:Button name="shop-button" class="secondary menu__shop">
+                    <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                    <ui:VisualElement class="button-content" picking-mode="Ignore">
+                        <ui:VisualElement class="icon coin-icon menu__shop-coin" picking-mode="Ignore" />
+                        <ui:Label class="secondary__label" picking-mode="Ignore">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="menu.shop" />
+                            </Bindings>
+                        </ui:Label>
+                    </ui:VisualElement>
+                </ui:Button>
+                <ui:VisualElement class="key-hint menu__hint" picking-mode="Ignore">
+                    <ui:Label text="Space" class="keycap" />
+                    <ui:Label class="key-hint__text">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="menu.space_hint" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <e:InkPanel class="controls panel" picking-mode="Ignore">
+            <ui:VisualElement class="controls__row">
+                <ui:VisualElement class="controls__keys">
+                    <ui:Label text="A" class="keycap" />
+                    <ui:Label text="D" class="keycap" />
+                    <ui:Label class="controls__or">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="controls.or" />
+                        </Bindings>
+                    </ui:Label>
+                    <ui:Label text="←" class="keycap" />
+                    <ui:Label text="→" class="keycap" />
+                </ui:VisualElement>
+                <ui:Label class="controls__action">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="controls.switch_lane" />
+                    </Bindings>
+                </ui:Label>
+            </ui:VisualElement>
+            <ui:VisualElement class="controls__row">
+                <ui:VisualElement class="controls__keys">
+                    <ui:Label text="Space" class="keycap" />
+                    <ui:Label class="controls__or">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="controls.or" />
+                        </Bindings>
+                    </ui:Label>
+                    <ui:Label text="↑" class="keycap" />
+                </ui:VisualElement>
+                <ui:Label class="controls__action">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="controls.jump" />
+                    </Bindings>
+                </ui:Label>
+            </ui:VisualElement>
+            <ui:VisualElement class="controls__row">
+                <ui:VisualElement class="controls__keys">
+                    <ui:Label text="S" class="keycap" />
+                    <ui:Label class="controls__or">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="controls.or" />
+                        </Bindings>
+                    </ui:Label>
+                    <ui:Label text="↓" class="keycap" />
+                </ui:VisualElement>
+                <ui:Label class="controls__action">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="controls.slide" />
+                    </Bindings>
+                </ui:Label>
+            </ui:VisualElement>
+            <ui:VisualElement class="controls__row">
+                <ui:VisualElement class="controls__keys">
+                    <ui:Label text="Shift" class="keycap" />
+                </ui:VisualElement>
+                <ui:Label class="controls__action">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="controls.nitro" />
+                    </Bindings>
+                </ui:Label>
+            </ui:VisualElement>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

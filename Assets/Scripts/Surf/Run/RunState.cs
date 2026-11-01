@@ -2,32 +2,35 @@ using System;
 
 namespace Game.Surf
 {
-    /// <summary>
-    /// Per-run progress shown by the HUD.
-    /// </summary>
-    public sealed class RunState
-    {
-        public int Score { get; private set; }
-        public int Coins { get; private set; }
+	/// <summary>
+	/// Per-run progress shown by the HUD.
+	/// </summary>
+	public sealed class RunState
+	{
+		public int Score { get; private set; }
+		public int Coins { get; private set; }
 
-        public event Action<int> ScoreChanged;
-        public event Action<int> CoinsChanged;
+		/// <summary>Set when the run ends.</summary>
+		public bool IsNewBest { get; set; }
 
-        public void AddCoins(int amount)
-        {
-            Coins += amount;
-            CoinsChanged?.Invoke(Coins);
-        }
+		public event Action<int> ScoreChanged;
+		public event Action<int> CoinsChanged;
 
-        public void SetScore(int score)
-        {
-            if (score == Score)
-            {
-                return;
-            }
+		public void AddCoins(int amount)
+		{
+			Coins += amount;
+			CoinsChanged?.Invoke(Coins);
+		}
 
-            Score = score;
-            ScoreChanged?.Invoke(score);
-        }
-    }
+		public void SetScore(int score)
+		{
+			if (score == Score)
+			{
+				return;
+			}
+
+			Score = score;
+			ScoreChanged?.Invoke(score);
+		}
+	}
 }

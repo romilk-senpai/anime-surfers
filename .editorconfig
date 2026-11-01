@@ -1,0 +1,11 @@
+root = true
+
+[*.cs]
+indent_style = tab
+indent_size = tab
+tab_width = 3
+
+# Third-party code keeps its own style.
+[Assets/Scripts/Game/EZSoftBone/**.cs]
+indent_style = space
+indent_size = 4

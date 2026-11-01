@@ -1,0 +1,178 @@
+/* Pause and settings boxes. */
+
+.pause-modal {
+    width: 420px;
+}
+
+.settings-modal {
+    width: 600px;
+    max-width: 94%;
+}
+
+.modal__cta {
+    height: 76px;
+    margin: 6px 8px 0;
+}
+
+.modal__cta-label {
+    font-size: 34px;
+}
+
+.modal__secondary {
+    margin-top: 18px;
+}
+
+.modal__note {
+    margin-top: 16px;
+    font-size: 15px;
+    -unity-text-align: middle-center;
+}
+
+.settings__title {
+    -unity-text-align: middle-left;
+    margin-bottom: 26px;
+}
+
+.settings__section {
+    margin-bottom: 26px;
+}
+
+.settings__graphics {
+    margin: 0 8px 26px;
+}
+
+.settings__heading {
+    font-size: 19px;
+    margin-bottom: 12px;
+}
+
+.volume-row {
+    flex-direction: row;
+    align-items: center;
+    height: 44px;
+    margin-bottom: 6px;
+}
+
+.volume-row__label {
+    width: 150px;
+    font-size: 18px;
+}
+
+.volume-row__value {
+    width: 64px;
+    font-size: 24px;
+    -unity-text-align: middle-right;
+}
+
+/* Slider: paper track with an ink outline, pink fill, yellow knob. */
+.volume-slider {
+    flex-grow: 1;
+    margin: 0 18px;
+}
+
+.volume-slider .unity-base-slider__input {
+    height: 44px;
+}
+
+.volume-slider .unity-base-slider__drag-container {
+    height: 44px;
+    margin: 0;
+}
+
+.volume-slider .unity-base-slider__tracker {
+    top: 15px;
+    height: 14px;
+    margin-top: 0;
+    border-width: 3px;
+    border-radius: 8px;
+    border-color: var(--ink);
+    background-color: var(--paper);
+}
+
+.volume-slider .unity-base-slider__fill {
+    background-color: var(--alarm);
+    border-radius: 5px;
+}
+
+.volume-slider .unity-base-slider__dragger {
+    top: 7px;
+    width: 30px;
+    height: 30px;
+    margin-top: 0;
+    margin-left: -15px;
+    border-width: 3px;
+    border-radius: 15px;
+    border-color: var(--ink);
+    background-color: var(--coin);
+}
+
+.volume-slider .unity-base-slider__dragger-border {
+    display: none;
+}
+
+.volume-slider:focus .unity-base-slider__dragger,
+.volume-slider:hover .unity-base-slider__dragger {
+    background-color: #FFE27A;
+}
+
+/* USS has no :last-child; the negative margin absorbs the last button's gap. */
+.languages {
+    flex-direction: row;
+    margin-right: -14px;
+}
+
+.option-row {
+    flex-direction: row;
+    align-items: center;
+    height: 52px;
+    margin-bottom: 8px;
+}
+
+.option-row__label {
+    width: 150px;
+    font-size: 18px;
+}
+
+.options {
+    flex-grow: 1;
+    flex-direction: row;
+    margin-right: -10px;
+}
+
+.language-button,
+.option-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 58px;
+    margin-right: 14px;
+    border-width: 3px;
+    border-color: var(--ink);
+    background-color: var(--paper);
+    color: var(--ink);
+    font-size: 19px;
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Black-SDF.asset");
+}
+
+.option-button {
+    height: 48px;
+    margin-right: 10px;
+    font-size: 17px;
+}
+
+.language-button:hover,
+.language-button:focus,
+.option-button:hover,
+.option-button:focus {
+    background-color: #E6F4FE;
+    border-color: var(--ink);
+}
+
+.language-button--selected,
+.language-button--selected:hover,
+.language-button--selected:focus,
+.option-button--selected,
+.option-button--selected:hover,
+.option-button--selected:focus {
+    background-color: var(--ink);
+    color: var(--coin);
+}

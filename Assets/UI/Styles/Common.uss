@@ -1,0 +1,273 @@
+/*
+ * Anime Surfers UI: two-tone manga print in indigo ink.
+ * Ink #1C1B4D, paper #FFFFFF, sky #3FA9F5, coin yellow #FFD23F, alarm pink #FF3D6E.
+ * InkPanel / RadialProgress / FocusLines read their colours from custom properties, which take literal values.
+ */
+
+:root {
+    --ink: #1C1B4D;
+    --paper: #FFFFFF;
+    --sky: #3FA9F5;
+    --coin: #FFD23F;
+    --alarm: #FF3D6E;
+}
+
+.game-ui {
+    flex-grow: 1;
+    color: var(--ink);
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Bold-SDF.asset");
+    font-size: 18px;
+}
+
+.screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.display {
+    -unity-font-definition: url("../Fonts/DelaGothicOne-SDF.asset");
+}
+
+.heavy {
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Black-SDF.asset");
+}
+
+Label {
+    padding: 0;
+    margin: 0;
+}
+
+/* Halftone-dotted ink wash behind modals and the results. */
+.overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(28, 27, 77, 0.62);
+    background-image: url("../Textures/Halftone.png");
+    background-repeat: repeat repeat;
+    background-size: 10px 10px;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.14);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---- Panels ---- */
+
+.panel {
+    --panel-fill: #FFFFFF;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 3;
+    --panel-shadow: #1C1B4D;
+    --panel-shadow-x: 6;
+    --panel-shadow-y: 6;
+}
+
+.panel--ink {
+    --panel-fill: #1C1B4D;
+    --panel-border-width: 0;
+}
+
+.panel--slant {
+    --panel-skew: -10;
+}
+
+.modal {
+    --panel-fill: #FFFFFF;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 4;
+    --panel-shadow: #FFD23F;
+    --panel-shadow-x: 10;
+    --panel-shadow-y: 10;
+    padding: 34px 40px 36px;
+}
+
+.modal__title {
+    font-size: 56px;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+/* ---- Buttons ---- */
+
+Button {
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--ink);
+}
+
+Button:hover,
+Button:active,
+Button:focus {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Buttons draw their shape with an InkPanel child (.button-shape) so they get hard shadows. */
+.button-shape {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.button-content {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Primary action: a slanted ink slab with a pink shadow and yellow lettering. */
+.cta {
+    height: 92px;
+}
+
+.cta .button-shape {
+    --panel-fill: #1C1B4D;
+    --panel-shadow: #FF3D6E;
+    --panel-shadow-x: 8;
+    --panel-shadow-y: 8;
+    --panel-skew: -12;
+}
+
+.cta:hover .button-shape,
+.cta:focus .button-shape {
+    --panel-fill: #33318A;
+}
+
+.cta:active .button-shape {
+    --panel-shadow-x: 3;
+    --panel-shadow-y: 3;
+}
+
+.cta__label {
+    color: var(--coin);
+    font-size: 42px;
+}
+
+.cta__icon {
+    width: 34px;
+    height: 34px;
+    margin-right: 18px;
+    -unity-background-image-tint-color: var(--coin);
+}
+
+/* Secondary action: paper box, ink outline. */
+.secondary {
+    height: 58px;
+    padding: 0 30px;
+}
+
+.secondary .button-shape {
+    --panel-fill: #FFFFFF;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 3;
+    --panel-shadow: #1C1B4D;
+    --panel-shadow-x: 4;
+    --panel-shadow-y: 4;
+}
+
+.secondary:hover .button-shape,
+.secondary:focus .button-shape {
+    --panel-fill: #E6F4FE;
+}
+
+.secondary:active .button-shape {
+    --panel-shadow-x: 1;
+    --panel-shadow-y: 1;
+}
+
+.secondary__label {
+    -unity-font-definition: url("../Fonts/ZenKakuGothicNew-Black-SDF.asset");
+    font-size: 20px;
+}
+
+/* Round icon buttons: settings, sound, pause. */
+.round-button {
+    width: 58px;
+    height: 58px;
+    border-radius: 29px;
+    border-width: 3px;
+    border-color: var(--ink);
+    background-color: var(--paper);
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.round-button:hover,
+.round-button:focus {
+    background-color: #E6F4FE;
+    border-color: var(--ink);
+}
+
+.round-button:active {
+    background-color: var(--coin);
+}
+
+.round-button__icon {
+    width: 28px;
+    height: 28px;
+    -unity-background-image-tint-color: var(--ink);
+}
+
+/* ---- Bits ---- */
+
+.keycap {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 9px;
+    border-width: 2px;
+    border-bottom-width: 4px;
+    border-color: var(--ink);
+    border-radius: 6px;
+    background-color: var(--paper);
+    -unity-text-align: middle-center;
+    font-size: 16px;
+}
+
+.key-hint {
+    flex-direction: row;
+    align-items: center;
+}
+
+.key-hint__text {
+    margin-left: 8px;
+    font-size: 17px;
+}
+
+/* ---- Icons ---- */
+
+/* Single-colour icons are drawn white and tinted with -unity-background-image-tint-color. */
+.icon {
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.icon--gear { background-image: url("../Icons/gear.svg"); }
+.icon--speaker { background-image: url("../Icons/speaker.svg"); }
+.icon--speaker-muted { background-image: url("../Icons/speaker-muted.svg"); }
+.icon--play { background-image: url("../Icons/play.svg"); }
+.icon--restart { background-image: url("../Icons/restart.svg"); }
+.icon--magnet { background-image: url("../Icons/magnet.svg"); }
+.icon--shield { background-image: url("../Icons/shield.svg"); }
+.icon--super-jump { background-image: url("../Icons/super-jump.svg"); }
+
+/* The coin keeps its own colours; the on-ink variant has a white rim for dark panels. */
+.coin-icon {
+    width: 28px;
+    height: 28px;
+    background-image: url("../Icons/coin.svg");
+}
+
+.coin-icon--on-ink {
+    background-image: url("../Icons/coin-on-ink.svg");
+}

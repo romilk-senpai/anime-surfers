@@ -1,7 +1,7 @@
 namespace Game.Core
 {
-    public interface ISceneLoader
-    {
-        void ReloadActiveScene();
-    }
+	public interface ISceneLoader
+	{
+		void ReloadActiveScene();
+	}
 }
