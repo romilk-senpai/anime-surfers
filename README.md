@@ -1,3 +1,3 @@
 # Anime Surfers WIP
 
-[WebGL Build](https://romilk-senpai.github.io/anime-surfers/)
+[WebGL Build](https://surfers.playnesc.com)
