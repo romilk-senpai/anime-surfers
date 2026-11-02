@@ -1,25 +1,71 @@
-body { padding: 0; margin: 0 }
+/*
+ * Anime Surfers web page: the game's two-tone manga print (see Assets/UI/Styles/Common.uss) on a dark halftone night.
+ * Ink #1C1B4D, paper #FFFFFF, sky #3FA9F5, coin yellow #FFD23F, alarm pink #FF3D6E.
+ */
+:root {
+  --ink: #1C1B4D;
+  --night: #20245F;
+  --paper: #FFFFFF;
+  --sky: #3FA9F5;
+  --coin: #FFD23F;
+  --alarm: #FF3D6E;
+  --dots: radial-gradient(rgba(255, 255, 255, .16) 1.2px, transparent 1.7px) 0 0 / 10px 10px;
+  --display: "Dela Gothic One", "Arial Black", sans-serif;
+  --body: "Zen Kaku Gothic New", "Segoe UI", system-ui, sans-serif;
+}
+
+html, body { height: 100% }
+body { padding: 0; margin: 0; overflow: hidden; background: var(--dots), var(--night); color: var(--paper); font-family: var(--body); font-weight: 700 }
+
 #unity-container { position: absolute }
 #unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
 #unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
 .unity-mobile #unity-fullscreen-container { width: 100%; height: 100% }
-#unity-fullscreen-container { position: relative; }
-#unity-canvas { position: absolute; width: 100%; height: 100%; background: {{{ BACKGROUND_COLOR }}} }
-#unity-loading-container { position: absolute; width: 100%; height: 100%; backdrop-filter: blur(5px); display: none; }
-#unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-#unity-logo { width: 154px; height: 130px; background: url('unity-logo-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
-#unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; margin-left: 6.5px; background: url('progress-bar-empty-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
-#unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center }
-#unity-footer { position: relative }
+
+/* Desktop: the game sits in a manga panel with a hard yellow shadow. */
+#unity-fullscreen-container { position: relative }
+.unity-desktop #unity-fullscreen-container { outline: 4px solid var(--paper); box-shadow: 12px 12px 0 4px var(--coin) }
+#unity-fullscreen-container:fullscreen { outline: none; box-shadow: none }
+#unity-canvas { position: absolute; width: 100%; height: 100%; background: var(--ink) }
+
+/* ---- Loading ---- */
+
+#unity-loading-container { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(22px, 5vmin, 40px); background: var(--dots), var(--ink); transition: opacity .35s ease, visibility .35s }
+#unity-loading-container.is-done { opacity: 0; visibility: hidden }
+
+#unity-loading-title { display: flex; flex-direction: column; align-items: flex-end; transform: rotate(-5deg); font-family: var(--display); font-weight: 400; line-height: 1; letter-spacing: .01em; font-size: clamp(44px, 9vmin, 84px) }
+#unity-loading-title span { color: var(--paper); text-shadow: .09em .09em 0 var(--alarm) }
+#unity-loading-title span + span { margin: -.08em .55em 0 0 }
+
+#unity-loading-kana { font-family: var(--body); font-weight: 900; font-size: clamp(13px, 2.2vmin, 18px); letter-spacing: .5em; color: var(--coin); margin-right: -.5em }
+
+#unity-progress-bar-empty { width: min(360px, 68vw); height: 24px; border: 3px solid var(--paper); background: var(--ink); transform: skewX(-12deg); box-shadow: 7px 7px 0 var(--alarm) }
+#unity-progress-bar-full { width: 0%; height: 100%; background: var(--coin); transition: width .2s ease-out }
+
+#unity-loading-label { font-weight: 900; font-size: 14px; letter-spacing: .3em; font-variant-numeric: tabular-nums }
+
+/* ---- Footer (desktop only) ---- */
+
+#unity-footer { position: relative; display: flex; align-items: center; gap: 18px; height: 44px; margin-top: 22px }
 .unity-mobile #unity-footer { display: none }
-#unity-logo-title-footer { float:left; width: 102px; height: 38px; background: url('unity-logo-title-footer.png') no-repeat center }
-#unity-build-title { float: right; margin-right: 12px; line-height: 38px; font-family: arial; font-size: 18px }
-#unity-github-link { float: left; display: flex; align-items: center; gap: 6px; height: 38px; margin-left: 6px; padding: 0 6px; color: #57606a; font-family: arial; font-size: 14px; text-decoration: none }
-#unity-github-link:hover { color: #1f2328 }
-#unity-fullscreen-button { float: right; display: flex; align-items: center; gap: 7px; height: 30px; margin-top: 4px; padding: 0 12px; border: none; border-radius: 15px; background: #1f2328; color: #fff; font-family: arial; font-size: 14px; cursor: pointer; transition: background .15s, transform .1s }
-#unity-fullscreen-button:hover { background: #3a4048 }
-#unity-fullscreen-button:active { transform: scale(.96) }
-#unity-mobile-fullscreen-button { display: none; position: absolute; left: calc(16px + env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 48px; height: 48px; padding: 0; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, .35); border-radius: 50%; background: rgba(0, 0, 0, .45); color: #fff; backdrop-filter: blur(4px); -webkit-tap-highlight-color: transparent; cursor: pointer }
-#unity-mobile-fullscreen-button:active { background: rgba(0, 0, 0, .65) }
+#unity-build-title { margin-right: auto; font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .02em; text-shadow: 3px 3px 0 var(--alarm) }
+
+#unity-github-link { display: flex; align-items: center; gap: 7px; color: rgba(255, 255, 255, .72); font-size: 14px; text-decoration: none; transition: color .15s }
+#unity-github-link:hover { color: var(--paper) }
+
+/* Slanted yellow slab with a pink hard shadow, like the game's buttons. */
+#unity-fullscreen-button { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 18px; border: none; border-radius: 0; background: var(--coin); color: var(--ink); font-family: var(--body); font-weight: 900; font-size: 14px; letter-spacing: .06em; transform: skewX(-12deg); box-shadow: 5px 5px 0 var(--alarm); cursor: pointer; transition: box-shadow .1s, translate .1s }
+#unity-fullscreen-button > * { transform: skewX(12deg) }
+#unity-fullscreen-button:hover { background: #FFDD66 }
+#unity-fullscreen-button:active { translate: 3px 3px; box-shadow: 2px 2px 0 var(--alarm) }
+
+#unity-mobile-fullscreen-button { display: none; position: absolute; left: calc(16px + env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: 48px; height: 48px; padding: 0; align-items: center; justify-content: center; border: 3px solid var(--paper); border-radius: 50%; background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--alarm); -webkit-tap-highlight-color: transparent; cursor: pointer }
+#unity-mobile-fullscreen-button:active { background: #33318A }
 .unity-mobile #unity-mobile-fullscreen-button.unity-ready { display: flex }
-#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+
+/* ---- Banners ---- */
+
+#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); display: none; z-index: 10 }
+.unity-banner { padding: 10px 16px; margin-bottom: 8px; border: 3px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 5px 5px 0 var(--ink); font-size: 14px }
+.unity-banner--warning { background: var(--coin) }
+.unity-banner--error { background: var(--alarm); color: var(--paper) }
