@@ -53,7 +53,8 @@ namespace Game.Surf
 
 		private void Slide()
 		{
-			if (_state.IsCrashed)
+			// On trains the roll plays out before another one, rather than stretching into a held last frame.
+			if (_state.IsCrashed || _state.IsRunning && _state.IsSliding)
 			{
 				return;
 			}
