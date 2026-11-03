@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using VContainer;
 
@@ -6,6 +7,7 @@ namespace Game.Surf
 	/// <summary>
 	/// Places the board from <see cref="BoardState"/>: fits it to the water or obstacle surface, leans into carves
 	/// and turns, and squashes the rider while sliding on the water. Bouncing off a wall it spins away.
+	/// Raises <see cref="Placed"/> once the board is in place each frame, for the views that follow it.
 	/// </summary>
 	public class BoardView : MonoBehaviour
 	{
@@ -29,9 +31,9 @@ namespace Game.Surf
 		[SerializeField] private float riderScaleSharpness = 20f;
 
 		private BoardSettings _settings;
-		private BoardState _state;
+		private IBoardState _state;
 		private SurfPath _path;
-		private WaterSurface _water;
+		private IWaterSurface _water;
 		private ObstacleField _obstacles;
 
 		private bool _placed;
@@ -40,8 +42,13 @@ namespace Game.Surf
 		private float _spinVelocity;
 		private Vector3 _riderBaseScale = Vector3.one;
 
+		/// <summary>
+		/// Raised at the end of every Update, paused frames included, once the board's transform is set for the frame.
+		/// </summary>
+		public event Action Placed;
+
 		[Inject]
-		public void Construct(BoardSettings settings, BoardState state, SurfPath path, WaterSurface water,
+		public void Construct(BoardSettings settings, IBoardState state, SurfPath path, IWaterSurface water,
 			ObstacleField obstacles)
 		{
 			_settings = settings;
@@ -89,13 +96,13 @@ namespace Game.Surf
 				transform.rotation = Quaternion.LookRotation(_state.PathForward);
 			}
 
-			if (dt <= 0f)
+			if (dt > 0f)
 			{
-				return;
+				UpdateRotation(position, dt);
+				UpdateRider(dt);
 			}
 
-			UpdateRotation(position, dt);
-			UpdateRider(dt);
+			Placed?.Invoke();
 		}
 
 		private void UpdateRotation(Vector3 position, float dt)

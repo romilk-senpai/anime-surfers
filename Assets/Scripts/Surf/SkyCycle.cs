@@ -151,7 +151,7 @@ namespace Game.Surf
 			}
 		};
 
-		private BoardState _board;
+		private IBoardState _board;
 		private Weather _weather;
 		private Renderer _water;
 		private MaterialPropertyBlock _waterProperties;
@@ -167,7 +167,7 @@ namespace Game.Surf
 		private float _nextProbeRefresh;
 
 		[Inject]
-		public void Construct(BoardState board, Weather weather, WaterSurface water)
+		public void Construct(IBoardState board, Weather weather, WaterSurface water)
 		{
 			_board = board;
 			_weather = weather;

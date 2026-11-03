@@ -1,4 +1,3 @@
-using Game.Core;
 using UnityEngine;
 
 namespace Game.Surf
@@ -11,14 +10,14 @@ namespace Game.Surf
 		private readonly BoardSettings _settings;
 		private readonly BoardState _state;
 		private readonly SurfPath _path;
-		private readonly IInputService _input;
+		private readonly BoardInput _input;
 		private readonly Nitro _nitro;
 
 		private bool _running;
 		/// <summary>Forward speed before the nitro boost.</summary>
 		private float _baseSpeed;
 
-		public BoardMovement(BoardSettings settings, BoardState state, SurfPath path, IInputService input,
+		public BoardMovement(BoardSettings settings, BoardState state, SurfPath path, BoardInput input,
 			Nitro nitro)
 		{
 			_settings = settings;
@@ -95,7 +94,7 @@ namespace Game.Surf
 
 		private void ReadLaneInput()
 		{
-			int direction = _input.LaneChange;
+			int direction = _input.Current.LaneChange;
 
 			if (direction != 0)
 			{

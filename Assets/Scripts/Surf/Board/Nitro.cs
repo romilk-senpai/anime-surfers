@@ -1,4 +1,3 @@
-using Game.Core;
 using UnityEngine;
 
 namespace Game.Surf
@@ -11,9 +10,9 @@ namespace Game.Surf
 	{
 		private readonly BoardSettings _settings;
 		private readonly BoardState _board;
-		private readonly IInputService _input;
+		private readonly BoardInput _input;
 
-		public Nitro(BoardSettings settings, BoardState board, IInputService input)
+		public Nitro(BoardSettings settings, BoardState board, BoardInput input)
 		{
 			_settings = settings;
 			_board = board;
@@ -41,7 +40,7 @@ namespace Game.Surf
 
 		public void Tick(float dt)
 		{
-			IsActive = !_board.IsCrashed && Fill > 0f && _input.BoostHeld;
+			IsActive = !_board.IsCrashed && Fill > 0f && _input.Current.Boost;
 
 			if (IsActive)
 			{

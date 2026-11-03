@@ -15,9 +15,8 @@ namespace Game.Surf
 	/// flatten toward the outer edge to meet the flat water; the shading keeps every wave.
 	/// </summary>
 	[ExecuteAlways]
-	[DefaultExecutionOrder(-100)]
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-	public class WaterSurface : MonoBehaviour, IWaterHeight
+	public class WaterSurface : MonoBehaviour, IWaterSurface
 	{
 		[Serializable]
 		public struct Wave
@@ -106,7 +105,16 @@ namespace Game.Surf
 		// mesh jumps by whole coarse cells.
 		private Vector2 _lodCenter;
 
-		public float WaveTime => _time;
+		/// <summary>The wave clock, in seconds, matching what the GPU renders this frame.</summary>
+		public float WaveTime
+		{
+			get
+			{
+				SyncClock();
+				return _time;
+			}
+		}
+
 		public float BaseHeight => transform.position.y;
 
 		/// <summary>
@@ -209,8 +217,9 @@ namespace Game.Surf
 			return Vector3.Cross(binormal, tangent).normalized;
 		}
 
-		// Gameplay can sample before this component's Update (VContainer ticks run first), so the clock is
-		// refreshed on every query to always match what the GPU renders this frame.
+		// Gameplay and the other views can sample before this component's Update (VContainer ticks run first, and
+		// nothing orders the MonoBehaviours), so the clock is refreshed on every query to always match what the GPU
+		// renders this frame.
 		private void SyncClock()
 		{
 			_time = (Application.isPlaying ? Time.time : Time.realtimeSinceStartup) * timeScale;

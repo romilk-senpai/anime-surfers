@@ -30,7 +30,7 @@ namespace Game.UI
 		private readonly RunState _run;
 		private readonly PowerUps _powerUps;
 		private readonly Nitro _nitro;
-		private readonly BoardState _board;
+		private readonly IBoardState _board;
 		private readonly IRunFlow _runFlow;
 		private readonly ScreenStack _screens;
 		private readonly GameUi _ui;
@@ -52,7 +52,7 @@ namespace Game.UI
 		private int _nitroPointerId = -1;
 		private int _meters = -1;
 
-		public HudPresenter(RunState run, PowerUps powerUps, Nitro nitro, BoardState board, IRunFlow runFlow,
+		public HudPresenter(RunState run, PowerUps powerUps, Nitro nitro, IBoardState board, IRunFlow runFlow,
 			ScreenStack screens, GameUi ui, ITouchInput touch)
 		{
 			_run = run;
@@ -288,6 +288,11 @@ namespace Game.UI
 
 		private void UpdateSpeedLines()
 		{
+			if (_speedLines == null)
+			{
+				return;
+			}
+
 			float blend = _nitro.Blend;
 			_speedLines.style.opacity = blend;
 			GameUi.SetVisible(_speedLines, blend > 0f);
@@ -301,6 +306,11 @@ namespace Game.UI
 
 		private static void UpdateTimer(RadialProgress timer, float remaining, float duration)
 		{
+			if (timer == null)
+			{
+				return;
+			}
+
 			GameUi.SetVisible(timer, remaining > 0f);
 			timer.Value = duration > 0f ? remaining / duration : 0f;
 		}

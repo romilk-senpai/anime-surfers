@@ -21,7 +21,7 @@ namespace Game.UI
 
 		private readonly IRunFlow _runFlow;
 		private readonly RunState _run;
-		private readonly BoardState _board;
+		private readonly IBoardState _board;
 		private readonly IPlayerProgress _progress;
 		private readonly ScreenStack _screens;
 		private readonly GameUi _ui;
@@ -32,7 +32,7 @@ namespace Game.UI
 		private Label _soundEffect;
 		private IVisualElementScheduledItem _pulse;
 
-		public GameOverPresenter(IRunFlow runFlow, RunState run, BoardState board, IPlayerProgress progress,
+		public GameOverPresenter(IRunFlow runFlow, RunState run, IBoardState board, IPlayerProgress progress,
 			ScreenStack screens, GameUi ui)
 		{
 			_runFlow = runFlow;

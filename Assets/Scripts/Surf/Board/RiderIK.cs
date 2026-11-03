@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using VContainer;
 
@@ -12,11 +13,11 @@ namespace Game.Surf
 	/// Bouncing off an obstacle's side she flinches away from it. On a crash she turns to the obstacle, lets go of the
 	/// board and is knocked back off it into the water, moved by the crash animation's root motion. After a wall she
 	/// sinks.
+	/// Updates when <see cref="BoardView.Placed"/> fires and raises <see cref="BodyPlaced"/> once the body is placed
+	/// for the frame.
 	/// Needs IK Pass enabled on the animator layer.
 	/// </summary>
 	[RequireComponent(typeof(Animator))]
-	// After BoardView places the board, so the upright running pose doesn't lag a frame behind it.
-	[DefaultExecutionOrder(100)]
 	public class RiderIK : MonoBehaviour
 	{
 		// The generated stance clip has no IK goal curves, so the animator can't report where the hands and feet are.
@@ -124,10 +125,11 @@ namespace Game.Surf
 		private readonly Limb _rightHand = new Limb(AvatarIKGoal.RightHand, HumanBodyBones.RightHand);
 		private Limb[] _limbs;
 
-		private BoardState _state;
+		private IBoardState _state;
 		private BoardSettings _settings;
-		private WaterSurface _water;
+		private IWaterSurface _water;
 		private Animator _animator;
+		private BoardView _boardView;
 
 		private Calibration _calibration;
 		private int _calibrationWait;
@@ -163,8 +165,14 @@ namespace Game.Surf
 		private Vector3 _boardRestPosition;
 		private Quaternion _boardRestRotation;
 
+		/// <summary>
+		/// Raised at the end of every LateUpdate, once the body is placed for the frame: on the board, or after a crash
+		/// lying on the deck or in the water.
+		/// </summary>
+		public event Action BodyPlaced;
+
 		[Inject]
-		public void Construct(BoardState state, BoardSettings settings, WaterSurface water)
+		public void Construct(IBoardState state, BoardSettings settings, IWaterSurface water)
 		{
 			_state = state;
 			_settings = settings;
@@ -184,6 +192,10 @@ namespace Game.Surf
 				board = transform.parent;
 			}
 
+			// Kept after the crash, when she is no longer the board's child.
+			_boardView = board.GetComponentInParent<BoardView>();
+			_boardView.Placed += OnBoardPlaced;
+
 			_stanceRotation = transform.localRotation;
 			_stancePosition = transform.localPosition;
 
@@ -196,6 +208,11 @@ namespace Game.Surf
 
 		private void OnDestroy()
 		{
+			if (_boardView != null)
+			{
+				_boardView.Placed -= OnBoardPlaced;
+			}
+
 			if (_state != null)
 			{
 				_state.Jumped -= OnJumped;
@@ -238,7 +255,8 @@ namespace Game.Surf
 			_knockBackVelocity = -forward * knockBack;
 		}
 
-		private void Update()
+		// Right after BoardView places the board, so the upright running pose doesn't lag a frame behind it.
+		private void OnBoardPlaced()
 		{
 			if (_state == null)
 			{
@@ -453,6 +471,13 @@ namespace Game.Surf
 		}
 
 		private void LateUpdate()
+		{
+			PlaceBody();
+			BodyPlaced?.Invoke();
+		}
+
+		/// <summary>Rests the crashed body on the ground, or calibrates the stance from the animated pose.</summary>
+		private void PlaceBody()
 		{
 			if (_crashed)
 			{

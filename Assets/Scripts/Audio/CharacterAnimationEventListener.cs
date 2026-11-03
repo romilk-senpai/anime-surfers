@@ -21,12 +21,12 @@ namespace Game.Audio
 
 		// Null until injected; the events are ignored outside a scope, like in a preview.
 		private ISoundController _soundController;
-		private BoardState _board;
+		private IBoardState _board;
 		private int _lastRandFootstep = 0;
 		private float _nextLandSoundTime;
 
 		[Inject]
-		public void Construct(ISoundController soundController, BoardState board)
+		public void Construct(ISoundController soundController, IBoardState board)
 		{
 			_soundController = soundController;
 			_board = board;

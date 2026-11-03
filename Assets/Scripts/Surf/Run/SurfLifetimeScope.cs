@@ -17,6 +17,7 @@ namespace Game.Surf
 		[SerializeField] private RunSettings runSettings;
 		[SerializeField] private PathSettings pathSettings;
 		[SerializeField] private PickupSettings pickupSettings;
+		[SerializeField] private ObstacleSettings obstacleSettings;
 		[SerializeField] private WeatherSettings weatherSettings;
 		[Tooltip("Where the passage starts and which way it faces.")]
 		[SerializeField] private Transform pathOrigin;
@@ -32,9 +33,10 @@ namespace Game.Surf
 			builder.RegisterInstance(runSettings);
 			builder.RegisterInstance(pathSettings);
 			builder.RegisterInstance(pickupSettings);
+			builder.RegisterInstance(obstacleSettings);
 			builder.RegisterInstance(weatherSettings);
 
-			builder.RegisterComponent(water).AsSelf().As<IWaterHeight>();
+			builder.RegisterComponent(water).AsSelf().As<IWaterHeight>().As<IWaterSurface>();
 			builder.RegisterComponent(sound).As<ISoundController>();
 			builder.RegisterComponent(gameUi);
 

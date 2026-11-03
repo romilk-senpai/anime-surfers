@@ -5,9 +5,9 @@ using VContainer.Unity;
 namespace Game.Surf
 {
 	/// <summary>
-	/// The run's plain C# simulation: the path, obstacle and pickup fields, the board systems, the run flow and the
-	/// weather. Needs the settings assets, an <see cref="IWaterHeight"/> and the <see cref="WaterSurface"/>
-	/// registered next to it.
+	/// The run's plain C# simulation: the clock and randomness, the path, obstacle and pickup fields and their
+	/// generators, the board systems, the run flow and the weather. Needs the settings assets, an
+	/// <see cref="IWaterHeight"/> and an <see cref="IWaterSurface"/> registered next to it.
 	/// </summary>
 	public sealed class SurfSimulationInstaller : IInstaller
 	{
@@ -20,11 +20,17 @@ namespace Game.Surf
 
 		public void Install(IContainerBuilder builder)
 		{
+			builder.Register<RunClock>(Lifetime.Singleton);
+			builder.Register<RunRandom>(Lifetime.Singleton);
+			builder.Register<BoardInput>(Lifetime.Singleton);
+
 			builder.Register<SurfPath>(Lifetime.Singleton).WithParameter(_pathOrigin);
 			builder.Register<ObstacleField>(Lifetime.Singleton);
 			builder.Register<PickupField>(Lifetime.Singleton);
+			builder.Register<ObstacleGenerator>(Lifetime.Singleton);
+			builder.Register<PickupGenerator>(Lifetime.Singleton);
 
-			builder.Register<BoardState>(Lifetime.Singleton);
+			builder.Register<BoardState>(Lifetime.Singleton).AsSelf().As<IBoardState>();
 			builder.Register<Nitro>(Lifetime.Singleton);
 			builder.Register<BoardMovement>(Lifetime.Singleton);
 			builder.Register<BoardBody>(Lifetime.Singleton);
@@ -35,11 +41,10 @@ namespace Game.Surf
 
 			builder.Register<RunState>(Lifetime.Singleton);
 			builder.Register<ScoreCounter>(Lifetime.Singleton);
+			builder.Register<Weather>(Lifetime.Singleton);
+			builder.Register<RunStateMachine>(Lifetime.Singleton).AsSelf().As<IRunFlow>();
 
-			// RunLoop first: it initializes the board before the run starts.
 			builder.RegisterEntryPoint<RunLoop>();
-			builder.RegisterEntryPoint<RunStateMachine>();
-			builder.RegisterEntryPoint<Weather>().AsSelf();
 		}
 	}
 }

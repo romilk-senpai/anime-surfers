@@ -2446,23 +2446,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d58acf1dacba8445ba165c941269af0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.PickupSpawner
-  firstTrailDistance: 25
-  trailGap: {x: 6, y: 18}
-  spawnAhead: 80
-  despawnBehind: 10
-  coinCount: {x: 5, y: 12}
-  coinSpacing: 2.2
-  hoverHeight: 0.7
-  barrierArcLength: 5
-  barrierArcHeight: 2.6
-  maxStep: 1.5
-  powerUpChance: 0.08
-  nitroWeight: 2
-  magnetWeight: 1
-  multiplierWeight: 1
-  shieldWeight: 1
-  superJumpWeight: 1
-  coinDoublerWeight: 1
   coinPrefab: {fileID: 6183493611359753901, guid: bdadfecef16084848841056732665812, type: 3}
   coinDetailDistance: 15
   magnetPrefab: {fileID: 2605998323588266366, guid: c8b07e9d162c1174bb5097832797ecac, type: 3}
@@ -2659,6 +2642,7 @@ MonoBehaviour:
   runSettings: {fileID: 11400000, guid: aa47c5e3c6ad4b748aedc03426901621, type: 2}
   pathSettings: {fileID: 11400000, guid: 3c6639ea68dd3344b91a2269fc410167, type: 2}
   pickupSettings: {fileID: 11400000, guid: dd77f726f7155ea4898c52cafde0f3fa, type: 2}
+  obstacleSettings: {fileID: 11400000, guid: d95d7c1be16fbaf4c940bf48c9e06a70, type: 2}
   weatherSettings: {fileID: 11400000, guid: 697483e81a37fb24e960d1570ca3085c, type: 2}
   pathOrigin: {fileID: 1857486449}
   water: {fileID: 1433518376}
@@ -7633,6 +7617,11 @@ MonoBehaviour:
   fullSplashSpeed: 6
   cooldown: 0.3
   sparkleMaterial: {fileID: 2100000, guid: 54c93640510f6a04fbadc3d4cad6ade7, type: 2}
+  sparkleColor: {r: 0.75, g: 0.95, b: 1, a: 1}
+  glintsPerSplash: 26
+  twinkleRate: 22
+  twinkleTime: 1.4
+  twinkleRadius: 1.3
 --- !u!1 &391313210
 GameObject:
   m_ObjectHideFlags: 0
@@ -7749,8 +7738,12 @@ MonoBehaviour:
   positionSmoothTime: 0.12
   rotationSharpness: 10
   nitroFovBoost: 12
+  fovSpringFrequency: 1.6
+  fovSpringDamping: 0.45
   shakeRotation: {x: 0, y: 0, z: 0}
   shakePosition: 0
+  shakeFrequency: 14
+  maxAspect: 1.7777778
 --- !u!114 &391313215
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7824,27 +7817,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5743b8c8306477049997cc5c729120b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.ObstacleSpawner
-  firstRowDistance: 60
-  rowGap: {x: 16, y: 28}
-  spawnAhead: 160
-  despawnBehind: 20
-  noneWeight: 3
-  barrierWeight: 2
-  trainWeight: 2
-  climbableTrainWeight: 1.5
-  trainWidth: 2.1
-  trainHeight: 3.2
-  trainBottom: -1.5
-  carLength: 6
-  carGap: 0.6
-  trainCars: {x: 2, y: 4}
-  climbableTrainCars: {x: 3, y: 5}
-  rampLength: 9
-  rampStartHeight: -0.8
-  barrierWidth: 2.3
-  barrierBottom: 1.15
-  barrierTop: 1.55
-  barrierDepth: 0.3
   boatPrefabs:
   - {fileID: 2625531311577313352, guid: b65247b757178f94d8a6c4ffc5edf47e, type: 3}
   - {fileID: 1103339976060230153, guid: 13fceab11a3ef404a84edfe07ace4284, type: 3}
@@ -10492,7 +10464,6 @@ MonoBehaviour:
   shieldBlinkRate: 6
   shieldBurstTime: 0.35
   shieldBurstScale: 1.8
-  sparkleMaterial: {fileID: 2100000, guid: 54c93640510f6a04fbadc3d4cad6ade7, type: 2}
   jumpRingMaterial: {fileID: 2100000, guid: 99f06e5ab7694c98b8e386a1274fdb71, type: 2}
   jumpTrailMaterial: {fileID: 2100000, guid: 7a3dc0d17c6f49d9938354dff359dec8, type: 2}
   ringTime: 0.45
@@ -10507,7 +10478,47 @@ MonoBehaviour:
   nitroTrailWidth: 0.45
   nitroTrailSpacing: 0.2
   nitroTrailHeight: 0.15
+  nitroTrailGradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 0.97, b: 0.85, a: 1}
+    key1: {r: 1, g: 0.62, b: 0.18, a: 0.85}
+    key2: {r: 1, g: 0.25, b: 0.08, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 19661
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 26214
+    atime2: 65535
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 3
+  nitroTrailTiling: 3
+  nitroTrailScroll: 4
+  nitroTrailFlicker: 0.15
+  nitroTrailFlickerRate: 18
   nitroSmokeMaterial: {fileID: 2100000, guid: 5d796e30f3326544691ed79ed2f77e34, type: 2}
+  sparkleMaterial: {fileID: 2100000, guid: 54c93640510f6a04fbadc3d4cad6ade7, type: 2}
+  nitroSmokeRate: 40
+  nitroSparkRate: 45
+  nitroKickPuffs: 14
+  nitroSmokeColor: {r: 1, g: 0.92, b: 0.82, a: 0.55}
+  nitroSparkColor: {r: 1, g: 0.7, b: 0.25, a: 1}
 --- !u!4 &901355003
 Transform:
   m_ObjectHideFlags: 0

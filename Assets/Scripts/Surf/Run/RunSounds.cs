@@ -28,14 +28,14 @@ namespace Game.Surf
 		[SerializeField, Range(0f, 1f)] private float powerUpVolume = 0.5f;
 
 		private ISoundController _sound;
-		private BoardState _board;
+		private IBoardState _board;
 		private IRunFlow _run;
 		private RunState _runState;
 		private PowerUps _powerUps;
 		private PickupCollector _pickups;
 
 		[Inject]
-		public void Construct(ISoundController sound, BoardState board, IRunFlow run, RunState runState,
+		public void Construct(ISoundController sound, IBoardState board, IRunFlow run, RunState runState,
 			PowerUps powerUps, PickupCollector pickups)
 		{
 			_sound = sound;

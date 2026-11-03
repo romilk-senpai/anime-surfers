@@ -1,29 +1,30 @@
 using UnityEngine;
-using VContainer.Unity;
 
 namespace Game.Surf
 {
 	/// <summary>
 	/// Random storms along the run: picks where each storm starts and how long it lasts, exposes its strength for
-	/// the views and scales the waves the board rides on.
+	/// the views and scales the waves the board rides on. Ticked by <see cref="RunLoop"/> after the board systems.
 	/// </summary>
-	public sealed class Weather : ITickable
+	public sealed class Weather
 	{
 		private readonly WeatherSettings _settings;
 		private readonly BoardState _board;
-		private readonly WaterSurface _water;
+		private readonly IWaterSurface _water;
+		private readonly RandomStream _random;
 
 		private float _stormStart;
 		private float _stormEnd;
 
-		public Weather(WeatherSettings settings, BoardState board, WaterSurface water)
+		public Weather(WeatherSettings settings, BoardState board, IWaterSurface water, RunRandom random)
 		{
 			_settings = settings;
 			_board = board;
 			_water = water;
+			_random = random.Stream(RunRandom.WeatherStream);
 
 			// The first storm can come at any point, even right at the start.
-			_stormStart = Random.Range(0f, settings.CalmDistance.y);
+			_stormStart = _random.Range(0f, settings.CalmDistance.y);
 			_stormEnd = _stormStart + StormLength();
 		}
 
@@ -38,7 +39,7 @@ namespace Game.Surf
 			// Past this storm: schedule the next one after a calm stretch.
 			while (distance > _stormEnd + ramp)
 			{
-				_stormStart = _stormEnd + ramp + Random.Range(_settings.CalmDistance.x, _settings.CalmDistance.y);
+				_stormStart = _stormEnd + ramp + _random.Range(_settings.CalmDistance.x, _settings.CalmDistance.y);
 				_stormEnd = _stormStart + StormLength();
 			}
 
@@ -51,7 +52,7 @@ namespace Game.Surf
 
 		private float StormLength()
 		{
-			return Random.Range(_settings.StormDistance.x, _settings.StormDistance.y);
+			return _random.Range(_settings.StormDistance.x, _settings.StormDistance.y);
 		}
 	}
 }

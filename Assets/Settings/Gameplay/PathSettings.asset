@@ -17,5 +17,6 @@ MonoBehaviour:
   minTurnRadius: 35
   turnFrequency: 0.008
   straightBias: 0.3
+  maxHeadingDeviation: 55
   keepBehind: 60
   seed: 0

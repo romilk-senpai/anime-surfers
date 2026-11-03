@@ -42,7 +42,7 @@ namespace Game.Surf
 		[Tooltip("Widest aspect the field of view is tuned for. Wider screens keep this aspect's horizontal FOV instead of stretching.")]
 		[SerializeField] private float maxAspect = 16f / 9f;
 
-		private BoardState _board;
+		private IBoardState _board;
 		private SurfPath _path;
 		private Nitro _nitro;
 		private Camera _camera;
@@ -60,7 +60,7 @@ namespace Game.Surf
 		private float _followHeight;
 
 		[Inject]
-		public void Construct(BoardState board, SurfPath path, Nitro nitro)
+		public void Construct(IBoardState board, SurfPath path, Nitro nitro)
 		{
 			_board = board;
 			_path = path;

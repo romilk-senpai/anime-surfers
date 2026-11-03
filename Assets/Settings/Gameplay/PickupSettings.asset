@@ -12,6 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 074920d19c6d0114ba6f654a89deb961, type: 3}
   m_Name: PickupSettings
   m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.PickupSettings
+  firstTrailDistance: 25
+  trailGap: {x: 6, y: 18}
+  spawnAhead: 80
+  despawnBehind: 10
+  coinCount: {x: 5, y: 12}
+  coinSpacing: 2.2
+  hoverHeight: 0.7
+  barrierArcLength: 5
+  barrierArcHeight: 2.6
+  maxStep: 1.5
+  powerUpChance: 0.08
+  nitroWeight: 2
+  magnetWeight: 1
+  multiplierWeight: 1
+  shieldWeight: 1
+  superJumpWeight: 1
+  coinDoublerWeight: 1
   pickupRadius: 0.6
   magnetDuration: 10
   magnetRange: 10

@@ -3,7 +3,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Core;
 using UnityEngine;
-using VContainer.Unity;
 
 namespace Game.Surf
 {
@@ -20,8 +19,9 @@ namespace Game.Surf
 	/// <summary>
 	/// Run flow: Menu → Intro (board floats, no input) → Running ⇄ Paused → Crashed → Results.
 	/// Leaving the results or the pause menu reloads the scene; "Surf again" skips the menu on the next load.
+	/// Started by <see cref="RunLoop"/> once the board is in place.
 	/// </summary>
-	public sealed class RunStateMachine : IRunFlow, IStartable, IDisposable
+	public sealed class RunStateMachine : IRunFlow, IDisposable
 	{
 		private readonly RunSettings _settings;
 		private readonly BoardState _board;
@@ -51,7 +51,7 @@ namespace Game.Surf
 
 		public event Action<RunPhase> PhaseChanged;
 
-		public void Start()
+		public void Begin()
 		{
 			_board.Crashed += OnCrashed;
 

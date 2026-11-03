@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Game.Core;
 using Game.Rendering;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -8,62 +7,18 @@ using VContainer;
 namespace Game.Surf
 {
 	/// <summary>
-	/// Spawns coin trails along single lanes ahead of the board, shaped around the obstacles already placed there:
-	/// arcs over barriers, up ramps and along train roofs, ending before walls that cannot be climbed. While super jump
-	/// will still be active when the board gets there, trains without a ramp get a coin arc along the jump onto the roof.
-	/// Some trails carry a power-up in the middle. Coins are drawn with GPU instancing: the model with an outline up
-	/// close, a low-poly stand-in without one beyond. Power-up visuals are pooled per kind, kinds without a model are
-	/// cubes, and their outlines are only drawn once they come close.
-	/// Runs after <see cref="ObstacleSpawner"/> so the obstacles of this frame exist before trails are shaped.
+	/// Draws the pickups of the <see cref="PickupField"/> that <see cref="PickupGenerator"/> places. Coins are drawn
+	/// with GPU instancing: the model with an outline up close, a low-poly stand-in without one beyond. Power-up visuals
+	/// are pooled per kind, kinds without a model are cubes, and their outlines are only drawn once they come close.
 	/// </summary>
-	[DefaultExecutionOrder(100)]
 	public class PickupSpawner : MonoBehaviour
 	{
-		private struct Spawned
-		{
-			public Pickup Pickup;
-			/// <summary>None for coins, which are drawn instanced.</summary>
-			public View View;
-		}
-
 		private class View
 		{
 			public Transform Transform;
 			public readonly List<Renderer> Renderers = new List<Renderer>();
 			public bool Outlined;
 		}
-
-		[Header("Placement")]
-		[SerializeField] private float firstTrailDistance = 25f;
-		[SerializeField] private Vector2 trailGap = new Vector2(6f, 18f);
-		[Tooltip("Just past the fog end, so trails appear unseen. Keep below the obstacle spawner's spawn distance " +
-		         "minus the longest trail, so trails are only shaped around obstacles that already exist. At medium " +
-		         "view distance; all three scale with the player's setting.")]
-		[SerializeField] private float spawnAhead = 80f;
-		[SerializeField] private float despawnBehind = 10f;
-
-		[Header("Trail")]
-		[SerializeField] private Vector2Int coinCount = new Vector2Int(5, 12);
-		[SerializeField] private float coinSpacing = 2.2f;
-		[Tooltip("Height of the coins above the surface they hover over.")]
-		[SerializeField] private float hoverHeight = 0.7f;
-		[Tooltip("Coins within this distance of a barrier arc over it.")]
-		[SerializeField] private float barrierArcLength = 5f;
-		[Tooltip("Height of the arc over a barrier, above the water.")]
-		[SerializeField] private float barrierArcHeight = 2.6f;
-		[Tooltip("A trail ends where the surface rises more than this between two coins (a train without a ramp).")]
-		[SerializeField] private float maxStep = 1.5f;
-
-		[Header("Power-Ups")]
-		[SerializeField, Range(0f, 1f)] private float powerUpChance = 0.08f;
-
-		[Header("Power-Up Weights")]
-		[SerializeField, Min(0f)] private float nitroWeight = 2f;
-		[SerializeField, Min(0f)] private float magnetWeight = 1f;
-		[SerializeField, Min(0f)] private float multiplierWeight = 1f;
-		[SerializeField, Min(0f)] private float shieldWeight = 1f;
-		[SerializeField, Min(0f)] private float superJumpWeight = 1f;
-		[SerializeField, Min(0f)] private float coinDoublerWeight = 1f;
 
 		[Header("Visuals")]
 		[Tooltip("Coin model, lying flat with its faces along local Y; only its mesh, material and layer are used. " +
@@ -90,21 +45,15 @@ namespace Game.Surf
 		[SerializeField] private Material superJumpMaterial;
 		[SerializeField] private Material coinDoublerMaterial;
 
-		private readonly List<Spawned> _spawned = new List<Spawned>();
-		private readonly Stack<Pickup> _freePickups = new Stack<Pickup>();
+		/// <summary>Power-ups only; coins are drawn instanced.</summary>
+		private readonly Dictionary<Pickup, View> _spawned = new Dictionary<Pickup, View>();
 		private readonly ObjectPool<View>[] _views =
 			new ObjectPool<View>[System.Enum.GetValues(typeof(PickupKind)).Length];
 
-		private BoardState _board;
-		private BoardSettings _boardSettings;
-		private PickupSettings _pickupSettings;
-		private PowerUps _powerUps;
+		private IBoardState _board;
 		private SurfPath _path;
-		private WaterSurface _water;
-		private ObstacleField _obstacles;
+		private IWaterSurface _water;
 		private PickupField _field;
-		private IGraphicsSettings _graphics;
-		private float _nextTrailDistance;
 
 		private Mesh _coinMesh;
 		private Mesh _farCoinMesh;
@@ -116,18 +65,11 @@ namespace Game.Surf
 		private Matrix4x4[] _farCoins = new Matrix4x4[128];
 
 		[Inject]
-		public void Construct(BoardState board, BoardSettings boardSettings, PickupSettings pickupSettings,
-			PowerUps powerUps, SurfPath path, WaterSurface water, ObstacleField obstacles, PickupField field,
-			IGraphicsSettings graphics)
+		public void Construct(IBoardState board, SurfPath path, IWaterSurface water, PickupField field)
 		{
-			_graphics = graphics;
 			_board = board;
-			_boardSettings = boardSettings;
-			_pickupSettings = pickupSettings;
-			_powerUps = powerUps;
 			_path = path;
 			_water = water;
-			_obstacles = obstacles;
 			_field = field;
 		}
 
@@ -157,41 +99,39 @@ namespace Game.Surf
 			_farCoinRenderParams.renderingLayerMask = ToonOutlineFeature.RenderingLayer(false);
 		}
 
-		private void OnDestroy()
-		{
-			Destroy(_farCoinMesh);
-		}
-
 		private void Start()
 		{
-			_nextTrailDistance = firstTrailDistance;
+			_field.Added += OnAdded;
+			_field.Removed += OnRemoved;
+
+			foreach (Pickup pickup in _field.Pickups)
+			{
+				OnAdded(pickup);
+			}
+		}
+
+		private void OnDestroy()
+		{
+			if (_field != null)
+			{
+				_field.Added -= OnAdded;
+				_field.Removed -= OnRemoved;
+			}
+
+			Destroy(_farCoinMesh);
 		}
 
 		private void Update()
 		{
 			float distance = _board.Distance;
-
-			while (_nextTrailDistance < distance + spawnAhead * _graphics.DistanceScale)
-			{
-				_nextTrailDistance = SpawnTrail(_nextTrailDistance) + Random.Range(trailGap.x, trailGap.y);
-			}
-
 			Quaternion spin = Quaternion.Euler(0f, Time.time * spinSpeed, 0f);
 			int nearCoins = 0;
 			int farCoins = 0;
+			IReadOnlyList<Pickup> pickups = _field.Pickups;
 
-			for (int i = _spawned.Count - 1; i >= 0; i--)
+			for (int i = 0; i < pickups.Count; i++)
 			{
-				Spawned spawned = _spawned[i];
-				Pickup pickup = spawned.Pickup;
-
-				if (pickup.Collected || pickup.Distance < distance - despawnBehind)
-				{
-					Despawn(spawned);
-					_spawned.RemoveAt(i);
-					continue;
-				}
-
+				Pickup pickup = pickups[i];
 				_path.Sample(pickup.Distance, out Vector3 center, out Vector3 forward);
 				Vector3 position = center + Vector3.Cross(Vector3.up, forward) * pickup.Lateral;
 				// Collection checks against the board's own water height, so the view can use the cheaper one.
@@ -218,7 +158,7 @@ namespace Game.Surf
 					continue;
 				}
 
-				View view = spawned.View;
+				View view = _spawned[pickup];
 				view.Transform.SetPositionAndRotation(position, rotation);
 
 				bool outlined = ahead < ToonOutlineFeature.MaxDistance;
@@ -250,186 +190,20 @@ namespace Game.Surf
 			instances[count++] = matrix;
 		}
 
-		/// <summary>Spawns one trail starting at the given distance and returns where it ends.</summary>
-		private float SpawnTrail(float start)
+		private void OnAdded(Pickup pickup)
 		{
-			float lateral = _boardSettings.LaneOffset(Random.Range(0, _boardSettings.LaneCount));
-			int count = Random.Range(coinCount.x, coinCount.y + 1);
-			int powerUpIndex = Random.value < powerUpChance ? count / 2 : -1;
-			float previousSurface = float.NaN;
-			float end = start;
-			// Where super jump runs out, at the current speed.
-			float superJumpUntil = _board.Distance + _powerUps.Remaining(PickupKind.SuperJump) * _board.Speed;
-
-			for (int i = 0; i < count; i++)
+			if (pickup.Kind != PickupKind.Coin)
 			{
-				float distance = start + i * coinSpacing;
-				float surface = Placement(distance, lateral, superJumpUntil, out float height, out bool followsWater,
-					out bool onJumpArc);
-
-				if (!onJumpArc && surface - previousSurface > maxStep)
-				{
-					break;
-				}
-
-				previousSurface = surface;
-				end = distance;
-
-				PickupKind kind = i != powerUpIndex ? PickupKind.Coin : RandomPowerUp();
-				Spawn(kind, distance, lateral, height, followsWater);
+				_spawned.Add(pickup, _views[(int)pickup.Kind].Get());
 			}
-
-			return end;
 		}
 
-		private PickupKind RandomPowerUp()
+		private void OnRemoved(Pickup pickup)
 		{
-			float roll = Random.Range(0f,
-				nitroWeight + magnetWeight + multiplierWeight + shieldWeight + superJumpWeight + coinDoublerWeight);
-
-			if ((roll -= nitroWeight) < 0f)
+			if (_spawned.Remove(pickup, out View view))
 			{
-				return PickupKind.Nitro;
+				_views[(int)pickup.Kind].Release(view);
 			}
-
-			if ((roll -= magnetWeight) < 0f)
-			{
-				return PickupKind.Magnet;
-			}
-
-			if ((roll -= multiplierWeight) < 0f)
-			{
-				return PickupKind.ScoreMultiplier;
-			}
-
-			if ((roll -= shieldWeight) < 0f)
-			{
-				return PickupKind.Shield;
-			}
-
-			return roll - superJumpWeight < 0f ? PickupKind.SuperJump : PickupKind.CoinDoubler;
-		}
-
-		/// <summary>
-		/// Where a coin goes at the given point: hovering over the water, a barrier arc, a super jump arc or a train
-		/// roof. Returns the nominal height of the surface under it, or of the board along a jump arc.
-		/// </summary>
-		private float Placement(float distance, float lateral, float superJumpUntil, out float height,
-			out bool followsWater, out bool onJumpArc)
-		{
-			float waterLevel = _water.BaseHeight;
-			float surface = waterLevel;
-			height = hoverHeight;
-			followsWater = true;
-			onJumpArc = false;
-
-			foreach (ObstacleBox box in _obstacles.Boxes)
-			{
-				if (!box.OverlapsLateral(lateral, 0f))
-				{
-					continue;
-				}
-
-				if (!box.Walkable)
-				{
-					float arc = Mathf.Abs(distance - (box.Start + box.End) * 0.5f) / barrierArcLength;
-					if (arc < 1f && followsWater)
-					{
-						height = Mathf.Max(height, Mathf.Lerp(hoverHeight, barrierArcHeight, 1f - arc * arc));
-					}
-
-					continue;
-				}
-
-				if (distance < box.Start && box.RampLength <= 0f &&
-					TryJumpArc(box.Start - distance, box.Top - waterLevel, superJumpUntil - box.Start, out float rise))
-				{
-					float arc = waterLevel + rise;
-					if (arc > surface)
-					{
-						surface = arc;
-						height = arc + hoverHeight;
-						followsWater = false;
-						onJumpArc = true;
-					}
-
-					continue;
-				}
-
-				if (distance < box.Start || distance > box.End)
-				{
-					continue;
-				}
-
-				// Ramps start below the water; follow the water until they rise out of it.
-				float top = box.SurfaceAt(distance);
-				if (top > surface)
-				{
-					surface = top;
-					height = top + hoverHeight;
-					followsWater = false;
-				}
-			}
-
-			return surface;
-		}
-
-		/// <summary>
-		/// Height of the board along a super jump that clears a wall of the given height exactly at it, at the given
-		/// distance before the wall. Fails before the take-off, if the jump is too low, or if super jump runs out
-		/// before the take-off (<paramref name="activeAfterWall"/> is how far past the wall it lasts).
-		/// </summary>
-		private bool TryJumpArc(float beforeWall, float wallHeight, float activeAfterWall, out float rise)
-		{
-			rise = 0f;
-			float speed = _board.Speed;
-			float gravity = _boardSettings.Gravity;
-			float jumpHeight = Mathf.Max(_boardSettings.JumpHeight, _pickupSettings.SuperJumpHeight);
-
-			if (speed <= 0f || wallHeight >= jumpHeight)
-			{
-				return false;
-			}
-
-			float launchSpeed = Mathf.Sqrt(2f * gravity * jumpHeight);
-			float climbTime = (launchSpeed - Mathf.Sqrt(launchSpeed * launchSpeed - 2f * gravity * wallHeight)) / gravity;
-			float runUp = speed * climbTime;
-
-			if (beforeWall > runUp || activeAfterWall < -runUp)
-			{
-				return false;
-			}
-
-			float time = (runUp - beforeWall) / speed;
-			rise = launchSpeed * time - 0.5f * gravity * time * time;
-			return true;
-		}
-
-		private void Spawn(PickupKind kind, float distance, float lateral, float height, bool followsWater)
-		{
-			Pickup pickup = _freePickups.Count > 0 ? _freePickups.Pop() : new Pickup();
-			pickup.Kind = kind;
-			pickup.Distance = distance;
-			pickup.Lateral = lateral;
-			pickup.Height = height;
-			pickup.FollowsWater = followsWater;
-			pickup.Attracted = false;
-			pickup.Collected = false;
-
-			_field.Add(pickup);
-			View view = kind != PickupKind.Coin ? _views[(int)kind].Get() : null;
-			_spawned.Add(new Spawned { Pickup = pickup, View = view });
-		}
-
-		private void Despawn(Spawned spawned)
-		{
-			_field.Remove(spawned.Pickup);
-			if (spawned.View != null)
-			{
-				_views[(int)spawned.Pickup.Kind].Release(spawned.View);
-			}
-
-			_freePickups.Push(spawned.Pickup);
 		}
 
 		private View CreateView(PickupKind kind)

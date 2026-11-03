@@ -9,7 +9,6 @@ namespace Game.Surf
 	/// samples for foam and normal bumps (Boat Attack's WaterFX buffer, without a second camera).
 	/// Sources should use the AnimeSurfers/WaterFX material, so the regular cameras never draw them.
 	/// </summary>
-	[DefaultExecutionOrder(20)]
 	public class WaterFXBuffer : MonoBehaviour
 	{
 		private static readonly int MapId = Shader.PropertyToID("_WaterFXMap");

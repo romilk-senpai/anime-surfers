@@ -12,16 +12,19 @@ namespace Game.Surf
 	}
 
 	/// <summary>
-	/// Board simulation state shared by the board systems (writers) and the views (readers).
-	/// Positions are in passage space: distance along the path, lateral offset from the centerline and height.
+	/// Board simulation state written by the board systems; views and presenters read it through
+	/// <see cref="IBoardState"/>. Positions are in passage space: distance along the path, lateral offset from the
+	/// centerline and height.
 	/// </summary>
-	public sealed class BoardState
+	public sealed class BoardState : IBoardState
 	{
 		private readonly BoardSettings _settings;
+		private readonly RunClock _clock;
 
-		public BoardState(BoardSettings settings)
+		public BoardState(BoardSettings settings, RunClock clock)
 		{
 			_settings = settings;
+			_clock = clock;
 		}
 
 		public float Distance { get; set; }
@@ -50,6 +53,7 @@ namespace Game.Surf
 		/// </summary>
 		public bool IsRunning { get; set; }
 
+		/// <summary>Times are on the <see cref="RunClock"/>.</summary>
 		public float SlideUntil { get; set; } = float.NegativeInfinity;
 		public float JumpRequestTime { get; set; } = float.NegativeInfinity;
 		public float IgnoreWaterUntil { get; set; }
@@ -57,7 +61,7 @@ namespace Game.Surf
 		public Vector3 PathPosition { get; set; }
 		public Vector3 PathForward { get; set; } = Vector3.forward;
 
-		public bool IsSliding => Time.time < SlideUntil;
+		public bool IsSliding => _clock.Time < SlideUntil;
 		public Vector3 PathRight => Vector3.Cross(Vector3.up, PathForward);
 		/// <summary>Board position on the path plane; the height is in <see cref="Height"/>.</summary>
 		public Vector3 PlanarPosition => PathPosition + PathRight * Lateral;

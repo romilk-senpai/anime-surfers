@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Game.Surf
@@ -42,14 +43,21 @@ namespace Game.Surf
 
 		public IReadOnlyList<Pickup> Pickups => _pickups;
 
+		public event Action<Pickup> Added;
+		public event Action<Pickup> Removed;
+
 		public void Add(Pickup pickup)
 		{
 			_pickups.Add(pickup);
+			Added?.Invoke(pickup);
 		}
 
 		public void Remove(Pickup pickup)
 		{
-			_pickups.Remove(pickup);
+			if (_pickups.Remove(pickup))
+			{
+				Removed?.Invoke(pickup);
+			}
 		}
 	}
 }

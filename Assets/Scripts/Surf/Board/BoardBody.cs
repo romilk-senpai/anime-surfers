@@ -1,4 +1,3 @@
-using Game.Core;
 using UnityEngine;
 
 namespace Game.Surf
@@ -16,11 +15,12 @@ namespace Game.Surf
 		private readonly BoardState _state;
 		private readonly IWaterHeight _water;
 		private readonly ObstacleField _obstacles;
-		private readonly IInputService _input;
+		private readonly BoardInput _input;
 		private readonly PowerUps _powerUps;
+		private readonly RunClock _clock;
 
 		public BoardBody(BoardSettings settings, BoardState state, IWaterHeight water, ObstacleField obstacles,
-			IInputService input, PowerUps powerUps)
+			BoardInput input, PowerUps powerUps, RunClock clock)
 		{
 			_settings = settings;
 			_state = state;
@@ -28,6 +28,7 @@ namespace Game.Surf
 			_obstacles = obstacles;
 			_input = input;
 			_powerUps = powerUps;
+			_clock = clock;
 		}
 
 		public void Initialize()
@@ -38,12 +39,12 @@ namespace Game.Surf
 
 		public void Tick(float dt)
 		{
-			if (_input.JumpPressed)
+			if (_input.Current.Jump)
 			{
-				_state.JumpRequestTime = Time.time;
+				_state.JumpRequestTime = _clock.Time;
 			}
 
-			if (_input.SlidePressed)
+			if (_input.Current.Slide)
 			{
 				Slide();
 			}
@@ -59,7 +60,7 @@ namespace Game.Surf
 				return;
 			}
 
-			_state.SlideUntil = Time.time + _settings.SlideDuration;
+			_state.SlideUntil = _clock.Time + _settings.SlideDuration;
 			_state.JumpRequestTime = float.NegativeInfinity;
 
 			if (!_state.IsGrounded)
@@ -88,19 +89,19 @@ namespace Game.Surf
 			bool hasSupport = _obstacles.TryGetSupport(_state.Distance, _state.PreviousDistance, _state.Lateral,
 				_settings.BoardWidth * 0.5f, height + _settings.StepHeight, waterHeight, out float support);
 
-			if (_state.IsGrounded && Time.time - _state.JumpRequestTime <= Mathf.Max(_settings.JumpBufferTime, dt))
+			if (_state.IsGrounded && _clock.Time - _state.JumpRequestTime <= Mathf.Max(_settings.JumpBufferTime, dt))
 			{
 				_state.JumpRequestTime = float.NegativeInfinity;
 				_state.SlideUntil = float.NegativeInfinity;
 				float jumpHeight = _powerUps.JumpHeight(_settings.JumpHeight);
 				verticalVelocity = Mathf.Sqrt(2f * gravity * jumpHeight) + Mathf.Max(0f, waterVelocity);
-				_state.IgnoreWaterUntil = Time.time + JumpWaterIgnoreTime;
+				_state.IgnoreWaterUntil = _clock.Time + JumpWaterIgnoreTime;
 				_state.NotifyJumped();
 			}
 
 			bool wasGrounded = _state.IsGrounded;
 			float impactSpeed = Mathf.Max(0f, waterVelocity - verticalVelocity);
-			bool ignoreWater = Time.time < _state.IgnoreWaterUntil;
+			bool ignoreWater = _clock.Time < _state.IgnoreWaterUntil;
 			int steps = Mathf.CeilToInt(dt / MaxSimulationStep);
 			float step = dt / steps;
 

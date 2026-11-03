@@ -70,7 +70,7 @@ namespace Game.Surf
 		private readonly Dictionary<GameObject, ObjectPool<GameObject>> _pools =
 			new Dictionary<GameObject, ObjectPool<GameObject>>();
 
-		private BoardState _board;
+		private IBoardState _board;
 		private BoardSettings _boardSettings;
 		private SurfPath _path;
 		private IGraphicsSettings _graphics;
@@ -79,7 +79,7 @@ namespace Game.Surf
 		private float _nextLandmark;
 
 		[Inject]
-		public void Construct(BoardState board, BoardSettings boardSettings, SurfPath path, IGraphicsSettings graphics)
+		public void Construct(IBoardState board, BoardSettings boardSettings, SurfPath path, IGraphicsSettings graphics)
 		{
 			_board = board;
 			_boardSettings = boardSettings;

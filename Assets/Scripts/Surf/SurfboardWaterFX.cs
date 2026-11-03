@@ -7,8 +7,8 @@ namespace Game.Surf
 	/// <summary>
 	/// Board-to-water feedback: leaves a wake trail on the surface, throws spray sheets off the rails,
 	/// leaves mist behind and splashes on landings, with the rush of water under the board and splash sounds.
+	/// Updates when <see cref="BoardView.Placed"/> fires, so the wake follows the board where it is this frame.
 	/// </summary>
-	[DefaultExecutionOrder(10)]
 	public class SurfboardWaterFX : MonoBehaviour
 	{
 		[SerializeField] private WaterSurface water;
@@ -58,8 +58,9 @@ namespace Game.Surf
 		         "several points makes one sound.")]
 		[SerializeField] private float splashSoundInterval = 0.12f;
 
-		private BoardState _board;
+		private IBoardState _board;
 		private ISoundController _sound;
+		private BoardView _view;
 		private float _nextSplashSoundTime;
 		private float _lastSplashVolume;
 		private int _lastSplashClip = -1;
@@ -69,10 +70,16 @@ namespace Game.Surf
 		private float _mistRate;
 
 		[Inject]
-		public void Construct(BoardState board, ISoundController sound)
+		public void Construct(IBoardState board, ISoundController sound)
 		{
 			_board = board;
 			_sound = sound;
+		}
+
+		private void Awake()
+		{
+			_view = GetComponent<BoardView>();
+			_view.Placed += OnBoardPlaced;
 		}
 
 		private void Start()
@@ -83,6 +90,11 @@ namespace Game.Surf
 
 		private void OnDestroy()
 		{
+			if (_view != null)
+			{
+				_view.Placed -= OnBoardPlaced;
+			}
+
 			if (_board != null)
 			{
 				_board.Landed -= OnLanded;
@@ -90,7 +102,7 @@ namespace Game.Surf
 			}
 		}
 
-		private void Update()
+		private void OnBoardPlaced()
 		{
 			bool grounded = _board.IsOnWater;
 			Vector3 tail = transform.TransformPoint(tailOffset);

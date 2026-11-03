@@ -28,11 +28,11 @@ namespace Game.Surf
 		[Tooltip("The emitters stay this far ahead of the board, so drops reach it as it moves forward.")]
 		[SerializeField] private float aheadDistance = 12f;
 
-		private BoardState _board;
+		private IBoardState _board;
 		private Weather _weather;
 
 		[Inject]
-		public void Construct(BoardState board, Weather weather)
+		public void Construct(IBoardState board, Weather weather)
 		{
 			_board = board;
 			_weather = weather;

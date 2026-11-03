@@ -56,14 +56,14 @@ namespace Game.Surf
 		private Matrix4x4[] _ropeMatrices = new Matrix4x4[128];
 		private Mesh _ropeMesh;
 		private RenderParams _ropeRenderParams;
-		private BoardState _board;
+		private IBoardState _board;
 		private BoardSettings _boardSettings;
 		private SurfPath _path;
 		private float _nextDistance;
 		private bool _nextOdd;
 
 		[Inject]
-		public void Construct(BoardState board, BoardSettings boardSettings, SurfPath path)
+		public void Construct(IBoardState board, BoardSettings boardSettings, SurfPath path)
 		{
 			_board = board;
 			_boardSettings = boardSettings;

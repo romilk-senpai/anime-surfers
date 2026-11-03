@@ -22,11 +22,10 @@ namespace Game.Surf
 		private readonly float _baseHeading;
 		private int _firstIndex;
 
-		public SurfPath(PathSettings settings, Pose origin)
+		public SurfPath(PathSettings settings, Pose origin, RunRandom random)
 		{
 			_settings = settings;
-			_noiseOffset = (settings.Seed != 0 ? new System.Random(settings.Seed) : new System.Random())
-				.Next(0, 10000) * 0.37f;
+			_noiseOffset = random.Stream(RunRandom.PathStream).Range(0, 10000) * 0.37f;
 			_baseHeading = origin.rotation.eulerAngles.y * Mathf.Deg2Rad;
 			_points.Add(new PathPoint
 			{

@@ -24,6 +24,8 @@ namespace Game.Audio
 
 		private Queue<AudioSource> _spawnedAudioSources;
 		private IVolumeSettings _volume;
+		// The fade before stopping the music; cleared when the music is started again, so that stop is skipped.
+		private Tween _musicFadeOut;
 
 		[Inject]
 		public void Construct(IVolumeSettings volume)
@@ -48,6 +50,17 @@ namespace Game.Audio
 
 		public void StartMusic()
 		{
+			if (_musicFadeOut != null)
+			{
+				// Still fading out: cancel the stop and fade back in. Cleared before the kill, which resumes the
+				// pending stop right away, so it sees it was cancelled.
+				Tween fadeOut = _musicFadeOut;
+				_musicFadeOut = null;
+				fadeOut.Kill();
+				musicAudioSource.DOFade(MusicVolume, .5f);
+				return;
+			}
+
 			if (musicAudioSource.isPlaying)
 			{
 				return;
@@ -58,10 +71,25 @@ namespace Game.Audio
 			musicAudioSource.DOFade(MusicVolume, .5f);
 		}
 
-		public async void StopMusic()
+		public void StopMusic()
 		{
-			await musicAudioSource.DOFade(0f, .5f);
+			StopMusicAsync().Forget();
+		}
 
+		private async UniTaskVoid StopMusicAsync()
+		{
+			Tween fadeOut = musicAudioSource.DOFade(0f, .5f);
+			_musicFadeOut = fadeOut;
+			// Also resumes when the fade is killed.
+			await fadeOut;
+
+			// Started again, or stopped again by a newer fade.
+			if (_musicFadeOut != fadeOut)
+			{
+				return;
+			}
+
+			_musicFadeOut = null;
 			musicAudioSource.Stop();
 		}
 
@@ -72,7 +100,12 @@ namespace Game.Audio
 			globalAudioSource.PlayOneShot(clip);
 		}
 
-		public async void PlayClipAtPosition(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f)
+		public void PlayClipAtPosition(AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f)
+		{
+			PlayClipAtPositionAsync(clip, position, volume, pitch).Forget();
+		}
+
+		private async UniTaskVoid PlayClipAtPositionAsync(AudioClip clip, Vector3 position, float volume, float pitch)
 		{
 			if (!_spawnedAudioSources.TryDequeue(out AudioSource pointSource))
 			{

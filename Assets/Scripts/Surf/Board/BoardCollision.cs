@@ -16,13 +16,18 @@ namespace Game.Surf
 		private readonly BoardState _state;
 		private readonly ObstacleField _obstacles;
 		private readonly PowerUps _powerUps;
+		private readonly RunClock _clock;
+		private readonly RandomStream _random;
 
-		public BoardCollision(BoardSettings settings, BoardState state, ObstacleField obstacles, PowerUps powerUps)
+		public BoardCollision(BoardSettings settings, BoardState state, ObstacleField obstacles, PowerUps powerUps,
+			RunClock clock, RunRandom random)
 		{
 			_settings = settings;
 			_state = state;
 			_obstacles = obstacles;
 			_powerUps = powerUps;
+			_clock = clock;
+			_random = random.Stream(RunRandom.CollisionStream);
 		}
 
 		public void Tick()
@@ -105,12 +110,12 @@ namespace Game.Surf
 			if (kind == CrashKind.Wall)
 			{
 				// Back off the wall, up, and away toward the middle of the passage.
-				float side = Mathf.Abs(_state.Lateral) > 0.1f ? -Mathf.Sign(_state.Lateral) : Random.value < 0.5f ? -1f : 1f;
+				float side = Mathf.Abs(_state.Lateral) > 0.1f ? -Mathf.Sign(_state.Lateral) : _random.Value < 0.5f ? -1f : 1f;
 				_state.Speed = -_settings.WallBounceSpeed;
 				_state.LateralVelocity = side * _settings.WallBounceSideSpeed;
 				_state.VerticalVelocity = Mathf.Max(_state.VerticalVelocity,
 					Mathf.Sqrt(2f * _settings.Gravity * _settings.WallBounceHeight));
-				_state.IgnoreWaterUntil = Time.time + BounceWaterIgnoreTime;
+				_state.IgnoreWaterUntil = _clock.Time + BounceWaterIgnoreTime;
 			}
 
 			_state.NotifyCrashed();

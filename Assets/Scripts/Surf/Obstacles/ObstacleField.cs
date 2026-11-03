@@ -1,14 +1,28 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.Surf
 {
+	public enum ObstacleKind
+	{
+		/// <summary>A rope over the water, jumped over or slid under.</summary>
+		Barrier,
+		/// <summary>A row of moored boats that blocks the lane but can be ridden on.</summary>
+		Train,
+		/// <summary>A train with a ramp in front.</summary>
+		ClimbableTrain
+	}
+
 	/// <summary>
 	/// Obstacle volume in passage space: distance along the path, lateral offset from the centerline and height.
 	/// Working in path space keeps collisions exact on curves, where the visuals are only approximated.
 	/// </summary>
 	public sealed class ObstacleBox
 	{
+		public ObstacleKind Kind;
+		/// <summary>Number of cars of a train; 0 for a barrier.</summary>
+		public int Cars;
 		public float Start;
 		public float End;
 		public float Left;
@@ -50,14 +64,21 @@ namespace Game.Surf
 
 		public IReadOnlyList<ObstacleBox> Boxes => _boxes;
 
+		public event Action<ObstacleBox> Added;
+		public event Action<ObstacleBox> Removed;
+
 		public void Add(ObstacleBox box)
 		{
 			_boxes.Add(box);
+			Added?.Invoke(box);
 		}
 
 		public void Remove(ObstacleBox box)
 		{
-			_boxes.Remove(box);
+			if (_boxes.Remove(box))
+			{
+				Removed?.Invoke(box);
+			}
 		}
 
 		/// <summary>

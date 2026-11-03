@@ -21,34 +21,16 @@ namespace Game.Core
 
 		public bool IsEnabled => _actions.Player.enabled;
 
-		public int LaneChange
+		public GameplayInput ReadGameplay()
 		{
-			get
-			{
-				if (TakeSwipe(Swipe.Left))
-				{
-					return -1;
-				}
+			Swipe? swipe = TakeSwipe();
 
-				if (TakeSwipe(Swipe.Right))
-				{
-					return 1;
-				}
-
-				InputAction move = _actions.Player.Move;
-
-				if (!move.triggered)
-				{
-					return 0;
-				}
-
-				return move.ReadValue<float>() > 0f ? 1 : -1;
-			}
+			return new GameplayInput(LaneChange(swipe),
+				_actions.Player.Jump.WasPerformedThisFrame() || swipe == Swipe.Up,
+				_actions.Player.Slide.WasPerformedThisFrame() || swipe == Swipe.Down,
+				_actions.Player.Boost.IsPressed() || (IsEnabled && _touchBoost));
 		}
 
-		public bool JumpPressed => _actions.Player.Jump.WasPerformedThisFrame() | TakeSwipe(Swipe.Up);
-		public bool SlidePressed => _actions.Player.Slide.WasPerformedThisFrame() | TakeSwipe(Swipe.Down);
-		public bool BoostHeld => _actions.Player.Boost.IsPressed() || (IsEnabled && _touchBoost);
 		public bool ConfirmPressed => _actions.Menu.Confirm.WasPerformedThisFrame();
 		public bool PausePressed => _actions.Menu.Pause.WasPerformedThisFrame();
 
@@ -84,15 +66,33 @@ namespace Game.Core
 			_actions.Dispose();
 		}
 
-		private bool TakeSwipe(Swipe swipe)
+		private int LaneChange(Swipe? swipe)
 		{
-			if (_swipe != swipe)
+			if (swipe == Swipe.Left)
 			{
-				return false;
+				return -1;
 			}
 
+			if (swipe == Swipe.Right)
+			{
+				return 1;
+			}
+
+			InputAction move = _actions.Player.Move;
+
+			if (!move.triggered)
+			{
+				return 0;
+			}
+
+			return move.ReadValue<float>() > 0f ? 1 : -1;
+		}
+
+		private Swipe? TakeSwipe()
+		{
+			Swipe? swipe = _swipe;
 			_swipe = null;
-			return Time.frameCount - _swipeFrame <= 1;
+			return Time.frameCount - _swipeFrame <= 1 ? swipe : null;
 		}
 	}
 }
