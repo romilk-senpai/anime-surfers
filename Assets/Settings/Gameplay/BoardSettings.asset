@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbf26c834eb177e41b39b81f3b899fb3, type: 3}
   m_Name: BoardSettings
   m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.BoardSettings
-  startSpeed: 10
-  maxSpeed: 22
+  startSpeed: 20
+  maxSpeed: 55
   acceleration: 0.2
   laneCount: 3
   laneWidth: 2.5
@@ -41,3 +41,4 @@ MonoBehaviour:
   wallBounceSpeed: 3
   wallBounceSideSpeed: 4.5
   wallBounceHeight: 1.5
+  edgeForgiveness: 0.4

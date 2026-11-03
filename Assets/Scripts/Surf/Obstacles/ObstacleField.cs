@@ -117,14 +117,14 @@ namespace Game.Surf
 
 		/// <summary>
 		/// First obstacle the body intersects. Walkable surfaces within <paramref name="stepHeight"/> of the body bottom
-		/// are stepped onto rather than hit.
+		/// are stepped onto rather than hit. <paramref name="ignore"/>, if given, is skipped.
 		/// </summary>
 		public bool TryGetHit(float distance, float halfLength, float lateral, float halfWidth, float bodyBottom,
-			float bodyTop, float stepHeight, float waterHeight, out ObstacleBox hit)
+			float bodyTop, float stepHeight, float waterHeight, out ObstacleBox hit, ObstacleBox ignore = null)
 		{
 			foreach (ObstacleBox box in _boxes)
 			{
-				if (box.Smashed || distance + halfLength < box.Start || distance - halfLength > box.End ||
+				if (box.Smashed || box == ignore || distance + halfLength < box.Start || distance - halfLength > box.End ||
 					!box.OverlapsLateral(lateral, halfWidth))
 				{
 					continue;

@@ -27,8 +27,8 @@ MonoBehaviour:
   carGap: 0.6
   trainCars: {x: 2, y: 4}
   climbableTrainCars: {x: 3, y: 5}
-  rampLength: 9
-  rampStartHeight: -0.8
+  rampLength: 11.25
+  rampStartHeight: -1.8
   barrierWidth: 2.3
   barrierBottom: 1.15
   barrierTop: 1.55

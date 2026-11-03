@@ -53,23 +53,37 @@ namespace Game.Surf
 			// Only clipping its edge mid lane change glances off like hitting its side.
 			if (hit.OverlapsLateral(_state.PreviousLateral, halfWidth) && depth > _settings.EdgeForgiveness)
 			{
-				if (_powerUps.TryAbsorbHit())
-				{
-					hit.Smashed = true;
-					return;
-				}
-
-				// Anything that starts above the board could have been slid under; the rest is a wall.
-				float bottom = hit.Bottom + (hit.FollowsWater ? _state.WaterHeight : 0f);
-				Crash(bottom > _state.Height ? CrashKind.Barrier : CrashKind.Wall);
+				HitHeadOn(hit);
 				return;
 			}
 
-			// Changed lanes into its side: bounce back out.
-			_state.Lateral = fromLeft ? hit.Left - halfWidth : hit.Right + halfWidth;
+			// Changed lanes into its side: bounce back out, unless that spot is blocked too, like squeezing between
+			// two trains in neighboring lanes with less than a board's width between them.
+			float outLateral = fromLeft ? hit.Left - halfWidth : hit.Right + halfWidth;
+			if (_obstacles.TryGetHit(_state.Distance, _settings.BodyHalfLength, outLateral, halfWidth,
+					_state.Height, bodyTop, _settings.StepHeight, _state.WaterHeight, out _, hit))
+			{
+				HitHeadOn(hit);
+				return;
+			}
+
+			_state.Lateral = outLateral;
 			_state.LateralVelocity = 0f;
 			_state.Lane = _settings.NearestLane(_state.Lateral);
 			_state.NotifySideHit(fromLeft ? 1 : -1);
+		}
+
+		private void HitHeadOn(ObstacleBox hit)
+		{
+			if (_powerUps.TryAbsorbHit())
+			{
+				hit.Smashed = true;
+				return;
+			}
+
+			// Anything that starts above the board could have been slid under; the rest is a wall.
+			float bottom = hit.Bottom + (hit.FollowsWater ? _state.WaterHeight : 0f);
+			Crash(bottom > _state.Height ? CrashKind.Barrier : CrashKind.Wall);
 		}
 
 		/// <summary>Only the deck collides, so the board passes under the barrier that knocked her off.</summary>
