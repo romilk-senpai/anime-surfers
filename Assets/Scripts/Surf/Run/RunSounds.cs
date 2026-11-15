@@ -7,7 +7,8 @@ namespace Game.Surf
 	/// <summary>
 	/// Run sound cues carried over from the runner's main stage: music while running, a metal hit and a shout when
 	/// bouncing off an obstacle's side, and a hit and a cry on the crash, which also fades the music out. Plus a chime
-	/// for each coin picked up, a pickup sound for power-ups, a shatter when the shield breaks and a whoosh on super jumps.
+	/// for each coin picked up, a pickup sound for power-ups, the side-hit sounds when the shield breaks and a whoosh on
+	/// super jumps.
 	/// </summary>
 	public class RunSounds : MonoBehaviour
 	{
@@ -16,7 +17,6 @@ namespace Game.Surf
 		[SerializeField] private AudioClip deathSound;
 		[SerializeField] private AudioClip coinSound;
 		[SerializeField] private AudioClip powerUpSound;
-		[SerializeField] private AudioClip shieldBreakSound;
 		[SerializeField] private AudioClip superJumpSound;
 		[Tooltip("Height above the board the vocals play at.")]
 		[SerializeField] private float voiceHeight = 1.4f;
@@ -124,10 +124,9 @@ namespace Game.Surf
 
 		private void OnShieldBroken()
 		{
-			if (shieldBreakSound != null)
-			{
-				_sound.PlayClipAtPosition(shieldBreakSound, RiderPosition() + _board.PathForward * 0.5f, powerUpVolume);
-			}
+			Vector3 rider = RiderPosition();
+			_sound.PlayClipAtPosition(hitSound, rider + _board.PathForward * 0.5f, hitVolume);
+			_sound.PlayClipAtPosition(damageSound, rider, voiceVolume);
 		}
 
 		private Vector3 RiderPosition()
