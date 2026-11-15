@@ -40,6 +40,7 @@ namespace Game.Core
 		private bool _sceneFog;
 		private float _fogStart;
 		private float _fogEnd;
+		private float _fogDensity;
 		private Camera _camera;
 		private float _farClip;
 		private Light _sun;
@@ -56,6 +57,12 @@ namespace Game.Core
 
 		public void Start()
 		{
+			// Mobile defaults to 30 fps when no target is set.
+			if (Application.isMobilePlatform)
+			{
+				Application.targetFrameRate = 60;
+			}
+
 			_pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
 
 			if (_pipeline != null)
@@ -117,6 +124,7 @@ namespace Game.Core
 			_sceneFog = RenderSettings.fog;
 			_fogStart = RenderSettings.fogStartDistance;
 			_fogEnd = RenderSettings.fogEndDistance;
+			_fogDensity = RenderSettings.fogDensity;
 			_camera = Camera.main;
 			_farClip = _camera != null ? _camera.farClipPlane : 0f;
 			_sun = RenderSettings.sun;
@@ -145,6 +153,7 @@ namespace Game.Core
 			RenderSettings.fog = _sceneFog && _settings.Fog;
 			RenderSettings.fogStartDistance = _fogStart * distanceScale;
 			RenderSettings.fogEndDistance = _fogEnd * distanceScale;
+			RenderSettings.fogDensity = _fogDensity / distanceScale;
 
 			if (_camera != null)
 			{

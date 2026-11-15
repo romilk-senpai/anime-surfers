@@ -28,7 +28,7 @@ MonoBehaviour:
   - {fileID: 4369369106847006579}
   m_RendererFeatureMap: 737f2e820d1ea33cl
   xrSystemData: {fileID: 0}
-  postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
+  postProcessData: {fileID: 11400000, guid: deb1d0b7c4559d144b37648c30da14bd, type: 2}
   m_AssetVersion: 3
   m_PrepassLayerMask:
     serializedVersion: 2

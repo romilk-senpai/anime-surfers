@@ -289,12 +289,19 @@ Shader "AnimeSurfers/StylizedWater"
                 gradient += float2(dx, dz) * (_WaterFXNormalStrength * edge);
             }
 
+            // UV of world xz at a tiling (m) plus a scroll (in repeats), measured from the wave origin and wrapped: world
+            // positions and the clock grow without bound over a run, and large UVs lose precision on mobile GPUs.
+            float2 WaterUV(float2 xz, float tiling, float2 scroll)
+            {
+                return (xz - _WaterOrigin.xy) / tiling + frac(_WaterOrigin.xy / tiling + scroll);
+            }
+
             // Two ripple normal map layers scrolling in different directions, blended (whiteout).
             float3 SampleRipples(float2 xz, float distanceFade)
             {
                 float t = _WaterWaveTime * _NormalSpeed;
-                float2 uvA = xz / _NormalTilingA + float2(0.6, 0.8) * t / _NormalTilingA * 2.0;
-                float2 uvB = xz / _NormalTilingB + float2(-0.8, 0.45) * t / _NormalTilingB;
+                float2 uvA = WaterUV(xz, _NormalTilingA, float2(0.6, 0.8) * t / _NormalTilingA * 2.0);
+                float2 uvB = WaterUV(xz, _NormalTilingB, float2(-0.8, 0.45) * t / _NormalTilingB);
                 float strength = _NormalStrength * distanceFade;
                 float3 a = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uvA), strength);
                 float3 b = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uvB), strength * 0.7);
@@ -304,8 +311,8 @@ Shader "AnimeSurfers/StylizedWater"
             half FoamPattern(float2 xz)
             {
                 float t = _WaterWaveTime * 0.05;
-                half a = SAMPLE_TEXTURE2D(_FoamTex, sampler_FoamTex, xz / _FoamTiling + float2(t, t * 0.6)).r;
-                half b = SAMPLE_TEXTURE2D(_FoamTex, sampler_FoamTex, xz / (_FoamTiling * 2.3) - float2(t * 0.7, t)).r;
+                half a = SAMPLE_TEXTURE2D(_FoamTex, sampler_FoamTex, WaterUV(xz, _FoamTiling, float2(t, t * 0.6))).r;
+                half b = SAMPLE_TEXTURE2D(_FoamTex, sampler_FoamTex, WaterUV(xz, _FoamTiling * 2.3, -float2(t * 0.7, t))).r;
                 return saturate(a * 0.6 + b * 0.6);
             }
 
@@ -348,16 +355,24 @@ Shader "AnimeSurfers/StylizedWater"
             {
                 float2 xz = input.positionWS.xz;
 
-                // Recompute the waves per pixel at the undisplaced grid position for crisp normals.
+                // Recompute the waves per pixel at the undisplaced grid position for crisp normals, minus the ones too
+                // short for the pixel.
+                float2 gridDx = ddx(input.gridXZ);
+                float2 gridDy = ddy(input.gridXZ);
                 float3 offset, tangent, binormal;
             #if defined(_WATER_LOW)
                 // Only the height of the offset is used below.
                 offset = float3(0, input.longWavesA.w, 0);
                 tangent = float3(1, 0, 0) + input.longWavesA.xyz;
                 binormal = float3(0, 0, 1) + input.longWavesB;
-                AddWaterWaves(input.gridXZ, WATER_LONG_WAVES, WATER_MAX_WAVES, offset, tangent, binormal);
+                float removedVariance = AddWaterWavesFiltered(input.gridXZ, gridDx, gridDy, WATER_LONG_WAVES,
+                    WATER_MAX_WAVES, offset, tangent, binormal);
             #else
-                EvaluateWaterWaves(input.gridXZ, offset, tangent, binormal);
+                offset = 0;
+                tangent = float3(1, 0, 0);
+                binormal = float3(0, 0, 1);
+                float removedVariance = AddWaterWavesFiltered(input.gridXZ, gridDx, gridDy, 0, WATER_MAX_WAVES, offset,
+                    tangent, binormal);
             #endif
                 float3 waveNormal = normalize(cross(binormal, tangent));
                 float3 waveTangent = normalize(tangent);
@@ -431,16 +446,23 @@ Shader "AnimeSurfers/StylizedWater"
 
                 half3 color = lerp(refracted + scatter, reflection, fresnel * _ReflectionStrength);
 
-                // Sun glints (GGX); stylized mode turns them into crisp sparkles.
+                // Sun glints (GGX), in float: half (true fp16 on mobile) can't resolve a lobe this sharp, rounds the
+                // denominator to 0 and returns inf/NaN that bloom spreads. The slopes of the waves filtered out above
+                // widen the lobe in their place, so far water shows a glitter path instead of sparkling noise.
                 float3 halfDir = normalize(lightDir + viewDirWS);
-                half nh = saturate(dot(normalWS, halfDir));
+                float nh = saturate(dot(normalWS, halfDir));
                 half nl = saturate(dot(normalWS, lightDir));
-                half a2 = _SunRoughness * _SunRoughness * _SunRoughness * _SunRoughness;
-                half dTerm = nh * nh * (a2 - 1.0) + 1.0;
-                half ggx = a2 / (PI * dTerm * dTerm);
+                float sunRoughness = _SunRoughness;
+                float baseA2 = sunRoughness * sunRoughness * sunRoughness * sunRoughness;
+                float a2 = baseA2 + removedVariance;
+                float dTerm = nh * nh * (a2 - 1.0) + 1.0;
+                float ggx = a2 / (PI * dTerm * dTerm);
                 half sunFresnel = 0.02 + 0.98 * pow(1.0 - saturate(dot(viewDirWS, halfDir)), 5.0);
-                half glint = min(ggx * sunFresnel * nl * _SunIntensity, 40.0);
-                glint = lerp(glint, step(0.6, glint) * 1.5, _Stylize);
+                float glint = min(ggx * sunFresnel * nl * _SunIntensity, 40.0);
+                // Stylized mode turns them into crisp sparkles, cut over about a pixel. Where the lobe was widened
+                // they fade back to the smooth glint: a cutoff there would paint the whole glitter path solid.
+                float sparkle = saturate((glint - 0.6) / max(fwidth(glint), 1e-3) + 0.5) * 1.5;
+                glint = lerp(glint, sparkle, _Stylize * sqrt(baseA2 / a2));
                 color += mainLight.color * glint * realtimeShadow;
 
                 // Foam: whitecaps where Gerstner waves compress, contact foam, and the board's wake.
@@ -454,6 +476,13 @@ Shader "AnimeSurfers/StylizedWater"
                 color = lerp(color, foamLit, foam);
 
                 color = MixFog(color, input.fogFactor);
+
+                // The far plane cuts the water just below the horizon, where the sky shows its horizon color. Fade
+                // into that color toward the far plane so no band shows there even with fog turned off. Height on
+                // screen above the horizon goes as 1 / depth, so the fade runs on far / depth; it falls off
+                // exponentially away from the far plane, so it only softens the horizon instead of hazing the water.
+                half farFade = exp(-6.0 * (_ProjectionParams.z / max(input.eyeDepth, 0.001) - 1.0));
+                color = lerp(color, _HorizonColor.rgb, farFade);
                 return half4(color, 1.0);
             }
             ENDHLSL

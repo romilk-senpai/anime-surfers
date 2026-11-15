@@ -26,6 +26,8 @@ namespace Game.Surf
 		[SerializeField] private float spinDrag = 1.5f;
 
 		[Header("Rider")]
+		[Tooltip("The board's meshes, which the rider carries under her arm on trains.")]
+		[SerializeField] private Transform model;
 		[SerializeField] private Transform rider;
 		[SerializeField, Range(0.2f, 1f)] private float slideRiderScale = 0.5f;
 		[SerializeField] private float riderScaleSharpness = 20f;
@@ -46,6 +48,9 @@ namespace Game.Surf
 		/// Raised at the end of every Update, paused frames included, once the board's transform is set for the frame.
 		/// </summary>
 		public event Action Placed;
+
+		/// <summary>The board's meshes, apart from the riders and effects on the board.</summary>
+		public Transform Model => model;
 
 		[Inject]
 		public void Construct(BoardSettings settings, IBoardState state, SurfPath path, IWaterSurface water,

@@ -150,3 +150,69 @@
     height: 24px;
     margin-right: 10px;
 }
+
+/* Character tiles under Shop: a slanted portrait per roster entry, name above; tap to pick. */
+.character {
+    flex-direction: row;
+    justify-content: center;
+    width: 340px;
+    margin-top: 20px;
+}
+
+.character-tile {
+    margin: 0 3px;
+    align-items: flex-start;
+}
+
+/* Name sits over the portrait, nudged right to follow the slant. */
+.character-tile__name {
+    font-size: 17px;
+    margin: 0 0 -2px 10px;
+    color: var(--paper);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: var(--ink);
+    text-shadow: 2px 2px 0 var(--ink);
+}
+
+.character-tile__frame {
+    width: 116px;
+    height: 45px;
+    --panel-fill: #000000;
+    --panel-border: #1C1B4D;
+    --panel-border-width: 3;
+    --panel-shadow: #1C1B4D;
+    --panel-shadow-x: 4;
+    --panel-shadow-y: 4;
+    --panel-skew: -14;
+}
+
+/* Inset by the frame's border; portraits are face crops at the frame's aspect, black shows through their transparent bits. Dimmed until selected. */
+.character-tile__portrait {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    --panel-skew: -14;
+    -unity-background-image-tint-color: #8C8CA8;
+}
+
+.character-tile:hover .character-tile__portrait,
+.character-tile:focus .character-tile__portrait {
+    -unity-background-image-tint-color: #D0D0E0;
+}
+
+.character-tile--selected .character-tile__portrait,
+.character-tile--selected:hover .character-tile__portrait {
+    -unity-background-image-tint-color: #FFFFFF;
+}
+
+.character-tile--selected .character-tile__frame {
+    --panel-shadow: #FF3D6E;
+    --panel-shadow-x: 6;
+    --panel-shadow-y: 6;
+}
+
+.character-tile--selected .character-tile__name {
+    color: var(--coin);
+}

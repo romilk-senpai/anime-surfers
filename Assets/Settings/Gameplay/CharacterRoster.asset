@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e27654e7c0acc014680c1cc7eb85aa47, type: 3}
+  m_Name: CharacterRoster
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.CharacterRoster
+  characters:
+  - id: yuzuha
+    displayName:
+      m_TableReference:
+        m_TableCollectionName: GUID:a8715cf6e2512dc42b823fa1c26222ca
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: character.yuzuha
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    portrait: {fileID: 2800000, guid: fac643e9e5bc445d9204f97629934975, type: 3}
+    rider:
+      m_AssetGUID: ba47cbb6928ad8f4cbf5841959c810a9
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  - id: alice
+    displayName:
+      m_TableReference:
+        m_TableCollectionName: GUID:a8715cf6e2512dc42b823fa1c26222ca
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: character.alice
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    portrait: {fileID: 2800000, guid: 00cdde3179984c809d9b8e0a7a06babb, type: 3}
+    rider:
+      m_AssetGUID: a73852ae78e1e4f40a741bd5e3aaa193
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+  references:
+    version: 2
+    RefIds: []

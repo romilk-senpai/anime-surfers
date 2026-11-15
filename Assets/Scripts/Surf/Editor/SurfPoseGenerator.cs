@@ -65,7 +65,11 @@ namespace Game.Surf.EditorTools
 		private const float ProneHeadReach = 0.55f;
 		private const float ProneTorsoHeight = 0.09f;
 		private const string RunnerControllerPath = "Assets/Animations/Miko.controller";
-		private const string ModelPath = "Assets/Models/Miko Ooka/Miko Ooka.fbx";
+		// Blendshape clips for the rider's face mesh.
+		private const string BlinkClipPath = "Assets/Animations/YuzuhaBlendShapes/Blink.anim";
+		private const string EyesCloseClipPath = "Assets/Animations/YuzuhaBlendShapes/EyesClose.anim";
+		// The rider the body heights and the prone placement are solved for.
+		private const string ModelPath = "Assets/Models/ukinami-yuzuha/source/Avatar_Female_Size02_YuzuhaSwimwear_UI.fbx";
 		// Fingers (the katana grip) and anything not listed below come from this clip.
 		private const string BasePosePath = "Assets/Animations/Locomotion/M_katana_Blade@Idle_ver_B.FBX";
 		private const float LoopDuration = 2f;
@@ -80,11 +84,11 @@ namespace Game.Surf.EditorTools
 			{ "Neck Nod Down-Up", 0f }, { "Neck Tilt Left-Right", 0f }, { "Neck Turn Left-Right", -0.6f },
 			{ "Head Nod Down-Up", 0.1f }, { "Head Tilt Left-Right", 0f }, { "Head Turn Left-Right", -1f },
 
-			// Wide crouch with the feet under the hips.
-			{ "Left Upper Leg Front-Back", -0.2f }, { "Left Upper Leg In-Out", 0.7f }, { "Left Upper Leg Twist In-Out", 0f },
+			// Wide crouch with the feet under the hips. Wider than 0.45 folds Yuzuha's skin sharply at the crotch.
+			{ "Left Upper Leg Front-Back", 0.15f }, { "Left Upper Leg In-Out", 0.45f }, { "Left Upper Leg Twist In-Out", 0f },
 			{ "Left Lower Leg Stretch", 0.1f }, { "Left Lower Leg Twist In-Out", 0f },
 			{ "Left Foot Up-Down", -0.3f }, { "Left Foot Twist In-Out", 0f }, { "Left Toes Up-Down", 0f },
-			{ "Right Upper Leg Front-Back", -0.2f }, { "Right Upper Leg In-Out", 0.7f }, { "Right Upper Leg Twist In-Out", 0f },
+			{ "Right Upper Leg Front-Back", 0.15f }, { "Right Upper Leg In-Out", 0.45f }, { "Right Upper Leg Twist In-Out", 0f },
 			{ "Right Lower Leg Stretch", 0.1f }, { "Right Lower Leg Twist In-Out", 0f },
 			{ "Right Foot Up-Down", -0.3f }, { "Right Foot Twist In-Out", 0f }, { "Right Toes Up-Down", 0f },
 
@@ -106,29 +110,30 @@ namespace Game.Surf.EditorTools
 			{ "Left Arm Down-Up", -0.06f }, { "Right Arm Down-Up", 0.05f }
 		};
 
-		// Slide: belly down along the board, head raised to look ahead, hands on the rails beside the chest, heels up.
+		// Slide: belly down along the board, head raised to look ahead, hands on the rails beside the chest, legs straight
+		// with the toes pointed at the tail.
 		// Spine Front-Back arches the back here, since the body is rotated to lie chest down.
 		private static readonly Dictionary<string, float> Prone = new Dictionary<string, float>
 		{
-			{ "Spine Front-Back", 0.35f }, { "Spine Left-Right", 0f }, { "Spine Twist Left-Right", 0f },
-			{ "Chest Front-Back", 0.3f }, { "Chest Left-Right", 0f }, { "Chest Twist Left-Right", 0f },
-			{ "UpperChest Front-Back", 0.2f }, { "UpperChest Left-Right", 0f }, { "UpperChest Twist Left-Right", 0f },
+			{ "Spine Front-Back", 0.15f }, { "Spine Left-Right", 0f }, { "Spine Twist Left-Right", 0f },
+			{ "Chest Front-Back", 0.15f }, { "Chest Left-Right", 0f }, { "Chest Twist Left-Right", 0f },
+			{ "UpperChest Front-Back", 0.1f }, { "UpperChest Left-Right", 0f }, { "UpperChest Twist Left-Right", 0f },
 			{ "Neck Nod Down-Up", 0.6f }, { "Neck Tilt Left-Right", 0f }, { "Neck Turn Left-Right", 0f },
-			{ "Head Nod Down-Up", 0.5f }, { "Head Tilt Left-Right", 0f }, { "Head Turn Left-Right", 0f },
+			{ "Head Nod Down-Up", 0.6f }, { "Head Tilt Left-Right", 0f }, { "Head Turn Left-Right", 0f },
 
-			{ "Left Upper Leg Front-Back", 0.6f }, { "Left Upper Leg In-Out", 0.15f }, { "Left Upper Leg Twist In-Out", 0f },
-			{ "Left Lower Leg Stretch", 0.6f }, { "Left Lower Leg Twist In-Out", 0f },
-			{ "Left Foot Up-Down", 0.3f }, { "Left Foot Twist In-Out", 0f }, { "Left Toes Up-Down", 0f },
-			{ "Right Upper Leg Front-Back", 0.6f }, { "Right Upper Leg In-Out", 0.15f }, { "Right Upper Leg Twist In-Out", 0f },
-			{ "Right Lower Leg Stretch", 0.6f }, { "Right Lower Leg Twist In-Out", 0f },
-			{ "Right Foot Up-Down", 0.3f }, { "Right Foot Twist In-Out", 0f }, { "Right Toes Up-Down", 0f },
+			{ "Left Upper Leg Front-Back", 0.6f }, { "Left Upper Leg In-Out", 0.05f }, { "Left Upper Leg Twist In-Out", 0f },
+			{ "Left Lower Leg Stretch", 0.95f }, { "Left Lower Leg Twist In-Out", 0f },
+			{ "Left Foot Up-Down", -0.5f }, { "Left Foot Twist In-Out", 0f }, { "Left Toes Up-Down", 0f },
+			{ "Right Upper Leg Front-Back", 0.6f }, { "Right Upper Leg In-Out", 0.05f }, { "Right Upper Leg Twist In-Out", 0f },
+			{ "Right Lower Leg Stretch", 0.95f }, { "Right Lower Leg Twist In-Out", 0f },
+			{ "Right Foot Up-Down", -0.5f }, { "Right Foot Twist In-Out", 0f }, { "Right Toes Up-Down", 0f },
 
 			{ "Left Shoulder Down-Up", 0f }, { "Left Shoulder Front-Back", 0f },
-			{ "Left Arm Down-Up", -0.3f }, { "Left Arm Front-Back", 0.5f }, { "Left Arm Twist In-Out", 0f },
-			{ "Left Forearm Stretch", 0.2f }, { "Left Forearm Twist In-Out", 0f },
+			{ "Left Arm Down-Up", -0.5f }, { "Left Arm Front-Back", 0.3f }, { "Left Arm Twist In-Out", 0f },
+			{ "Left Forearm Stretch", 0.4f }, { "Left Forearm Twist In-Out", 0f },
 			{ "Right Shoulder Down-Up", 0f }, { "Right Shoulder Front-Back", 0f },
-			{ "Right Arm Down-Up", -0.3f }, { "Right Arm Front-Back", 0.5f }, { "Right Arm Twist In-Out", 0f },
-			{ "Right Forearm Stretch", 0.2f }, { "Right Forearm Twist In-Out", 0f }
+			{ "Right Arm Down-Up", -0.5f }, { "Right Arm Front-Back", 0.3f }, { "Right Arm Twist In-Out", 0f },
+			{ "Right Forearm Stretch", 0.4f }, { "Right Forearm Twist In-Out", 0f }
 		};
 
 		private static readonly Regex IkGoalCurve = new Regex(@"^(Left|Right)(Foot|Hand)(T|Q)\.");
@@ -464,7 +469,7 @@ namespace Game.Surf.EditorTools
 			AddCrash(machine, AddClipState(machine, "CrashBarrier", CrashBarrierClipPath), CrashBarrierParameter);
 
 			AnimatorControllerLayer facial = controller.layers.FirstOrDefault(l => l.name == "Facial");
-			var eyesClose = AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Animations/MikoBlendShapes/EyesClose.anim");
+			var eyesClose = AssetDatabase.LoadAssetAtPath<AnimationClip>(EyesCloseClipPath);
 			if (facial != null && eyesClose != null)
 			{
 				AnimatorState closed = facial.stateMachine.AddState("EyesClose");
@@ -601,7 +606,7 @@ namespace Game.Surf.EditorTools
 			surf.iKOnFeet = false;
 			baseMachine.defaultState = surf;
 
-			// Keep blinking from the runner controller.
+			// Keep the runner controller's facial layer, blinking on the rider's face.
 			var runner = AssetDatabase.LoadAssetAtPath<AnimatorController>(RunnerControllerPath);
 			AnimatorControllerLayer runnerFacial = runner.layers.FirstOrDefault(l => l.name == "Facial");
 			ChildAnimatorState blink = runnerFacial?.stateMachine.states.FirstOrDefault(s => s.state.name == "Blink") ?? default;
@@ -611,7 +616,7 @@ namespace Game.Surf.EditorTools
 				var machine = new AnimatorStateMachine { name = "Facial", hideFlags = HideFlags.HideInHierarchy };
 				AssetDatabase.AddObjectToAsset(machine, controller);
 				AnimatorState state = machine.AddState("Blink");
-				state.motion = blink.state.motion;
+				state.motion = AssetDatabase.LoadAssetAtPath<AnimationClip>(BlinkClipPath);
 				machine.defaultState = state;
 
 				controller.AddLayer(new AnimatorControllerLayer

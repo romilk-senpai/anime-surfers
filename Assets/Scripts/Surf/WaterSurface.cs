@@ -47,6 +47,7 @@ namespace Game.Surf
 		private static readonly int BaseHeightId = Shader.PropertyToID("_WaterBaseHeight");
 		private static readonly int MeshBoundsId = Shader.PropertyToID("_WaterMeshBounds");
 		private static readonly int LodParamsId = Shader.PropertyToID("_WaterLodParams");
+		private static readonly int OriginId = Shader.PropertyToID("_WaterOrigin");
 		// Packed wave shapes by wavelength (z), longest first.
 		private static readonly IComparer<Vector4> LongestFirst =
 			Comparer<Vector4>.Create((a, b) => b.z.CompareTo(a.z));
@@ -268,9 +269,10 @@ namespace Game.Surf
 				float dz = wave.y;
 				float steepness = shape.x * fade;
 				float a = shape.y * fade;
-				float f = wave.z * (dx * x + dz * z) - wave.w * _time;
-				float s = Mathf.Sin(f);
-				float c = Mathf.Cos(f);
+				// In double: the arguments grow without bound over a run. The GPU measures them from an origin instead.
+				double f = wave.z * ((double)dx * x + (double)dz * z) - wave.w * (double)_time;
+				float s = (float)Math.Sin(f);
+				float c = (float)Math.Cos(f);
 
 				offset.x += dx * a * c;
 				offset.y += a * s;
@@ -343,6 +345,18 @@ namespace Game.Surf
 
 		private void PushGlobals()
 		{
+			// Each wave's phase at the mesh origin now, wrapped in double, so the shader's sines only see small
+			// arguments (see AddWaterWave in WaterWaves.hlsl).
+			Vector3 origin = transform.position;
+
+			for (int i = 0; i < MaxWaves; i++)
+			{
+				Vector4 wave = _packedWaves[i];
+				double phase = wave.z * ((double)wave.x * origin.x + (double)wave.y * origin.z) - wave.w * (double)_time;
+				_packedShapes[i].w = (float)(phase - Math.Floor(phase / (2.0 * Math.PI)) * (2.0 * Math.PI));
+			}
+
+			Shader.SetGlobalVector(OriginId, new Vector4(origin.x, origin.z, 0f, 0f));
 			Shader.SetGlobalVectorArray(WavesId, _packedWaves);
 			Shader.SetGlobalVectorArray(ShapesId, _packedShapes);
 			Shader.SetGlobalFloat(TimeId, _time);

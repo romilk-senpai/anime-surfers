@@ -76,6 +76,8 @@
                     </ui:Label>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <!-- CharacterPickerPresenter adds a tile per roster character. -->
+            <ui:VisualElement name="character-picker" class="character" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <e:InkPanel class="controls panel" picking-mode="Ignore">

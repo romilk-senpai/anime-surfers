@@ -17,6 +17,7 @@ namespace Game.Core
 			builder.Register<IVolumeSettings, VolumeSettings>(Lifetime.Singleton);
 			builder.Register<ILanguageSettings, LanguageSettings>(Lifetime.Singleton);
 			builder.Register<IGraphicsSettings, GraphicsSettings>(Lifetime.Singleton);
+			builder.Register<ICharacterSelection, CharacterSelection>(Lifetime.Singleton);
 			builder.RegisterEntryPoint<GraphicsApplier>();
 			builder.Register<GameSession>(Lifetime.Singleton);
 		}

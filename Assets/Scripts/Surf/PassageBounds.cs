@@ -8,8 +8,8 @@ namespace Game.Surf
 {
 	/// <summary>
 	/// Visualization of the passage limits: buoys along both edges of the path joined by a sagging rope, drawn with GPU
-	/// instancing. Nothing casts shadows. Near buoys use the prefab's model with an outline; beyond that a low-poly
-	/// stand-in without one, and far ahead only every other pair is drawn.
+	/// instancing. Nothing casts shadows or has an outline. Near buoys use the prefab's model; beyond that a low-poly
+	/// stand-in, and far ahead only every other pair is drawn.
 	/// </summary>
 	public class PassageBounds : MonoBehaviour
 	{
@@ -26,8 +26,7 @@ namespace Game.Surf
 		[SerializeField] private float spawnAhead = 140f;
 		[Tooltip("Past the camera, which trails the board.")]
 		[SerializeField] private float despawnBehind = 8f;
-		[Tooltip("Up to this distance ahead buoys use the prefab's model and are outlined; beyond it a low-poly " +
-		         "stand-in without outline.")]
+		[Tooltip("Up to this distance ahead buoys use the prefab's model; beyond it a low-poly stand-in.")]
 		[SerializeField] private float detailDistance = 15f;
 		[Tooltip("Beyond this distance ahead only every other pair is drawn.")]
 		[SerializeField] private float sparseDistance = 60f;
@@ -38,8 +37,7 @@ namespace Game.Surf
 		[SerializeField] private float postHeight;
 
 		[Header("Rope")]
-		[Tooltip("Rope between neighboring buoys, drawn without shadows; its material should have the outline pass " +
-		         "disabled. None leaves the rope out.")]
+		[Tooltip("Rope between neighboring buoys, drawn without shadows or outline. None leaves the rope out.")]
 		[SerializeField] private Material ropeMaterial;
 		[Tooltip("Height of the rope ends above the buoy pivot.")]
 		[SerializeField] private float ropeHeight = 0.1f;
@@ -52,7 +50,6 @@ namespace Game.Surf
 		private Mesh _mesh;
 		private Mesh _farMesh;
 		private RenderParams[] _renderParams;
-		private RenderParams _farRenderParams;
 		private Matrix4x4[] _ropeMatrices = new Matrix4x4[128];
 		private Mesh _ropeMesh;
 		private RenderParams _ropeRenderParams;
@@ -85,12 +82,10 @@ namespace Game.Surf
 					layer = gameObject.layer,
 					shadowCastingMode = ShadowCastingMode.Off,
 					receiveShadows = true,
-					renderingLayerMask = ToonOutlineFeature.RenderingLayer(true)
+					// The outline is barely visible on something this small and isn't worth its draws.
+					renderingLayerMask = ToonOutlineFeature.RenderingLayer(false)
 				};
 			}
-
-			_farRenderParams = _renderParams[0];
-			_farRenderParams.renderingLayerMask = ToonOutlineFeature.RenderingLayer(false);
 
 			if (ropeMaterial != null)
 			{
@@ -99,7 +94,8 @@ namespace Game.Surf
 				{
 					layer = gameObject.layer,
 					shadowCastingMode = ShadowCastingMode.Off,
-					receiveShadows = true
+					receiveShadows = true,
+					renderingLayerMask = ToonOutlineFeature.RenderingLayer(false)
 				};
 			}
 		}
@@ -196,7 +192,7 @@ namespace Game.Surf
 
 			if (count > nearCount)
 			{
-				Graphics.RenderMeshInstanced(_farRenderParams, _farMesh, 0, _matrices, count - nearCount, nearCount);
+				Graphics.RenderMeshInstanced(_renderParams[0], _farMesh, 0, _matrices, count - nearCount, nearCount);
 			}
 		}
 

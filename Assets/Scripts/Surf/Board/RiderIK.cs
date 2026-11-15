@@ -87,7 +87,8 @@ namespace Game.Surf
 		[SerializeField] private float slideBlendTime = 0.12f;
 
 		[Header("Run")]
-		[Tooltip("The board's meshes, moved from under the feet to under the arm while running on trains.")]
+		[Tooltip("The board's meshes, moved from under the feet to under the arm while running on trains. Defaults to " +
+		         "the BoardView's model, since a rider spawned from a prefab can't reference the scene.")]
 		[SerializeField] private Transform carriedBoard;
 		[Tooltip("Seconds to switch between riding and running; matches the Surf/Run transitions.")]
 		[SerializeField] private float runBlendTime = 0.15f;
@@ -196,6 +197,11 @@ namespace Game.Surf
 			_boardView = board.GetComponentInParent<BoardView>();
 			_boardView.Placed += OnBoardPlaced;
 
+			if (carriedBoard == null)
+			{
+				carriedBoard = _boardView.Model;
+			}
+
 			_stanceRotation = transform.localRotation;
 			_stancePosition = transform.localPosition;
 
@@ -221,8 +227,14 @@ namespace Game.Surf
 			}
 		}
 
+		// The board's events can still reach a rider RiderSpawner is replacing; it is inactive by then.
 		private void OnJumped()
 		{
+			if (!isActiveAndEnabled)
+			{
+				return;
+			}
+
 			_crouchVelocity += jumpPop;
 
 			if (_state.IsRunning)
@@ -235,12 +247,22 @@ namespace Game.Surf
 
 		private void OnSideHit(int side)
 		{
+			if (!isActiveAndEnabled)
+			{
+				return;
+			}
+
 			_leanVelocity -= side * sideHitKick;
 			_animator.SetTrigger(side < 0 ? HitLeftParameter : HitRightParameter);
 		}
 
 		private void OnCrashed()
 		{
+			if (!isActiveAndEnabled)
+			{
+				return;
+			}
+
 			_crashed = true;
 			_animator.SetTrigger(_state.CrashKind == CrashKind.Barrier ? CrashBarrierParameter : CrashWallParameter);
 
@@ -258,7 +280,7 @@ namespace Game.Surf
 		// Right after BoardView places the board, so the upright running pose doesn't lag a frame behind it.
 		private void OnBoardPlaced()
 		{
-			if (_state == null)
+			if (_state == null || !isActiveAndEnabled)
 			{
 				return;
 			}
@@ -372,7 +394,10 @@ namespace Game.Surf
 				Vector3 origin = transform.position;
 				float yaw = Vector3.SignedAngle(-transform.right, board.forward, up);
 				Quaternion align = Quaternion.AngleAxis(yaw * prone, up);
-				_animator.bodyPosition = origin + align * (_animator.bodyPosition - origin);
+				// The stance may stand her off the board's center line to keep her feet on the deck; lying down she
+				// centers on it.
+				Vector3 offCenter = Vector3.Project(origin - board.position, board.right);
+				_animator.bodyPosition = origin + align * (_animator.bodyPosition - origin) - offCenter * prone;
 				_animator.bodyRotation = align * _animator.bodyRotation;
 			}
 
@@ -452,6 +477,32 @@ namespace Game.Surf
 			_ground = ground;
 			Quaternion facing = Quaternion.Slerp(_crashStartRotation, _crashFacing, Mathf.SmoothStep(0f, 1f, _crash));
 			transform.SetPositionAndRotation(_fallPosition + Vector3.up * _rootDrop, facing * _rootTurn);
+		}
+
+		/// <summary>
+		/// How fast the air streams past her, in m/s: against the way the board travels. Only the forward speed, since
+		/// the wave bob and lane changes would flap anything that follows it. Still once she has crashed.
+		/// </summary>
+		public Vector3 Airflow => _state == null || _crashed ? Vector3.zero : -_state.PathForward * _state.Speed;
+
+		/// <summary>Lifts a point that sinks into the deck back onto it, while the point is over the board.</summary>
+		public Vector3 KeepAboveDeck(Vector3 point, float clearance)
+		{
+			if (_settings == null || board == null)
+			{
+				return point;
+			}
+
+			Vector3 onBoard = board.InverseTransformPoint(point);
+			float deck = _stancePosition.y + clearance;
+			if (onBoard.y >= deck || Mathf.Abs(onBoard.x) > _settings.BoardWidth * 0.5f ||
+			    Mathf.Abs(onBoard.z) > _settings.BoardLength * 0.5f)
+			{
+				return point;
+			}
+
+			onBoard.y = deck;
+			return board.TransformPoint(onBoard);
 		}
 
 		/// <summary>

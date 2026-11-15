@@ -30,7 +30,7 @@ namespace Game.Core
 			_distance = (ViewDistance)PlayerPrefs.GetInt(DistanceKey,
 				(int)(mobile ? ViewDistance.Near : ViewDistance.Medium));
 			_shadows = (ShadowDetail)PlayerPrefs.GetInt(ShadowsKey, (int)(mobile ? ShadowDetail.Low : ShadowDetail.High));
-			_fog = PlayerPrefs.GetInt(FogKey, 1) != 0;
+			_fog = PlayerPrefs.GetInt(FogKey, 0) != 0;
 		}
 
 		public GraphicsQuality Quality

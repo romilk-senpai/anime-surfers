@@ -234,6 +234,14 @@ MonoBehaviour:
     m_Localized: Barriers with a gap underneath can be slid under. Swipe down just before you reach one.
     m_Metadata:
       m_Items: []
+  - m_Id: 5324166332932096
+    m_Localized: Yuzuha
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166383263744
+    m_Localized: Alice
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

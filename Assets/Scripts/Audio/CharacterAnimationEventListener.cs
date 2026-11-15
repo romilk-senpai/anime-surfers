@@ -44,8 +44,8 @@ namespace Game.Audio
 		// Covers landings the animator has no landing for, like coming down on a train from a jump off the water.
 		private void OnLandedOnSurface(float impactSpeed)
 		{
-			// After a crash the board lands without her.
-			if (impactSpeed >= minLandingSpeed && !_board.IsCrashed)
+			// After a crash the board lands without her; a rider RiderSpawner is replacing isn't on it.
+			if (impactSpeed >= minLandingSpeed && !_board.IsCrashed && isActiveAndEnabled)
 			{
 				PlayLand();
 			}

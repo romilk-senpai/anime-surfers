@@ -7,9 +7,13 @@
 // A wave's geometry fades out between these many mesh cells per wavelength.
 #define WATER_MIN_WAVE_CELLS 3.0
 #define WATER_FULL_WAVE_CELLS 6.0
+// A wave's shading fades out between these many pixels per wavelength, before it aliases into noise.
+#define WATER_MIN_WAVE_PIXELS 2.0
+#define WATER_FULL_WAVE_PIXELS 4.0
 
 float4 _WaterGerstnerWaves[WATER_MAX_WAVES];  // xy = direction, z = wave number (2pi / wavelength), w = angular frequency
-float4 _WaterGerstnerShapes[WATER_MAX_WAVES]; // x = steepness, y = amplitude, z = wavelength
+float4 _WaterGerstnerShapes[WATER_MAX_WAVES]; // x = steepness, y = amplitude, z = wavelength, w = phase at _WaterOrigin now
+float4 _WaterOrigin;     // xy = xz the phases are measured from, near the board
 float _WaterWaveTime;
 float _WaterAmplitudeSum;
 float _WaterBaseHeight;
@@ -44,7 +48,9 @@ void AddWaterWave(int i, float2 xz, float scale, inout float3 offset, inout floa
     float steepness = shape.x * scale;
     float a = shape.y * scale;
     float s, c;
-    sincos(wave.z * dot(d, xz) - wave.w * _WaterWaveTime, s, c);
+    // Measured from the origin with the clock folded into the phase (wrapped on the CPU): world positions and the
+    // clock grow without bound over a run, and mobile GPUs lose sin/cos precision on large arguments.
+    sincos(wave.z * dot(d, xz - _WaterOrigin.xy) + shape.w, s, c);
 
     offset += float3(d.x * a * c, a * s, d.y * a * c);
     tangent += float3(-d.x * d.x * steepness * s, d.x * steepness * c, -d.x * d.y * steepness * s);
@@ -61,15 +67,32 @@ void AddWaterWaves(float2 xz, int first, int end, inout float3 offset, inout flo
     }
 }
 
-// Every wave at full strength, for shading.
+// Adds waves [first, end) for shading a pixel whose footprint spans gridDx / gridDy (its xz derivatives): waves too
+// short to resolve along their direction fade out instead of aliasing. Returns the slope variance they leave out, to
+// widen the highlights in their place.
 // offset: displacement of the grid point at xz.
 // tangent / binormal: unnormalized surface derivatives along x / z; normal = normalize(cross(binormal, tangent)).
-void EvaluateWaterWaves(float2 xz, out float3 offset, out float3 tangent, out float3 binormal)
+float AddWaterWavesFiltered(float2 xz, float2 gridDx, float2 gridDy, int first, int end, inout float3 offset,
+    inout float3 tangent, inout float3 binormal)
 {
-    offset = 0.0;
-    tangent = float3(1.0, 0.0, 0.0);
-    binormal = float3(0.0, 0.0, 1.0);
-    AddWaterWaves(xz, 0, WATER_MAX_WAVES, offset, tangent, binormal);
+    float variance = 0.0;
+
+    [unroll]
+    for (int i = first; i < end; i++)
+    {
+        float2 d = _WaterGerstnerWaves[i].xy;
+        float4 shape = _WaterGerstnerShapes[i];
+        float footprint = max(abs(dot(d, gridDx)), abs(dot(d, gridDy)));
+        float pixels = shape.z / max(footprint, 1e-5);
+        float fade = saturate((pixels - WATER_MIN_WAVE_PIXELS) / (WATER_FULL_WAVE_PIXELS - WATER_MIN_WAVE_PIXELS));
+        AddWaterWave(i, xz, fade, offset, tangent, binormal);
+
+        // A sine's slope amplitude is its steepness, so its mean squared slope is half that squared.
+        float removed = shape.x * (1.0 - fade);
+        variance += 0.5 * removed * removed;
+    }
+
+    return variance;
 }
 
 // Displacement of the mesh vertex at xz: waves too short for the cells there are flattened, so the geometry never

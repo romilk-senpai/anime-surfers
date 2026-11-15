@@ -68,6 +68,8 @@
                         </ui:Label>
                     </ui:VisualElement>
                 </ui:Button>
+                <!-- CharacterPickerPresenter adds a tile per roster character. -->
+                <ui:VisualElement name="character-picker" class="character" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
