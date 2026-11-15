@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Core;
+using Game.Online;
 using UnityEngine;
 
 namespace Game.Surf
@@ -31,11 +32,15 @@ namespace Game.Surf
 		private readonly ISceneLoader _sceneLoader;
 		private readonly IPlayerProgress _progress;
 		private readonly GameSession _session;
+		private readonly RunClock _clock;
+		private readonly ILeaderboard _leaderboard;
 		private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
 		private bool _leaving;
+		private float _runStartTime;
 
 		public RunStateMachine(RunSettings settings, BoardState board, BoardMovement movement, RunState run,
-			IInputService input, ISceneLoader sceneLoader, IPlayerProgress progress, GameSession session)
+			IInputService input, ISceneLoader sceneLoader, IPlayerProgress progress, GameSession session, RunClock clock,
+			ILeaderboard leaderboard)
 		{
 			_settings = settings;
 			_board = board;
@@ -45,6 +50,8 @@ namespace Game.Surf
 			_sceneLoader = sceneLoader;
 			_progress = progress;
 			_session = session;
+			_clock = clock;
+			_leaderboard = leaderboard;
 		}
 
 		public RunPhase Phase { get; private set; }
@@ -151,6 +158,7 @@ namespace Game.Surf
 			SetPhase(RunPhase.Running);
 			_input.Enable();
 			_movement.StartRunning();
+			_runStartTime = _clock.Time;
 		}
 
 		private void OnCrashed()
@@ -162,6 +170,8 @@ namespace Game.Surf
 		{
 			SetPhase(RunPhase.Crashed);
 			_input.Disable();
+			// Simulation time, so the pause menu doesn't count; the leaderboard checks the score against it.
+			float duration = _clock.Time - _runStartTime;
 
 			if (await Wait(_settings.ResultsDelay))
 			{
@@ -169,6 +179,7 @@ namespace Game.Surf
 			}
 
 			_run.IsNewBest = _progress.RecordRun(_run.Score, _run.Coins);
+			_leaderboard.ReportRun(_run.Score, duration);
 			SetPhase(RunPhase.Results);
 		}
 

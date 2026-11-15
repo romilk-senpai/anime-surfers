@@ -1,3 +1,4 @@
+using Game.Online;
 using VContainer;
 using VContainer.Unity;
 
@@ -20,6 +21,7 @@ namespace Game.Core
 			builder.Register<ICharacterSelection, CharacterSelection>(Lifetime.Singleton);
 			builder.RegisterEntryPoint<GraphicsApplier>();
 			builder.Register<GameSession>(Lifetime.Singleton);
+			builder.RegisterEntryPoint<Leaderboard>().As<ILeaderboard>();
 		}
 	}
 }

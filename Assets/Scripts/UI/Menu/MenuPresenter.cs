@@ -8,8 +8,8 @@ using VContainer.Unity;
 namespace Game.UI
 {
 	/// <summary>
-	/// Main menu over the floating board: best score, total coins, Surf, sound toggle and the shop and settings
-	/// entries.
+	/// Main menu over the floating board: best score, total coins, Surf, sound toggle and the shop, settings and
+	/// leaderboard entries.
 	/// </summary>
 	public sealed class MenuPresenter : IScreen, IStartable, IDisposable
 	{
@@ -21,6 +21,7 @@ namespace Game.UI
 		private readonly IVolumeSettings _volume;
 		private readonly SettingsPresenter _settings;
 		private readonly ShopPresenter _shop;
+		private readonly LeaderboardPresenter _leaderboard;
 		private readonly ScreenStack _screens;
 		private readonly GameUi _ui;
 
@@ -28,19 +29,21 @@ namespace Game.UI
 		private Button _surfButton;
 		private Button _settingsButton;
 		private Button _shopButton;
+		private Button _leaderboardButton;
 		private Label _totalCoins;
 		private Button _soundButton;
 		private VisualElement _soundIcon;
 		private IVisualElementScheduledItem _titlePulse;
 
 		public MenuPresenter(IRunFlow runFlow, IPlayerProgress progress, IVolumeSettings volume,
-			SettingsPresenter settings, ShopPresenter shop, ScreenStack screens, GameUi ui)
+			SettingsPresenter settings, ShopPresenter shop, LeaderboardPresenter leaderboard, ScreenStack screens, GameUi ui)
 		{
 			_runFlow = runFlow;
 			_progress = progress;
 			_volume = volume;
 			_settings = settings;
 			_shop = shop;
+			_leaderboard = leaderboard;
 			_screens = screens;
 			_ui = ui;
 		}
@@ -49,6 +52,7 @@ namespace Game.UI
 		{
 			_volume.Changed += UpdateSoundIcon;
 			_shop.Closed += OnShopClosed;
+			_leaderboard.Closed += OnLeaderboardClosed;
 			_runFlow.PhaseChanged += OnPhaseChanged;
 			OnPhaseChanged(_runFlow.Phase);
 			_ui.RegisterReloadCallback(Bind);
@@ -58,6 +62,7 @@ namespace Game.UI
 		{
 			_volume.Changed -= UpdateSoundIcon;
 			_shop.Closed -= OnShopClosed;
+			_leaderboard.Closed -= OnLeaderboardClosed;
 			_runFlow.PhaseChanged -= OnPhaseChanged;
 			_ui.UnregisterReloadCallback(Bind);
 			Unbind();
@@ -80,6 +85,7 @@ namespace Game.UI
 			_surfButton = _screen.Q<Button>("surf-button");
 			_settingsButton = _screen.Q<Button>("settings-button");
 			_shopButton = _screen.Q<Button>("shop-button");
+			_leaderboardButton = _screen.Q<Button>("leaderboard-button");
 			_totalCoins = _screen.Q<Label>("total-coins");
 			_soundButton = _screen.Q<Button>("sound-button");
 			_soundIcon = _screen.Q("sound-icon");
@@ -91,6 +97,7 @@ namespace Game.UI
 			_surfButton.clicked += _runFlow.StartRun;
 			_settingsButton.clicked += _settings.Open;
 			_shopButton.clicked += _shop.Open;
+			_leaderboardButton.clicked += _leaderboard.Open;
 			_soundButton.clicked += ToggleSound;
 
 			UpdateSoundIcon();
@@ -107,6 +114,7 @@ namespace Game.UI
 			_surfButton.clicked -= _runFlow.StartRun;
 			_settingsButton.clicked -= _settings.Open;
 			_shopButton.clicked -= _shop.Open;
+			_leaderboardButton.clicked -= _leaderboard.Open;
 			_soundButton.clicked -= ToggleSound;
 			_titlePulse.Pause();
 		}
@@ -149,6 +157,14 @@ namespace Game.UI
 			if (_runFlow.Phase == RunPhase.Menu)
 			{
 				_shopButton.Focus();
+			}
+		}
+
+		private void OnLeaderboardClosed()
+		{
+			if (_runFlow.Phase == RunPhase.Menu)
+			{
+				_leaderboardButton.Focus();
 			}
 		}
 

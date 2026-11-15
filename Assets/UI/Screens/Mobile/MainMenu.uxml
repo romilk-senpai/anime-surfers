@@ -24,6 +24,9 @@
                     <ui:Button name="sound-button" class="round-button">
                         <ui:VisualElement name="sound-icon" class="icon icon--speaker round-button__icon" picking-mode="Ignore" />
                     </ui:Button>
+                    <ui:Button name="leaderboard-button" class="round-button">
+                        <ui:VisualElement class="icon icon--trophy round-button__icon" picking-mode="Ignore" />
+                    </ui:Button>
                 </ui:VisualElement>
                 <ui:VisualElement class="menu__stats" picking-mode="Ignore">
                     <e:InkPanel class="stat panel panel--slant">

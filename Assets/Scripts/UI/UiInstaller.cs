@@ -15,6 +15,7 @@ namespace Game.UI
 			builder.RegisterEntryPoint<GraphicsPresenter>().AsSelf();
 			builder.RegisterEntryPoint<SettingsPresenter>().AsSelf();
 			builder.RegisterEntryPoint<ShopPresenter>().AsSelf();
+			builder.RegisterEntryPoint<LeaderboardPresenter>().AsSelf();
 			builder.RegisterEntryPoint<MenuPresenter>();
 			builder.RegisterEntryPoint<CharacterPickerPresenter>();
 			builder.RegisterEntryPoint<PausePresenter>();

@@ -1,0 +1,60 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:l="UnityEngine.Localization" xmlns:e="Game.UI.Elements">
+    <ui:VisualElement class="overlay">
+        <ui:Style src="../Styles/Modal.uss" />
+        <ui:Style src="../Styles/Leaderboard.uss" />
+        <e:InkPanel class="modal settings-modal leaderboard-modal">
+            <ui:Label class="modal__title leaderboard__title display">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="leaderboard.title" />
+                </Bindings>
+            </ui:Label>
+
+            <!-- LeaderboardPresenter shows one of these; neither in builds that can't sign in. -->
+            <ui:VisualElement name="signed-in" class="leaderboard__account" picking-mode="Ignore">
+                <ui:Label class="leaderboard__account-label">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="leaderboard.signed_in_as" />
+                    </Bindings>
+                </ui:Label>
+                <ui:Label name="player-name" class="leaderboard__player display" text="" />
+            </ui:VisualElement>
+            <ui:VisualElement name="signed-out" class="leaderboard__account">
+                <ui:Label class="leaderboard__hint">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="leaderboard.sign_in_hint" />
+                    </Bindings>
+                </ui:Label>
+                <ui:Button name="sign-in-button" class="secondary leaderboard__sign-in">
+                    <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                    <ui:VisualElement class="button-content" picking-mode="Ignore">
+                        <ui:Label class="secondary__label" picking-mode="Ignore">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="leaderboard.sign_in" />
+                            </Bindings>
+                        </ui:Label>
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:Label name="popup-blocked" class="leaderboard__notice">
+                <Bindings>
+                    <l:LocalizedString property="text" table="UI" entry="leaderboard.popup_blocked" />
+                </Bindings>
+            </ui:Label>
+
+            <!-- LeaderboardPresenter adds a row per entry; the status line covers loading, errors and an empty board. -->
+            <ui:ScrollView name="rows" class="leaderboard__rows" />
+            <ui:Label name="status" class="leaderboard__status" text="" />
+
+            <ui:Button name="done-button" class="cta modal__cta">
+                <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                <ui:VisualElement class="button-content" picking-mode="Ignore">
+                    <ui:Label class="cta__label modal__cta-label display" picking-mode="Ignore">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="settings.done" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:Button>
+        </e:InkPanel>
+    </ui:VisualElement>
+</ui:UXML>

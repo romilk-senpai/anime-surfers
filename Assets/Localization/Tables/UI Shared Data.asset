@@ -239,6 +239,46 @@ MonoBehaviour:
     m_Key: character.alice
     m_Metadata:
       m_Items: []
+  - m_Id: 5324166400000000
+    m_Key: leaderboard.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000001
+    m_Key: leaderboard.signed_in_as
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000002
+    m_Key: leaderboard.sign_in
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000003
+    m_Key: leaderboard.sign_in_hint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000004
+    m_Key: leaderboard.popup_blocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000005
+    m_Key: leaderboard.loading
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000006
+    m_Key: leaderboard.error
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000007
+    m_Key: leaderboard.empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000008
+    m_Key: gameover.rank
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5324166400000009
+    m_Key: gameover.sign_in
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

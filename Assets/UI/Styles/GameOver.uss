@@ -127,6 +127,43 @@
     margin-right: 8px;
 }
 
+/* Online rank or the sign-in prompt, under the stats. */
+.results__online {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 16px;
+}
+
+.results__rank {
+    flex-direction: row;
+    align-items: center;
+}
+
+.results__rank-value {
+    margin-left: 12px;
+    font-size: 28px;
+}
+
+.results__sign-in-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    -unity-background-image-tint-color: var(--ink);
+}
+
+.results__notice {
+    display: none;
+    width: 100%;
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--alarm);
+}
+
+.results__notice--shown {
+    display: flex;
+}
+
 .results__surf-again {
     margin: 26px 8px 0;
 }

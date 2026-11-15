@@ -266,6 +266,7 @@ Button:focus {
 .icon--shield { background-image: url("../Icons/shield.svg"); }
 .icon--super-jump { background-image: url("../Icons/super-jump.svg"); }
 .icon--nitro { background-image: url("../Icons/nitro.svg"); }
+.icon--trophy { background-image: url("../Icons/trophy.svg"); }
 
 /* The coin keeps its own colours; the on-ink variant has a white rim for dark panels. */
 .coin-icon {

@@ -57,6 +57,35 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
+                <!-- Online leaderboard: the rank once the run is sent, or a sign-in prompt. GameOverPresenter hides it in
+                     builds that can't sign in. -->
+                <ui:VisualElement name="online" class="results__online">
+                    <ui:VisualElement name="online-rank" class="results__rank" picking-mode="Ignore">
+                        <ui:Label class="results__stat-label">
+                            <Bindings>
+                                <l:LocalizedString property="text" table="UI" entry="gameover.rank" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:Label name="rank" class="results__rank-value display" text="" />
+                    </ui:VisualElement>
+                    <ui:Button name="sign-in-button" class="secondary results__sign-in">
+                        <e:InkPanel class="button-shape" picking-mode="Ignore" />
+                        <ui:VisualElement class="button-content" picking-mode="Ignore">
+                            <ui:VisualElement class="icon icon--trophy results__sign-in-icon" picking-mode="Ignore" />
+                            <ui:Label class="secondary__label" picking-mode="Ignore">
+                                <Bindings>
+                                    <l:LocalizedString property="text" table="UI" entry="gameover.sign_in" />
+                                </Bindings>
+                            </ui:Label>
+                        </ui:VisualElement>
+                    </ui:Button>
+                    <ui:Label name="popup-blocked" class="results__notice">
+                        <Bindings>
+                            <l:LocalizedString property="text" table="UI" entry="leaderboard.popup_blocked" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+
                 <ui:Button name="surf-again-button" class="cta results__surf-again">
                     <e:InkPanel class="button-shape" picking-mode="Ignore" />
                     <ui:VisualElement class="button-content" picking-mode="Ignore">

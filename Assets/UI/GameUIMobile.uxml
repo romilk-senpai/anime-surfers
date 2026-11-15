@@ -6,6 +6,7 @@
     <ui:Template name="Settings" src="Screens/Settings.uxml" />
     <ui:Template name="Graphics" src="Screens/Graphics.uxml" />
     <ui:Template name="Shop" src="Screens/Shop.uxml" />
+    <ui:Template name="Leaderboard" src="Screens/Leaderboard.uxml" />
     <ui:VisualElement name="game-ui" class="game-ui" picking-mode="Ignore">
         <ui:Style src="Styles/Common.uss" />
         <ui:Instance template="Hud" name="hud" class="screen" picking-mode="Ignore" />
@@ -15,5 +16,6 @@
         <ui:Instance template="Settings" name="settings" class="screen" />
         <ui:Instance template="Graphics" name="graphics" class="screen" />
         <ui:Instance template="Shop" name="shop" class="screen" />
+        <ui:Instance template="Leaderboard" name="leaderboard" class="screen" />
     </ui:VisualElement>
 </ui:UXML>

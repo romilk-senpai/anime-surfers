@@ -1,0 +1,95 @@
+/* Online leaderboard: the top of the board from playnesc.com, the signed-in player's row highlighted. */
+
+.leaderboard__title {
+    margin-bottom: 14px;
+}
+
+.leaderboard__account {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.leaderboard__account-label {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+/* Player names are typed on the site and can be Cyrillic; the display font has the full set. */
+.leaderboard__player {
+    font-size: 20px;
+}
+
+.leaderboard__hint {
+    flex-shrink: 1;
+    font-size: 15px;
+    white-space: normal;
+    margin-right: 16px;
+}
+
+.leaderboard__sign-in {
+    flex-shrink: 0;
+}
+
+.leaderboard__notice {
+    display: none;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: var(--alarm);
+    -unity-text-align: middle-center;
+}
+
+.leaderboard__notice--shown {
+    display: flex;
+}
+
+.leaderboard__rows {
+    height: 330px;
+    margin-bottom: 8px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-color: rgba(28, 27, 77, 0.12);
+}
+
+.leaderboard__status {
+    margin-bottom: 18px;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+}
+
+.leaderboard-row {
+    flex-direction: row;
+    align-items: center;
+    height: 44px;
+    padding: 0 12px;
+    border-bottom-width: 2px;
+    border-color: rgba(28, 27, 77, 0.12);
+}
+
+.leaderboard-row--me {
+    background-color: var(--coin);
+}
+
+.leaderboard-row__rank {
+    width: 56px;
+    font-size: 18px;
+}
+
+.leaderboard-row__name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 18px;
+}
+
+.leaderboard-row__score {
+    margin-left: 12px;
+    font-size: 20px;
+    -unity-text-align: middle-right;
+}
+
+.portrait .leaderboard__rows {
+    height: 420px;
+}

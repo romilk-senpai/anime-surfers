@@ -1,12 +1,15 @@
 """Cuts the UI fonts down to the characters the game shows, so the WebGL build doesn't ship full CJK fonts.
 
 The full fonts live in Assets/UI/Fonts/Source~ (Unity ignores folders ending in ~). Each subset keeps ASCII,
-Latin-1, common punctuation and arrows, all kana, and every character found in the localization tables, the UXML
-and USS files and the C# scripts. Re-run after adding text with new kanji:
+Latin-1, Cyrillic, common punctuation and arrows, all kana, and every character found in the localization tables,
+the UXML and USS files and the C# scripts. Re-run after adding text with new kanji:
 
     python tools/subset_fonts.py
 
-Then reimport the fonts in Unity; their dynamic FontAssets fill their atlases at runtime.
+Then reimport the fonts in Unity; their dynamic FontAssets fill their atlases at runtime. If the editor was open,
+also run Clear Dynamic Data (Inspector ⋮ menu) on each *-SDF FontAsset before saving the project: a new subset
+renumbers the glyphs, and the atlases already in memory are keyed by the old numbers, so text comes out with the
+wrong letters ("Anime" as "Anine"). Saving first would write those stale tables into the FontAssets.
 """
 import glob
 import io
@@ -22,6 +25,7 @@ OUTPUT_DIR = os.path.join(ROOT, 'Assets', 'UI', 'Fonts')
 RANGES = [
     (0x20, 0x7E),      # ASCII
     (0xA0, 0xFF),      # Latin-1
+    (0x400, 0x4FF),    # Cyrillic: leaderboard names come from playnesc.com, where many are Russian or Ukrainian
     (0x2010, 0x2044),  # General punctuation
     (0x2190, 0x21FF),  # Arrows
     (0x3000, 0x30FF),  # CJK punctuation, hiragana, katakana
@@ -63,6 +67,7 @@ def main():
         subset.save_font(font, target, options)
         print(f'{os.path.basename(source)}: {os.path.getsize(source) // 1024} KB -> {os.path.getsize(target) // 1024} KB')
     print(f'{len(chars)} characters kept')
+    print('Unity open? Clear Dynamic Data on each *-SDF FontAsset before saving (see the top of this file).')
 
 
 if __name__ == '__main__':
