@@ -11,6 +11,7 @@ namespace Game.Surf
 		public const int WeatherStream = 3;
 		public const int ObstacleStream = 4;
 		public const int PickupStream = 5;
+		public const int WaveStream = 6;
 
 		public RunRandom(PathSettings settings)
 		{

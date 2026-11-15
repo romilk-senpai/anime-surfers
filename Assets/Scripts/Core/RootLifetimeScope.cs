@@ -1,4 +1,5 @@
 using Game.Online;
+using Game.Surf;
 using VContainer;
 using VContainer.Unity;
 
@@ -19,6 +20,7 @@ namespace Game.Core
 			builder.Register<ILanguageSettings, LanguageSettings>(Lifetime.Singleton);
 			builder.Register<IGraphicsSettings, GraphicsSettings>(Lifetime.Singleton);
 			builder.Register<ICharacterSelection, CharacterSelection>(Lifetime.Singleton);
+			builder.Register<RiderCache>(Lifetime.Singleton);
 			builder.RegisterEntryPoint<GraphicsApplier>();
 			builder.Register<GameSession>(Lifetime.Singleton);
 			builder.RegisterEntryPoint<Leaderboard>().As<ILeaderboard>();

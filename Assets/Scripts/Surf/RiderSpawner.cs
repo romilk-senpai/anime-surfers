@@ -10,25 +10,28 @@ namespace Game.Surf
 	/// <summary>
 	/// Puts the selected character's rider on the board. Riders are Addressable prefabs from the
 	/// <see cref="CharacterRoster"/>, loaded when picked and released when replaced, so only the one riding is in memory.
+	/// The loaded prefab is kept in the <see cref="RiderCache"/>, so after a scene reload she is placed right away.
 	/// Each prefab's root transform is her stance on the board.
 	/// </summary>
 	public class RiderSpawner : MonoBehaviour
 	{
 		private ICharacterSelection _selection;
 		private CharacterRoster _roster;
+		private RiderCache _cache;
 		private IObjectResolver _resolver;
 
 		private GameObject _rider;
 		private string _riderId;
-		private AsyncOperationHandle<GameObject> _riderHandle;
 		// The character being loaded; a newer pick makes the older load release itself when it finishes.
 		private string _loadingId;
 
 		[Inject]
-		public void Construct(ICharacterSelection selection, CharacterRoster roster, IObjectResolver resolver)
+		public void Construct(ICharacterSelection selection, CharacterRoster roster, RiderCache cache,
+			IObjectResolver resolver)
 		{
 			_selection = selection;
 			_roster = roster;
+			_cache = cache;
 			_resolver = resolver;
 			_selection.Changed += Spawn;
 			Spawn();
@@ -36,15 +39,10 @@ namespace Game.Surf
 
 		private void OnDestroy()
 		{
+			// The rider goes with the scene; her prefab stays loaded in the cache for the next one.
 			if (_selection != null)
 			{
 				_selection.Changed -= Spawn;
-			}
-
-			// The rider goes with the scene; the prefab is released here.
-			if (_riderHandle.IsValid())
-			{
-				Addressables.Release(_riderHandle);
 			}
 		}
 
@@ -61,6 +59,14 @@ namespace Game.Surf
 			{
 				// Back to the one riding: drop a newer pick that is still loading.
 				_loadingId = null;
+				return;
+			}
+
+			if (id == _cache.Id)
+			{
+				// The scene was reloaded and she is still loaded.
+				_loadingId = null;
+				Place(id, _cache.Prefab);
 				return;
 			}
 
@@ -93,22 +99,29 @@ namespace Game.Surf
 				return;
 			}
 
+			RemoveRider();
+			// Releases the previous rider's prefab, now that nothing uses it.
+			_cache.Set(id, handle);
+			Place(id, handle.Result);
+		}
+
+		private void Place(string id, GameObject prefab)
+		{
+			RemoveRider();
+			_riderId = id;
+			_rider = _resolver.Instantiate(prefab, transform);
+			_rider.name = prefab.name;
+		}
+
+		private void RemoveRider()
+		{
 			if (_rider != null)
 			{
 				// Destroy waits for the end of the frame; inactive, she already ignores the board's events.
 				_rider.SetActive(false);
 				Destroy(_rider);
+				_rider = null;
 			}
-
-			if (_riderHandle.IsValid())
-			{
-				Addressables.Release(_riderHandle);
-			}
-
-			_riderHandle = handle;
-			_riderId = id;
-			_rider = _resolver.Instantiate(handle.Result, transform);
-			_rider.name = handle.Result.name;
 		}
 	}
 }

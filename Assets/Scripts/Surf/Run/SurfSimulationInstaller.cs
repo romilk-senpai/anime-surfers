@@ -5,7 +5,7 @@ using VContainer.Unity;
 namespace Game.Surf
 {
 	/// <summary>
-	/// The run's plain C# simulation: the clock and randomness, the path, obstacle and pickup fields and their
+	/// The run's plain C# simulation: the clock and randomness, the big wave schedule, the path, obstacle and pickup fields and their
 	/// generators, the board systems, the run flow and the weather. Needs the settings assets, an
 	/// <see cref="IWaterHeight"/> and an <see cref="IWaterSurface"/> registered next to it.
 	/// </summary>
@@ -24,6 +24,7 @@ namespace Game.Surf
 			builder.Register<RunRandom>(Lifetime.Singleton);
 			builder.Register<BoardInput>(Lifetime.Singleton);
 
+			builder.Register<WaveSchedule>(Lifetime.Singleton);
 			builder.Register<SurfPath>(Lifetime.Singleton).WithParameter(_pathOrigin);
 			builder.Register<ObstacleField>(Lifetime.Singleton);
 			builder.Register<PickupField>(Lifetime.Singleton);
