@@ -29,6 +29,8 @@ namespace Game.Surf
 		[Tooltip("The board's meshes, which the rider carries under her arm on trains.")]
 		[SerializeField] private Transform model;
 		[SerializeField] private Transform rider;
+		[Tooltip("The glider, pivoted on its grip, which the rider holds up while gliding.")]
+		[SerializeField] private Transform glider;
 		[SerializeField, Range(0.2f, 1f)] private float slideRiderScale = 0.5f;
 		[SerializeField] private float riderScaleSharpness = 20f;
 
@@ -51,6 +53,9 @@ namespace Game.Surf
 
 		/// <summary>The board's meshes, apart from the riders and effects on the board.</summary>
 		public Transform Model => model;
+
+		/// <summary>The glider, which <see cref="RiderIK"/> unfolds above the rider while gliding.</summary>
+		public Transform Glider => glider;
 
 		[Inject]
 		public void Construct(BoardSettings settings, IBoardState state, SurfPath path, IWaterSurface water,

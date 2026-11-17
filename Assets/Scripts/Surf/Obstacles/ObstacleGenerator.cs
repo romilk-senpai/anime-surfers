@@ -7,7 +7,9 @@ namespace Game.Surf
 	/// <summary>
 	/// Generates rows of obstacles ahead of the board, one obstacle (or nothing) per lane, always leaving a passable
 	/// lane: trains (rows of moored boats) block the lane but can be ridden on, climbable trains have a ramp in front,
-	/// and barriers (shimenawa ropes) are jumped over or slid under. Obstacles left behind are removed.
+	/// and barriers (shimenawa ropes) are jumped over or slid under. Big waves are left clear, and so is where a glider
+	/// flight comes down: rows already generated there at take-off, far out past the fog, are removed. Obstacles left
+	/// behind are removed.
 	/// </summary>
 	public sealed class ObstacleGenerator
 	{
@@ -15,18 +17,24 @@ namespace Game.Surf
 		private readonly BoardSettings _boardSettings;
 		private readonly BoardState _board;
 		private readonly ObstacleField _field;
+		private readonly WaveSchedule _waves;
+		private readonly GlideFlight _glide;
 		private readonly IGraphicsSettings _graphics;
 		private readonly RandomStream _random;
 		/// <summary>The obstacle in each lane of the row being generated; null for none.</summary>
 		private readonly ObstacleKind?[] _row = new ObstacleKind?[8];
+		/// <summary>The current glider flight's landing has been cleared of rows generated before it.</summary>
+		private bool _landingCleared;
 
 		public ObstacleGenerator(ObstacleSettings settings, BoardSettings boardSettings, BoardState board,
-			ObstacleField field, IGraphicsSettings graphics, RunRandom random)
+			ObstacleField field, WaveSchedule waves, GlideFlight glide, IGraphicsSettings graphics, RunRandom random)
 		{
 			_settings = settings;
 			_boardSettings = boardSettings;
 			_board = board;
 			_field = field;
+			_waves = waves;
+			_glide = glide;
 			_graphics = graphics;
 			_random = random.Stream(RunRandom.ObstacleStream);
 			GeneratedUntil = settings.FirstRowDistance;
@@ -38,9 +46,23 @@ namespace Game.Surf
 		public void Tick()
 		{
 			float distance = _board.Distance;
+			ClearLanding();
 
 			while (GeneratedUntil < distance + _settings.SpawnAhead * _graphics.DistanceScale)
 			{
+				// No row may reach into a wave.
+				if (_waves.TryGetClearOverlap(GeneratedUntil, GeneratedUntil + LongestRow(), out WaveEvent wave))
+				{
+					GeneratedUntil = wave.ClearEnd;
+					continue;
+				}
+
+				if (_glide.TryGetLandingClear(GeneratedUntil, GeneratedUntil + LongestRow(), out float landingClearEnd))
+				{
+					GeneratedUntil = landingClearEnd;
+					continue;
+				}
+
 				GeneratedUntil = GenerateRow(GeneratedUntil) + _random.Range(_settings.RowGap.x, _settings.RowGap.y);
 			}
 
@@ -49,6 +71,35 @@ namespace Game.Surf
 			for (int i = boxes.Count - 1; i >= 0; i--)
 			{
 				if (boxes[i].End < distance - _settings.DespawnBehind)
+				{
+					_field.Remove(boxes[i]);
+				}
+			}
+		}
+
+		/// <summary>
+		/// At take-off, removes rows already generated where the flight comes down. A flight covers more ground than the
+		/// fog hides, so they go unseen.
+		/// </summary>
+		private void ClearLanding()
+		{
+			if (!_glide.IsActive)
+			{
+				_landingCleared = false;
+				return;
+			}
+
+			if (_landingCleared)
+			{
+				return;
+			}
+
+			_landingCleared = true;
+			IReadOnlyList<ObstacleBox> boxes = _field.Boxes;
+
+			for (int i = boxes.Count - 1; i >= 0; i--)
+			{
+				if (_glide.TryGetLandingClear(boxes[i].Start, boxes[i].End, out _))
 				{
 					_field.Remove(boxes[i]);
 				}
@@ -102,6 +153,13 @@ namespace Game.Surf
 			}
 
 			return end;
+		}
+
+		private float LongestRow()
+		{
+			int cars = Mathf.Max(_settings.TrainCars.y, _settings.ClimbableTrainCars.y);
+			float train = _settings.RampLength + cars * _settings.CarLength + (cars - 1) * _settings.CarGap;
+			return Mathf.Max(train, _settings.BarrierDepth);
 		}
 
 		/// <summary>An obstacle for one lane, or null for none.</summary>

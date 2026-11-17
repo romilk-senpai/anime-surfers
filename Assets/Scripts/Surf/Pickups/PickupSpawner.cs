@@ -10,6 +10,7 @@ namespace Game.Surf
 	/// Draws the pickups of the <see cref="PickupField"/> that <see cref="PickupGenerator"/> places. Coins are drawn
 	/// with GPU instancing: the model with an outline up close, a low-poly stand-in without one beyond. Power-up visuals
 	/// are pooled per kind, kinds without a model are cubes, and their outlines are only drawn once they come close.
+	/// Coins that appear in view, like the sky coins of a glider flight taking off, scale in.
 	/// </summary>
 	public class PickupSpawner : MonoBehaviour
 	{
@@ -28,6 +29,9 @@ namespace Game.Surf
 		[Tooltip("Up to this distance ahead coins use the model with an outline; beyond it a low-poly stand-in " +
 		         "without one.")]
 		[SerializeField] private float coinDetailDistance = 15f;
+		[Tooltip("Coins that appear closer ahead than this scale in instead of popping up.")]
+		[SerializeField] private float coinPopInDistance = 60f;
+		[SerializeField, Min(0.01f)] private float coinPopInTime = 0.3f;
 		[Tooltip("Power-up models, upright and centered on their pivot. A cube is used for any left empty.")]
 		[SerializeField] private GameObject magnetPrefab;
 		[SerializeField] private GameObject multiplierPrefab;
@@ -35,6 +39,7 @@ namespace Game.Surf
 		[SerializeField] private GameObject shieldPrefab;
 		[SerializeField] private GameObject superJumpPrefab;
 		[SerializeField] private GameObject coinDoublerPrefab;
+		[SerializeField] private GameObject gliderPrefab;
 		[Tooltip("Size of the placeholder cube.")]
 		[SerializeField] private Vector3 powerUpSize = new Vector3(0.8f, 0.8f, 0.8f);
 		[SerializeField] private float spinSpeed = 180f;
@@ -44,9 +49,12 @@ namespace Game.Surf
 		[SerializeField] private Material shieldMaterial;
 		[SerializeField] private Material superJumpMaterial;
 		[SerializeField] private Material coinDoublerMaterial;
+		[SerializeField] private Material gliderMaterial;
 
 		/// <summary>Power-ups only; coins are drawn instanced.</summary>
 		private readonly Dictionary<Pickup, View> _spawned = new Dictionary<Pickup, View>();
+		/// <summary>Coins scaling in, with the time they appeared.</summary>
+		private readonly Dictionary<Pickup, float> _appearing = new Dictionary<Pickup, float>();
 		private readonly ObjectPool<View>[] _views =
 			new ObjectPool<View>[System.Enum.GetValues(typeof(PickupKind)).Length];
 
@@ -144,7 +152,7 @@ namespace Game.Surf
 				{
 					// Stand the flat coin up so it faces the rider.
 					rotation *= Quaternion.Euler(90f, 0f, 0f);
-					Matrix4x4 matrix = Matrix4x4.TRS(position, rotation, Vector3.one) * _coinModel;
+					Matrix4x4 matrix = Matrix4x4.TRS(position, rotation, Vector3.one * PopInScale(pickup)) * _coinModel;
 
 					if (ahead < coinDetailDistance)
 					{
@@ -180,6 +188,23 @@ namespace Game.Surf
 			}
 		}
 
+		private float PopInScale(Pickup pickup)
+		{
+			if (!_appearing.TryGetValue(pickup, out float appeared))
+			{
+				return 1f;
+			}
+
+			float t = (Time.time - appeared) / coinPopInTime;
+			if (t >= 1f)
+			{
+				_appearing.Remove(pickup);
+				return 1f;
+			}
+
+			return Mathf.SmoothStep(0f, 1f, t);
+		}
+
 		private static void AddInstance(ref Matrix4x4[] instances, ref int count, Matrix4x4 matrix)
 		{
 			if (count == instances.Length)
@@ -192,6 +217,11 @@ namespace Game.Surf
 
 		private void OnAdded(Pickup pickup)
 		{
+			if (pickup.Kind == PickupKind.Coin && pickup.Distance - _board.Distance < coinPopInDistance)
+			{
+				_appearing[pickup] = Time.time;
+			}
+
 			if (pickup.Kind != PickupKind.Coin)
 			{
 				_spawned.Add(pickup, _views[(int)pickup.Kind].Get());
@@ -200,6 +230,8 @@ namespace Game.Surf
 
 		private void OnRemoved(Pickup pickup)
 		{
+			_appearing.Remove(pickup);
+
 			if (_spawned.Remove(pickup, out View view))
 			{
 				_views[(int)pickup.Kind].Release(view);
@@ -223,6 +255,7 @@ namespace Game.Surf
 				PickupKind.Shield => shieldPrefab,
 				PickupKind.SuperJump => superJumpPrefab,
 				PickupKind.CoinDoubler => coinDoublerPrefab,
+				PickupKind.Glider => gliderPrefab,
 				_ => null
 			};
 
@@ -246,6 +279,7 @@ namespace Game.Surf
 				PickupKind.Shield => shieldMaterial,
 				PickupKind.SuperJump => superJumpMaterial,
 				PickupKind.CoinDoubler => coinDoublerMaterial,
+				PickupKind.Glider => gliderMaterial,
 				_ => null
 			};
 

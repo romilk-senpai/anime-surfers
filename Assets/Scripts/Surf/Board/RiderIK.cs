@@ -10,6 +10,11 @@ namespace Game.Surf
 	/// While sliding the animator lies Miko down on the board and these reactions fade out.
 	/// On trains she steps off and runs upright, carrying the board under her right arm, and jumps, rolls and dodges
 	/// with the runner animations. Heading for the water in the air she takes the surf stance again to land on the board.
+	/// On the glider she hangs from it facing ahead, her left hand up on its grip and the board under her right arm
+	/// as on trains, and the glider unfolds above her and banks into lane changes. Hanging from the grip she swings
+	/// like a pendulum: sideways behind lane changes and back on the climb, her legs swinging after her body and
+	/// dangling. When the flight ends the glider is gone at once and she drops to the water, taking the surf stance on
+	/// the way down. Through the flight and the fall, her tails stream in the air rushing past.
 	/// Bouncing off an obstacle's side she flinches away from it. On a crash she turns to the obstacle, lets go of the
 	/// board and is knocked back off it into the water, moved by the crash animation's root motion. After a wall she
 	/// sinks.
@@ -35,7 +40,9 @@ namespace Game.Surf
 		private const float DeckTolerance = 0.1f;
 
 		private static readonly int SlidingParameter = Animator.StringToHash("Sliding");
+		private static readonly int BarrelParameter = Animator.StringToHash("Barrel");
 		private static readonly int RunningParameter = Animator.StringToHash("Running");
+		private static readonly int GlidingParameter = Animator.StringToHash("Gliding");
 		private static readonly int JumpParameter = Animator.StringToHash("Jump");
 		private static readonly int GroundedParameter = Animator.StringToHash("Grounded");
 		private static readonly int DodgeLeftParameter = Animator.StringToHash("DodgeLeft");
@@ -99,6 +106,46 @@ namespace Game.Surf
 		[Tooltip("Where the right hand holds the board, in the board's space.")]
 		[SerializeField] private Vector3 carryGrip = new Vector3(0.12f, -0.08f, 0.1f);
 
+		[Header("Glide")]
+		[Tooltip("The glider, pivoted on its grip. Defaults to the BoardView's, since a rider spawned from a prefab " +
+		         "can't reference the scene.")]
+		[SerializeField] private Transform glider;
+		[Tooltip("Seconds to unfold the glider and turn to hang from it, and back for the landing.")]
+		[SerializeField] private float glideBlendTime = 0.3f;
+		[Tooltip("Direction from the left shoulder up to the grip, in Miko's space (x = right, y = up, z = forward).")]
+		[SerializeField] private Vector3 gliderReachDirection = new Vector3(-0.15f, 1f, 0.05f);
+		[Tooltip("How far the arm reaches up to the grip, as a share of its length; below 1 keeps the elbow soft.")]
+		[SerializeField, Range(0.5f, 1f)] private float gliderReach = 0.97f;
+		[Tooltip("From the wrist to the grip bar in the palm.")]
+		[SerializeField] private float gliderPalm = 0.07f;
+		[Tooltip("Nose-up pitch of the glider, in degrees.")]
+		[SerializeField] private float gliderPitch = 8f;
+		[Tooltip("Glider bank in degrees per unit of carve.")]
+		[SerializeField] private float gliderBank = 30f;
+		[Tooltip("Sideways swing under the grip, in degrees per unit of carve; she trails behind lane changes.")]
+		[SerializeField] private float glideSwingAngle = 35f;
+		[Tooltip("Swing back on the climb and forward on the descent, in degrees per m/s of vertical speed.")]
+		[SerializeField] private float glidePitchAngle = 1.5f;
+		[SerializeField] private float glidePitchLimit = 18f;
+		[Tooltip("Lower than the lean spring and lightly damped, so the swing overshoots and settles like a pendulum.")]
+		[SerializeField] private float glideSwingStiffness = 25f;
+		[SerializeField] private float glideSwingDamping = 3f;
+		[Tooltip("How much the legs follow their IK while hanging, against the glide pose.")]
+		[SerializeField, Range(0f, 1f)] private float glideLegWeight = 0.8f;
+		[Tooltip("How far the feet hang from the hips, as a share of the leg's length; below 1 bends the knees.")]
+		[SerializeField, Range(0.5f, 1f)] private float glideLegReach = 0.92f;
+		[Tooltip("Legs swing back from straight down, in degrees: left, right.")]
+		[SerializeField] private Vector2 glideLegTrail = new Vector2(12f, -6f);
+		[Tooltip("Softer than the body's swing, so the legs swing after it.")]
+		[SerializeField] private float glideLegStiffness = 12f;
+		[SerializeField] private float glideLegDamping = 2f;
+		[Tooltip("Alternating dangle of the legs back and forth, in degrees.")]
+		[SerializeField] private float glideLegKick = 10f;
+		[SerializeField] private float glideLegKickRate = 0.7f;
+		[Tooltip("Gusts in the air streaming past her tails in flight: sideways speed in m/s, and how often.")]
+		[SerializeField] private float glideFlutter = 3f;
+		[SerializeField] private float glideFlutterRate = 1.3f;
+
 		[Header("Hit")]
 		[Tooltip("Lean speed away from an obstacle's side when bouncing off it, in units of carve per second.")]
 		[SerializeField] private float sideHitKick = 4f;
@@ -129,6 +176,7 @@ namespace Game.Surf
 		private IBoardState _state;
 		private BoardSettings _settings;
 		private IWaterSurface _water;
+		private BarrelRide _barrel;
 		private Animator _animator;
 		private BoardView _boardView;
 
@@ -142,6 +190,31 @@ namespace Game.Surf
 		private float _air;
 		private float _slide;
 		private float _run;
+		private float _glide;
+		private float _swing;
+		private float _swingVelocity;
+		private float _pitch;
+		private float _pitchVelocity;
+		private float _legSwing;
+		private float _legSwingVelocity;
+		private float _legPitch;
+		private float _legPitchVelocity;
+		/// <summary>From the glider's take-off until she lands on the water again.</summary>
+		private bool _flying;
+		/// <summary>The hang's swing about the grip, which the carried board follows too.</summary>
+		private Quaternion _hangSwing = Quaternion.identity;
+		private float _armLength;
+		private float _legLength;
+		/// <summary>Left shoulder and hips in body space, read from last frame's pose.</summary>
+		private Vector3 _shoulder;
+		private Vector3 _leftHip;
+		private Vector3 _rightHip;
+		private bool _hasShoulder;
+		/// <summary>Where she last held the grip, relative to her; the swing eases out about it as she lets go.</summary>
+		private Vector3 _lastGrip;
+		/// <summary>Body pose at the end of last frame's IK, relative to the rider, to read the shoulder against.</summary>
+		private Vector3 _lastBodyPosition;
+		private Quaternion _lastBodyRotation = Quaternion.identity;
 		private float _roll;
 		private int _lastLane = -1;
 		private bool _wasGrounded = true;
@@ -173,11 +246,12 @@ namespace Game.Surf
 		public event Action BodyPlaced;
 
 		[Inject]
-		public void Construct(IBoardState state, BoardSettings settings, IWaterSurface water)
+		public void Construct(IBoardState state, BoardSettings settings, IWaterSurface water, BarrelRide barrel)
 		{
 			_state = state;
 			_settings = settings;
 			_water = water;
+			_barrel = barrel;
 			_state.Jumped += OnJumped;
 			_state.SideHit += OnSideHit;
 			_state.Crashed += OnCrashed;
@@ -200,6 +274,16 @@ namespace Game.Surf
 			if (carriedBoard == null)
 			{
 				carriedBoard = _boardView.Model;
+			}
+
+			if (glider == null)
+			{
+				glider = _boardView.Glider;
+			}
+
+			if (glider != null)
+			{
+				glider.gameObject.SetActive(false);
 			}
 
 			_stanceRotation = transform.localRotation;
@@ -264,7 +348,8 @@ namespace Game.Surf
 			}
 
 			_crashed = true;
-			_animator.SetTrigger(_state.CrashKind == CrashKind.Barrier ? CrashBarrierParameter : CrashWallParameter);
+			// Wiped out by a wave, she's knocked back off the board like by a barrier.
+			_animator.SetTrigger(_state.CrashKind == CrashKind.Wall ? CrashWallParameter : CrashBarrierParameter);
 
 			// From here on she moves on her own while the board stays behind.
 			transform.SetParent(board.parent, true);
@@ -309,12 +394,23 @@ namespace Game.Surf
 
 			bool sliding = _state.IsSliding;
 			_animator.SetBool(SlidingParameter, sliding);
+			// Crouches as the board drops in, and stays down through the barrel.
+			_animator.SetBool(BarrelParameter, _barrel.LocksControls);
 			_slide = Mathf.MoveTowards(_slide, sliding ? 1f : 0f, dt / slideBlendTime);
 
 			bool running = _state.IsRunning;
 			_animator.SetBool(RunningParameter, running);
 			_animator.SetBool(GroundedParameter, grounded);
 			_run = Mathf.MoveTowards(_run, running ? 1f : 0f, dt / runBlendTime);
+			_animator.SetBool(GlidingParameter, _state.IsGliding);
+			_glide = Mathf.MoveTowards(_glide, _state.IsGliding ? 1f : 0f, dt / glideBlendTime);
+			float pitchTarget = Mathf.Clamp(_state.VerticalVelocity * glidePitchAngle, -glidePitchLimit, glidePitchLimit);
+			Spring(ref _swing, ref _swingVelocity, -_state.Carve * glideSwingAngle * _glide, glideSwingStiffness,
+				glideSwingDamping, dt);
+			Spring(ref _pitch, ref _pitchVelocity, pitchTarget * _glide, glideSwingStiffness, glideSwingDamping, dt);
+			Spring(ref _legSwing, ref _legSwingVelocity, _swing, glideLegStiffness, glideLegDamping, dt);
+			Spring(ref _legPitch, ref _legPitchVelocity, _pitch, glideLegStiffness, glideLegDamping, dt);
+			_flying = _state.IsGliding || _flying && !grounded;
 			_roll = Mathf.MoveTowards(_roll, sliding && running ? 1f : 0f, dt / slideBlendTime);
 
 			if (!running)
@@ -334,10 +430,11 @@ namespace Game.Surf
 
 			_lastLane = lane;
 
-			// Turn from the sideways stance to face down the train, upright on ramps and through the board's roll.
+			// Turn from the sideways stance to face down the train or the flight, upright on ramps and through the
+			// board's roll.
 			Quaternion upright = Quaternion.LookRotation(Vector3.ProjectOnPlane(board.forward, Vector3.up), Vector3.up);
 			transform.localRotation = Quaternion.Slerp(_stanceRotation,
-				Quaternion.Inverse(transform.parent.rotation) * upright, _run);
+				Quaternion.Inverse(transform.parent.rotation) * upright, Upright);
 
 			// Deepest tuck at the apex, legs reaching down again for the landing.
 			float jumpSpeed = Mathf.Sqrt(2f * _settings.Gravity * _settings.JumpHeight);
@@ -376,7 +473,7 @@ namespace Game.Surf
 			Vector3 pivot = board.TransformPoint((_leftFoot.Position + _rightFoot.Position) * 0.5f);
 			// Everything below fades out as she lets go of the board in a crash.
 			float hold = 1f - _crash;
-			float stand = (1f - _slide) * (1f - _run) * hold;
+			float stand = (1f - _slide) * (1f - Upright) * hold;
 
 			// Lean toward the side the board moves to and turn the body into the move, pivoting over the feet.
 			Quaternion lean = Quaternion.AngleAxis(-_lean * leanAngle * stand, board.forward) *
@@ -388,7 +485,7 @@ namespace Game.Surf
 
 			// The prone pose lies along Miko's left, which the stance yaw turns a few degrees off the board's axis.
 			// On trains the slide is a roll instead, already facing ahead.
-			float prone = _slide * (1f - _run) * hold;
+			float prone = _slide * (1f - Upright) * hold;
 			if (prone > 0f)
 			{
 				Vector3 origin = transform.position;
@@ -420,11 +517,18 @@ namespace Game.Surf
 				_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0f);
 			}
 
+			HangFromGlider();
 			CarryBoard();
 
 			_animator.SetLookAtWeight(lookWeight * hold, 0f, 0.8f, 1f, 0.5f);
 			_animator.SetLookAtPosition(board.position + _state.PathForward * lookAhead + Vector3.up * lookHeight);
+
+			_lastBodyPosition = transform.InverseTransformPoint(_animator.bodyPosition);
+			_lastBodyRotation = Quaternion.Inverse(transform.rotation) * _animator.bodyRotation;
 		}
+
+		/// <summary>Turned to face ahead with the board under the arm: running on a train or hanging from the glider.</summary>
+		private float Upright => Mathf.Max(_run, _glide);
 
 		/// <summary>The crash animation's root motion, applied on top of the fall in <see cref="UpdateCrash"/>.</summary>
 		private void OnAnimatorMove()
@@ -446,7 +550,7 @@ namespace Game.Surf
 		{
 			_crash = Mathf.MoveTowards(_crash, 1f, dt / crashBlendTime);
 			_crashTime += dt;
-			if (_state.CrashKind == CrashKind.Wall && _crashTime > drownDelay)
+			if (_state.CrashKind != CrashKind.Barrier && _crashTime > drownDelay)
 			{
 				_drown += drownSpeed * dt;
 			}
@@ -483,12 +587,32 @@ namespace Game.Surf
 		/// How fast the air streams past her, in m/s: against the way the board travels. Only the forward speed, since
 		/// the wave bob and lane changes would flap anything that follows it. Still once she has crashed.
 		/// </summary>
-		public Vector3 Airflow => _state == null || _crashed ? Vector3.zero : -_state.PathForward * _state.Speed;
+		public Vector3 Airflow
+		{
+			get
+			{
+				if (_state == null || _crashed)
+				{
+					return Vector3.zero;
+				}
+
+				Vector3 air = -_state.PathForward * _state.Speed;
+				if (!_flying)
+				{
+					return air;
+				}
+
+				// In flight the climb and the fall stream the air past her too, and it gusts.
+				float gust = Mathf.PerlinNoise(Time.time * glideFlutterRate, 0f) * 2f - 1f;
+				return air - Vector3.up * _state.VerticalVelocity + _state.PathRight * (gust * glideFlutter);
+			}
+		}
 
 		/// <summary>Lifts a point that sinks into the deck back onto it, while the point is over the board.</summary>
 		public Vector3 KeepAboveDeck(Vector3 point, float clearance)
 		{
-			if (_settings == null || board == null)
+			// In flight the board is under her arm.
+			if (_settings == null || board == null || _flying)
 			{
 				return point;
 			}
@@ -570,7 +694,7 @@ namespace Game.Surf
 		{
 			Vector3 position = pivot + lean * (board.TransformPoint(hand.Position) - pivot) + offset;
 			PinLimb(hand, position, lean * board.rotation * hand.Rotation,
-				_air * (1f - _slide) * (1f - _run) * (1f - _crash));
+				_air * (1f - _slide) * (1f - Upright) * (1f - _crash));
 		}
 
 		/// <summary>Swings the board from under the feet to her side, following the body, with the right hand on it.</summary>
@@ -582,24 +706,145 @@ namespace Game.Surf
 			}
 
 			// Dropped in a crash.
-			if (_run <= 0f || _crashed)
+			float carry = Upright;
+			if (carry <= 0f || _crashed)
 			{
 				carriedBoard.SetLocalPositionAndRotation(_boardRestPosition, _boardRestRotation);
 				return;
 			}
 
-			// Level with her heading, even through the roll, where it only follows the body up and down.
-			Quaternion facing = transform.rotation;
+			// Level with her heading, even through the roll, where it only follows the body up and down. Hanging from
+			// the glider it swings with her.
+			Quaternion facing = _hangSwing * transform.rotation;
 			Vector3 carryPosition = _animator.bodyPosition + facing * carryOffset;
 			Quaternion held = facing * Quaternion.Euler(carryRotation);
 			carriedBoard.SetPositionAndRotation(
-				Vector3.Lerp(board.TransformPoint(_boardRestPosition), carryPosition, _run),
-				Quaternion.Slerp(board.rotation * _boardRestRotation, held, _run));
+				Vector3.Lerp(board.TransformPoint(_boardRestPosition), carryPosition, carry),
+				Quaternion.Slerp(board.rotation * _boardRestRotation, held, carry));
 
 			// Position only: the hand keeps the animation's grip. Let go while rolling, which needs the arm.
-			_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, _run * (1f - _roll));
+			_animator.SetIKPositionWeight(AvatarIKGoal.RightHand, carry * (1f - _roll));
 			_animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0f);
 			_animator.SetIKPosition(AvatarIKGoal.RightHand, carriedBoard.TransformPoint(carryGrip));
+		}
+
+		/// <summary>
+		/// Unfolds the glider above her, banking into lane changes, with the grip where her left arm reaches straight up
+		/// from the shoulder, and swings the body under it. Placed for the unswung body, so the swing about the grip
+		/// keeps it in reach.
+		/// </summary>
+		private void HangFromGlider()
+		{
+			_hangSwing = Quaternion.identity;
+
+			if (glider == null)
+			{
+				return;
+			}
+
+			// Unfolds as she takes off, but is gone at once when the flight ends.
+			bool shown = _state.IsGliding && !_crashed;
+			if (glider.gameObject.activeSelf != shown)
+			{
+				glider.gameObject.SetActive(shown);
+			}
+
+			if (!shown)
+			{
+				_hasShoulder = false;
+
+				// Let go, the swing eases out instead of snapping the body straight under the grip.
+				if (_glide > 0f && !_crashed)
+				{
+					Swing(transform.TransformPoint(_lastGrip), transform.rotation);
+				}
+
+				return;
+			}
+
+			_shoulder = ReadBodyPoint(HumanBodyBones.LeftUpperArm, _shoulder);
+			_leftHip = ReadBodyPoint(HumanBodyBones.LeftUpperLeg, _leftHip);
+			_rightHip = ReadBodyPoint(HumanBodyBones.RightUpperLeg, _rightHip);
+			_hasShoulder = true;
+
+			if (_armLength <= 0f)
+			{
+				_armLength = LimbLength(HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm,
+					HumanBodyBones.LeftHand);
+				_legLength = LimbLength(HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg,
+					HumanBodyBones.LeftFoot);
+			}
+
+			Quaternion facing = transform.rotation;
+			Vector3 reach = facing * gliderReachDirection.normalized;
+			Vector3 wrist = _animator.bodyPosition + _animator.bodyRotation * _shoulder +
+			                reach * (_armLength * gliderReach);
+			Vector3 grip = wrist + reach * gliderPalm;
+
+			glider.SetPositionAndRotation(grip, facing * Quaternion.Euler(-gliderPitch, 0f, -_lean * gliderBank));
+			glider.localScale = Vector3.one * Mathf.SmoothStep(0f, 1f, _glide);
+
+			_lastGrip = transform.InverseTransformPoint(grip);
+			Swing(grip, facing);
+
+			_animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, _glide);
+			_animator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 0f);
+			_animator.SetIKPosition(AvatarIKGoal.LeftHand, _hangSwing * (wrist - grip) + grip);
+
+			DangleLeg(AvatarIKGoal.LeftFoot, AvatarIKHint.LeftKnee, _leftHip, glideLegTrail.x, 0f, facing);
+			DangleLeg(AvatarIKGoal.RightFoot, AvatarIKHint.RightKnee, _rightHip, glideLegTrail.y, Mathf.PI, facing);
+		}
+
+		/// <summary>Swings the body about the grip: positive pitch takes the legs back, positive swing takes it right.</summary>
+		private void Swing(Vector3 grip, Quaternion facing)
+		{
+			_hangSwing = Quaternion.AngleAxis(_swing, facing * Vector3.forward) *
+			             Quaternion.AngleAxis(_pitch, facing * Vector3.right);
+			_animator.bodyPosition = grip + _hangSwing * (_animator.bodyPosition - grip);
+			_animator.bodyRotation = _hangSwing * _animator.bodyRotation;
+		}
+
+		/// <summary>
+		/// Hangs a foot below its hip, swinging after the body as a slower pendulum, trailing back by
+		/// <paramref name="trail"/> degrees and dangling back and forth out of step with the other leg.
+		/// </summary>
+		private void DangleLeg(AvatarIKGoal foot, AvatarIKHint knee, Vector3 hip, float trail, float phase,
+			Quaternion facing)
+		{
+			Vector3 forward = facing * Vector3.forward;
+			Vector3 right = facing * Vector3.right;
+			float kick = glideLegKick * Mathf.Sin(2f * Mathf.PI * glideLegKickRate * Time.time + phase);
+			// Relative to the body, which the hang already swings: only how far the legs lag behind it.
+			Quaternion lag = Quaternion.AngleAxis(_legSwing - _swing, forward) *
+			                 Quaternion.AngleAxis(_legPitch - _pitch + trail + kick, right);
+			Vector3 down = _hangSwing * (lag * (facing * Vector3.down));
+
+			Vector3 hipPosition = _animator.bodyPosition + _animator.bodyRotation * hip;
+			float weight = glideLegWeight * _glide;
+			_animator.SetIKPositionWeight(foot, weight);
+			_animator.SetIKPosition(foot, hipPosition + down * (_legLength * glideLegReach));
+			// Knees bend forward.
+			_animator.SetIKHintPositionWeight(knee, weight);
+			_animator.SetIKHintPosition(knee,
+				hipPosition + down * (_legLength * 0.5f) + _hangSwing * forward * (_legLength * 0.5f));
+		}
+
+		/// <summary>
+		/// A bone's position in body space. The bones still hold last frame's pose, so it is read against last frame's
+		/// body, and eased in to ride out any jitter.
+		/// </summary>
+		private Vector3 ReadBodyPoint(HumanBodyBones bone, Vector3 previous)
+		{
+			Vector3 point = transform.InverseTransformPoint(_animator.GetBoneTransform(bone).position);
+			point = Quaternion.Inverse(_lastBodyRotation) * (point - _lastBodyPosition);
+			return _hasShoulder ? Vector3.Lerp(previous, point, 0.2f) : point;
+		}
+
+		private float LimbLength(HumanBodyBones upper, HumanBodyBones lower, HumanBodyBones end)
+		{
+			Vector3 middle = _animator.GetBoneTransform(lower).position;
+			return Vector3.Distance(_animator.GetBoneTransform(upper).position, middle) +
+			       Vector3.Distance(middle, _animator.GetBoneTransform(end).position);
 		}
 
 		/// <summary>Places the limb's bone at the given pose by solving for the goal that produces it.</summary>

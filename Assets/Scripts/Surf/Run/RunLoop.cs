@@ -5,14 +5,19 @@ using VContainer.Unity;
 namespace Game.Surf
 {
 	/// <summary>
-	/// Steps the run in a fixed order: the clock and input, the board systems, the weather, then the obstacle and
-	/// pickup generators. Runs before MonoBehaviour updates, so views always read this frame's state.
+	/// Steps the run in a fixed order: the clock and input, the barrel ride and the glider flight, the board systems
+	/// (with the big wave shaped once the board has moved, before it settles on the water), the weather, then the
+	/// obstacle, pickup and sky coin generators. Runs before MonoBehaviour updates, so views always read this frame's
+	/// state.
 	/// </summary>
 	public sealed class RunLoop : IStartable, ITickable
 	{
 		private readonly RunClock _clock;
 		private readonly IInputService _input;
 		private readonly BoardInput _boardInput;
+		private readonly BarrelRide _barrel;
+		private readonly BigWave _bigWave;
+		private readonly GlideFlight _glide;
 		private readonly Nitro _nitro;
 		private readonly BoardMovement _movement;
 		private readonly BoardBody _body;
@@ -23,15 +28,21 @@ namespace Game.Surf
 		private readonly Weather _weather;
 		private readonly ObstacleGenerator _obstacleGenerator;
 		private readonly PickupGenerator _pickupGenerator;
+		private readonly SkyCoinGenerator _skyCoins;
 		private readonly RunStateMachine _flow;
 
-		public RunLoop(RunClock clock, IInputService input, BoardInput boardInput, Nitro nitro, BoardMovement movement,
-			BoardBody body, BoardCollision collision, PickupCollector pickups, PowerUps powerUps, ScoreCounter score,
-			Weather weather, ObstacleGenerator obstacleGenerator, PickupGenerator pickupGenerator, RunStateMachine flow)
+		public RunLoop(RunClock clock, IInputService input, BoardInput boardInput, BarrelRide barrel, BigWave bigWave,
+			GlideFlight glide, Nitro nitro, BoardMovement movement, BoardBody body, BoardCollision collision,
+			PickupCollector pickups, PowerUps powerUps, ScoreCounter score, Weather weather,
+			ObstacleGenerator obstacleGenerator, PickupGenerator pickupGenerator, SkyCoinGenerator skyCoins,
+			RunStateMachine flow)
 		{
 			_clock = clock;
 			_input = input;
 			_boardInput = boardInput;
+			_barrel = barrel;
+			_bigWave = bigWave;
+			_glide = glide;
 			_nitro = nitro;
 			_movement = movement;
 			_body = body;
@@ -42,6 +53,7 @@ namespace Game.Surf
 			_weather = weather;
 			_obstacleGenerator = obstacleGenerator;
 			_pickupGenerator = pickupGenerator;
+			_skyCoins = skyCoins;
 			_flow = flow;
 		}
 
@@ -63,9 +75,23 @@ namespace Game.Surf
 
 			_clock.Advance(dt);
 			_boardInput.Current = _input.ReadGameplay();
+			_barrel.Tick(dt);
+			_glide.Tick(dt);
+
+			// Riding into and through the barrel, holding is the only control.
+			if (_barrel.LocksControls)
+			{
+				_boardInput.Current = _boardInput.Current.HoldOnly();
+			}
+			else if (_glide.LocksControls)
+			{
+				_boardInput.Current = _boardInput.Current.LanesOnly();
+			}
+
 
 			_nitro.Tick(dt);
 			_movement.Tick(dt);
+			_bigWave.Tick();
 			_body.Tick(dt);
 			_collision.Tick();
 			_pickups.Tick(dt);
@@ -75,6 +101,7 @@ namespace Game.Surf
 			// Obstacles first, so pickup trails are shaped around this frame's rows.
 			_obstacleGenerator.Tick();
 			_pickupGenerator.Tick();
+			_skyCoins.Tick();
 		}
 	}
 }

@@ -119,6 +119,38 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &9880138
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9880139}
+  m_Layer: 0
+  m_Name: Glider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &9880139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9880138}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 449998330}
+  m_Father: {fileID: 872919582}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &25786858
 GameObject:
   m_ObjectHideFlags: 0
@@ -2448,12 +2480,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.PickupSpawner
   coinPrefab: {fileID: 6183493611359753901, guid: bdadfecef16084848841056732665812, type: 3}
   coinDetailDistance: 15
+  coinPopInDistance: 60
+  coinPopInTime: 0.3
   magnetPrefab: {fileID: 2605998323588266366, guid: c8b07e9d162c1174bb5097832797ecac, type: 3}
   multiplierPrefab: {fileID: 58841284062279268, guid: 337e4769d210e484682da76f2640ccfb, type: 3}
   nitroPrefab: {fileID: 7862201740683790229, guid: 1929156f4883bde4ba9e502c2b340fc0, type: 3}
   shieldPrefab: {fileID: 3627321629345528564, guid: 2737d003076d1cf42b1f46bab5b39007, type: 3}
   superJumpPrefab: {fileID: 9210156013054400040, guid: 95ac96d68a0f3a44baea94175d268012, type: 3}
   coinDoublerPrefab: {fileID: 4241172396557925770, guid: f27b180e53ce46a489897e1de03eaab4, type: 3}
+  gliderPrefab: {fileID: 6929588844544476879, guid: 8e3a8b44d3d63534ea12ddeaf1c5d26e, type: 3}
   powerUpSize: {x: 0.8, y: 0.8, z: 0.8}
   spinSpeed: 180
   magnetMaterial: {fileID: 2100000, guid: 6659bb7b17201c641ad694216e2dd011, type: 2}
@@ -2462,6 +2497,7 @@ MonoBehaviour:
   shieldMaterial: {fileID: 2100000, guid: 2a4b308483ee424daf0991a3b59ec165, type: 2}
   superJumpMaterial: {fileID: 2100000, guid: 585da51fa30941519b4c6b880782be4d, type: 2}
   coinDoublerMaterial: {fileID: 2100000, guid: 66ae5a8e47d14891aef39e904de92cc9, type: 2}
+  gliderMaterial: {fileID: 0}
 --- !u!4 &80002735
 Transform:
   m_ObjectHideFlags: 0
@@ -2553,12 +2589,14 @@ MonoBehaviour:
   - {fileID: 377963584}
   - {fileID: 901355001}
   - {fileID: 1023692835}
+  - {fileID: 1987057531}
   boardSettings: {fileID: 11400000, guid: f5e714c3efa881a4ebfb8f3216314dbe, type: 2}
   runSettings: {fileID: 11400000, guid: aa47c5e3c6ad4b748aedc03426901621, type: 2}
   pathSettings: {fileID: 11400000, guid: 3c6639ea68dd3344b91a2269fc410167, type: 2}
   pickupSettings: {fileID: 11400000, guid: dd77f726f7155ea4898c52cafde0f3fa, type: 2}
   obstacleSettings: {fileID: 11400000, guid: d95d7c1be16fbaf4c940bf48c9e06a70, type: 2}
   weatherSettings: {fileID: 11400000, guid: 697483e81a37fb24e960d1570ca3085c, type: 2}
+  bigWaveSettings: {fileID: 11400000, guid: bb7d041c9ba413d4998d023ac38b45f1, type: 2}
   characterRoster: {fileID: 11400000, guid: 95da54cc811a1a944a03a7b7ddb367dd, type: 2}
   pathOrigin: {fileID: 1857486449}
   water: {fileID: 1433518376}
@@ -7445,9 +7483,12 @@ MonoBehaviour:
   deathSound: {fileID: 8300000, guid: f71bb3dd8a22f1365b3d9a8bb08140eb, type: 3}
   coinSound: {fileID: 8300000, guid: 4210b235c5db5294e8f433a984dbd6c3, type: 3}
   powerUpSound: {fileID: 8300000, guid: 4210b235c5db5294e8f433a984dbd6c3, type: 3}
-  shieldBreakSound: {fileID: 8300000, guid: 11133667bfea419ab96050ec7385b042, type: 3}
   superJumpSound: {fileID: 8300000, guid: bbdf6d9e01184ef8a09f73c24160a47c, type: 3}
   voiceHeight: 1.4
+  glideWindLoop: {fileID: 8300000, guid: 2728a1b8d92b0994f910c9f81ef1bb61, type: 3}
+  glideWindVolume: 0.45
+  glideWindFadeIn: 0.6
+  glideWindFadeOut: 0.15
   hitVolume: 0.3
   voiceVolume: 0.6
   coinVolume: 0.2
@@ -7582,6 +7623,10 @@ MonoBehaviour:
   lookHeight: 0.8
   positionSmoothTime: 0.12
   rotationSharpness: 10
+  glideFollowDistance: 2
+  glideHeight: 1
+  glideLookDrop: 1.5
+  glideSmoothTime: 0.5
   nitroFovBoost: 12
   fovSpringFrequency: 1.6
   fovSpringDamping: 0.45
@@ -7767,6 +7812,68 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &449998329
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 9880139}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.00000004371139
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+      propertyPath: m_Name
+      value: Model
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+--- !u!4 &449998330 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1a6ce1a51f8340b4293a7b8cfa28cb99, type: 3}
+  m_PrefabInstance: {fileID: 449998329}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &517392039
 GameObject:
   m_ObjectHideFlags: 0
@@ -10224,6 +10331,7 @@ Transform:
   - {fileID: 1920613848}
   - {fileID: 517392042}
   - {fileID: 2134071625}
+  - {fileID: 9880139}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &872919583
@@ -10246,6 +10354,7 @@ MonoBehaviour:
   spinDrag: 1.5
   model: {fileID: 1422947360}
   rider: {fileID: 0}
+  glider: {fileID: 9880139}
   slideRiderScale: 0.5
   riderScaleSharpness: 20
 --- !u!114 &872919584
@@ -10410,6 +10519,10 @@ MonoBehaviour:
   trailTime: 0.45
   trailWidth: 0.6
   trailHeight: 0.3
+  glideTrailTime: 0.6
+  glideTrailWidth: 0.08
+  glideTrailTip: {x: 1.3, y: 2.6, z: 0.3}
+  glideTrailBank: 30
   nitroTrailMaterial: {fileID: 2100000, guid: 7c851d86ba2149f5b213192a9aeada17, type: 2}
   nitroTrailTime: 0.3
   nitroTrailWidth: 0.45
@@ -13234,7 +13347,7 @@ Transform:
   m_GameObject: {fileID: 1433518371}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 12.799999}
+  m_LocalPosition: {x: 0, y: 0, z: 10.24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13288,7 +13401,7 @@ MonoBehaviour:
   timeScale: 1
   cellSize: 0.64
   levelCells: 64
-  waveExtent: 80
+  waveExtent: 130
   forwardOffset: 12
   edgeFlatten: 12
   farExtent: 2000
@@ -13669,7 +13782,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -13686,7 +13799,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -13703,7 +13816,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationX:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -13720,7 +13833,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -18192,6 +18305,243 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1 &1987057531
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1987057535}
+  - component: {fileID: 1987057534}
+  - component: {fileID: 1987057533}
+  - component: {fileID: 1987057532}
+  - component: {fileID: 1987057537}
+  - component: {fileID: 1987057536}
+  m_Layer: 0
+  m_Name: BigWave
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1987057532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66ddab78814c83a44b7fe5523943f5ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.BigWaveLip
+  waterRenderer: {fileID: 1433518372}
+  crossSegments: 24
+  alongSpacing: 2
+  curlLength: 23.5
+  tipAngle: 254
+  curlBend: 0.7
+  turnLead: 0.15
+  backGrowth: 10
+  thickness: {x: 1.6, y: 0.35}
+  tipWobble: 0.1
+  tipWobbleLength: 8
+  tipWobbleSpeed: 0.4
+--- !u!23 &1987057533
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3c457ecc5558a904bbea53f5d8b770f0, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1987057534
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  m_Mesh: {fileID: 0}
+--- !u!4 &1987057535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1987057536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 302e6c21abc424547b7cd078ec893f4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.BigWaveFX
+  roarLoop: {fileID: 1987057537}
+  roarVolume: 0.35
+  standingRoar: 0.4
+  roarSmoothing: 3
+  splashClips:
+  - {fileID: 8300000, guid: ec5727691dbfee64182dc9830527d347, type: 3}
+  - {fileID: 8300000, guid: 0d969f1a7549e7640a1472705fd7d2de, type: 3}
+  - {fileID: 8300000, guid: 17bcb7823c17eb343957558d2cd0857a, type: 3}
+  kickOutClip: {fileID: 8300000, guid: bbdf6d9e01184ef8a09f73c24160a47c, type: 3}
+  splashVolume: 0.6
+  kickOutVolume: 0.5
+--- !u!82 &1987057537
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1987057531}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 8300000, guid: 54e5043522c99d34f8ee876670b56d05, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0
+  m_Pitch: 0.55
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1994452917
 GameObject:
   m_ObjectHideFlags: 0
@@ -18454,3 +18804,4 @@ SceneRoots:
   - {fileID: 901355003}
   - {fileID: 1023692837}
   - {fileID: 400072957}
+  - {fileID: 1987057535}

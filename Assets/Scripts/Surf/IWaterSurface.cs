@@ -25,5 +25,8 @@ namespace Game.Surf
 
 		/// <summary>Multiplies every wave's height, e.g. 2 in a storm.</summary>
 		float WaveScale { get; set; }
+
+		/// <summary>The big wave on top of the others, if any.</summary>
+		BigWaveShape BigWave { get; set; }
 	}
 }

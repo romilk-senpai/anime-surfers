@@ -8,7 +8,8 @@ using UnityEngine;
 namespace Game.Surf.EditorTools
 {
 	/// <summary>
-	/// Builds Miko's surf stance and slide pose as humanoid clips from muscle values, plus a controller that plays them.
+	/// Builds Miko's surf stance, slide pose, barrel crouch and glide hang as humanoid clips from muscle values, plus a
+	/// controller that plays them.
 	/// Regular stance: Miko faces the board's side with her left side toward the nose.
 	/// </summary>
 	public static class SurfPoseGenerator
@@ -16,8 +17,12 @@ namespace Game.Surf.EditorTools
 		private const string Folder = "Assets/Animations/Surf";
 		private const string ClipPath = Folder + "/Surf_Stance.anim";
 		private const string ProneClipPath = Folder + "/Surf_Prone.anim";
+		private const string BarrelClipPath = Folder + "/Surf_Barrel.anim";
+		private const string GlideClipPath = Folder + "/Surf_Glide.anim";
 		private const string ControllerPath = Folder + "/MikoSurf.controller";
 		private const string SlidingParameter = "Sliding";
+		private const string BarrelParameter = "Barrel";
+		private const string GlidingParameter = "Gliding";
 		private const string RunningParameter = "Running";
 		private const string JumpParameter = "Jump";
 		private const string GroundedParameter = "Grounded";
@@ -30,6 +35,10 @@ namespace Game.Surf.EditorTools
 		// Match RiderIK's slide and run blend times.
 		private const float SlideTransition = 0.12f;
 		private const float RunTransition = 0.15f;
+		// Sinking into the crouch as the board drops in, and rising out of it.
+		private const float BarrelTransition = 0.4f;
+		// Matches RiderIK's glide blend time.
+		private const float GlideTransition = 0.3f;
 		// Runner clips played on trains, with the board under the arm.
 		private const string LocomotionFolder = "Assets/Animations/Locomotion/";
 		private const string RunClipPath = LocomotionFolder + "M_katana_Blade@Run_ver_B.FBX";
@@ -136,6 +145,54 @@ namespace Game.Surf.EditorTools
 			{ "Right Forearm Stretch", 0.4f }, { "Right Forearm Twist In-Out", 0f }
 		};
 
+		// Inside the barrel, overriding the stance: a deeper crouch leaning in over the front foot, arms spread wide
+		// along the board for balance.
+		private static readonly Dictionary<string, float> Barrel = new Dictionary<string, float>
+		{
+			{ "Spine Front-Back", -0.45f }, { "Chest Front-Back", -0.2f },
+			{ "Head Nod Down-Up", 0.25f },
+
+			{ "Left Upper Leg Front-Back", -0.1f }, { "Left Lower Leg Stretch", -0.35f }, { "Left Foot Up-Down", -0.45f },
+			{ "Right Upper Leg Front-Back", -0.1f }, { "Right Lower Leg Stretch", -0.35f }, { "Right Foot Up-Down", -0.45f },
+
+			{ "Left Arm Down-Up", 0.45f }, { "Left Arm Front-Back", 0.15f }, { "Left Forearm Stretch", 0.95f },
+			{ "Right Arm Down-Up", 0.5f }, { "Right Arm Front-Back", 0.1f }, { "Right Forearm Stretch", 0.9f }
+		};
+
+		// Hanging from the glider facing ahead (RiderIK turns her): upright with a slight forward lean, the left arm up
+		// to the grip, the right arm down holding the board, legs trailing loosely with the toes pointed.
+		private static readonly Dictionary<string, float> Glide = new Dictionary<string, float>
+		{
+			{ "Spine Front-Back", -0.1f }, { "Spine Left-Right", 0f }, { "Spine Twist Left-Right", 0f },
+			{ "Chest Front-Back", -0.05f }, { "Chest Left-Right", 0.05f }, { "Chest Twist Left-Right", 0f },
+			{ "UpperChest Front-Back", 0f }, { "UpperChest Left-Right", 0.05f }, { "UpperChest Twist Left-Right", 0f },
+			{ "Neck Nod Down-Up", 0f }, { "Neck Tilt Left-Right", 0f }, { "Neck Turn Left-Right", 0f },
+			{ "Head Nod Down-Up", 0f }, { "Head Tilt Left-Right", 0f }, { "Head Turn Left-Right", 0f },
+
+			// Scissored a little, the left leg trailing.
+			{ "Left Upper Leg Front-Back", 0.75f }, { "Left Upper Leg In-Out", 0.1f }, { "Left Upper Leg Twist In-Out", 0f },
+			{ "Left Lower Leg Stretch", 0.55f }, { "Left Lower Leg Twist In-Out", 0f },
+			{ "Left Foot Up-Down", -0.4f }, { "Left Foot Twist In-Out", 0f }, { "Left Toes Up-Down", 0f },
+			{ "Right Upper Leg Front-Back", 0.5f }, { "Right Upper Leg In-Out", 0.1f }, { "Right Upper Leg Twist In-Out", 0f },
+			{ "Right Lower Leg Stretch", 0.85f }, { "Right Lower Leg Twist In-Out", 0f },
+			{ "Right Foot Up-Down", -0.4f }, { "Right Foot Twist In-Out", 0f }, { "Right Toes Up-Down", 0f },
+
+			{ "Left Shoulder Down-Up", 0.8f }, { "Left Shoulder Front-Back", 0f },
+			{ "Left Arm Down-Up", 1f }, { "Left Arm Front-Back", 0.2f }, { "Left Arm Twist In-Out", 0f },
+			{ "Left Forearm Stretch", 1f }, { "Left Forearm Twist In-Out", 0f },
+			{ "Right Shoulder Down-Up", 0f }, { "Right Shoulder Front-Back", 0f },
+			{ "Right Arm Down-Up", -0.6f }, { "Right Arm Front-Back", 0.2f }, { "Right Arm Twist In-Out", 0f },
+			{ "Right Forearm Stretch", 0.7f }, { "Right Forearm Twist In-Out", 0f }
+		};
+
+		// Added to the glide halfway through the loop: the legs swap their scissor and the free arm sways.
+		private static readonly Dictionary<string, float> GlideSway = new Dictionary<string, float>
+		{
+			{ "Left Upper Leg Front-Back", -0.2f }, { "Right Upper Leg Front-Back", 0.2f },
+			{ "Left Lower Leg Stretch", 0.25f }, { "Right Lower Leg Stretch", -0.25f },
+			{ "Right Arm Front-Back", 0.1f }
+		};
+
 		private static readonly Regex IkGoalCurve = new Regex(@"^(Left|Right)(Foot|Hand)(T|Q)\.");
 
 		[MenuItem("Tools/Surf/Generate Surf Pose")]
@@ -190,6 +247,101 @@ namespace Game.Surf.EditorTools
 
 			Debug.Log($"Surf poses generated: {ClipPath} (body height {stanceHeight:F3} / {dippedHeight:F3}), " +
 			          $"{ProneClipPath}");
+			GenerateBarrel();
+			GenerateGlide();
+		}
+
+		/// <summary>Only the barrel crouch and its state, leaving the other clips as they are.</summary>
+		[MenuItem("Tools/Surf/Generate Barrel Pose")]
+		public static void GenerateBarrel()
+		{
+			AnimationClip basePose = AssetDatabase.LoadAllAssetsAtPath(BasePosePath).OfType<AnimationClip>()
+				.First(c => !c.name.StartsWith("__preview"));
+			Avatar avatar = AssetDatabase.LoadAllAssetsAtPath(ModelPath).OfType<Avatar>().First();
+
+			Dictionary<string, float> crouch = Combine(Stance, Barrel, false);
+			Dictionary<string, float> dipped = Combine(crouch, Bob, true);
+
+			var model = (GameObject)Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(ModelPath));
+			float crouchHeight, dippedHeight;
+
+			try
+			{
+				var animator = model.GetComponent<Animator>();
+				if (animator == null)
+				{
+					animator = model.AddComponent<Animator>();
+				}
+
+				animator.avatar = avatar;
+				float footTarget = FootHeight(basePose, model, animator);
+				crouchHeight = SolveBodyHeight(basePose, crouch, footTarget, model, animator);
+				dippedHeight = SolveBodyHeight(basePose, dipped, footTarget, model, animator);
+			}
+			finally
+			{
+				Object.DestroyImmediate(model);
+			}
+
+			SaveClip(BuildClip("Surf_Barrel", basePose, new[] { crouch, dipped, crouch },
+				new[] { Vector3.up * crouchHeight, Vector3.up * dippedHeight, Vector3.up * crouchHeight },
+				Quaternion.identity), BarrelClipPath);
+			AddBarrelStateIfMissing();
+
+			Debug.Log($"Barrel pose generated: {BarrelClipPath} (body height {crouchHeight:F3} / {dippedHeight:F3})");
+		}
+
+		/// <summary>Only the glide hang and its state, leaving the other clips as they are.</summary>
+		[MenuItem("Tools/Surf/Generate Glide Pose")]
+		public static void GenerateGlide()
+		{
+			AnimationClip basePose = AssetDatabase.LoadAllAssetsAtPath(BasePosePath).OfType<AnimationClip>()
+				.First(c => !c.name.StartsWith("__preview"));
+			Avatar avatar = AssetDatabase.LoadAllAssetsAtPath(ModelPath).OfType<Avatar>().First();
+			Dictionary<string, float> swayed = Combine(Glide, GlideSway, true);
+
+			// Feet at the deck like standing, so she hangs where she stood and the board swings up beside her.
+			var model = (GameObject)Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(ModelPath));
+			float hangHeight;
+
+			try
+			{
+				var animator = model.GetComponent<Animator>();
+				if (animator == null)
+				{
+					animator = model.AddComponent<Animator>();
+				}
+
+				animator.avatar = avatar;
+				hangHeight = SolveBodyHeight(basePose, Glide, FootHeight(basePose, model, animator), model, animator);
+			}
+			finally
+			{
+				Object.DestroyImmediate(model);
+			}
+
+			Vector3 root = Vector3.up * hangHeight;
+			SaveClip(BuildClip("Surf_Glide", basePose, new[] { Glide, swayed, Glide }, new[] { root, root, root },
+				Quaternion.identity), GlideClipPath);
+			AddGlideStateIfMissing();
+
+			Debug.Log($"Glide pose generated: {GlideClipPath} (body height {hangHeight:F3})");
+		}
+
+		/// <summary>A copy of the pose with the changes either set over it or added to it.</summary>
+		private static Dictionary<string, float> Combine(Dictionary<string, float> pose,
+			Dictionary<string, float> changes, bool add)
+		{
+			var combined = new Dictionary<string, float>(pose);
+
+			foreach (KeyValuePair<string, float> change in changes)
+			{
+				combined[change.Key] = add && combined.TryGetValue(change.Key, out float value)
+					? value + change.Value
+					: change.Value;
+			}
+
+			return combined;
 		}
 
 		private static float SolveBodyHeight(AnimationClip basePose, Dictionary<string, float> pose, float footTarget,
@@ -348,6 +500,53 @@ namespace Game.Surf.EditorTools
 			prone.iKOnFeet = false;
 			AddSlideTransition(machine.defaultState, prone, AnimatorConditionMode.If);
 			AddSlideTransition(prone, machine.defaultState, AnimatorConditionMode.IfNot);
+			AssetDatabase.SaveAssets();
+		}
+
+		/// <summary>Adds the barrel crouch, entered from and left to the surf stance on the Barrel parameter.</summary>
+		private static void AddBarrelStateIfMissing()
+		{
+			var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
+			AnimatorStateMachine machine = controller.layers[0].stateMachine;
+			if (machine.states.Any(s => s.state.name == "Barrel"))
+			{
+				return;
+			}
+
+			AddParameterIfMissing(controller, BarrelParameter, AnimatorControllerParameterType.Bool);
+			AnimatorState barrel = machine.AddState("Barrel");
+			barrel.motion = AssetDatabase.LoadAssetAtPath<AnimationClip>(BarrelClipPath);
+			barrel.iKOnFeet = false;
+			AddTransition(machine.defaultState, barrel, AnimatorConditionMode.If, BarrelParameter, BarrelTransition);
+			AddTransition(barrel, machine.defaultState, AnimatorConditionMode.IfNot, BarrelParameter, BarrelTransition);
+			AssetDatabase.SaveAssets();
+		}
+
+		/// <summary>
+		/// Adds the glide hang, entered from any state on the Gliding parameter (she may take off from a train) and
+		/// left to the surf stance to land on the board.
+		/// </summary>
+		private static void AddGlideStateIfMissing()
+		{
+			var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
+			AnimatorStateMachine machine = controller.layers[0].stateMachine;
+			if (machine.states.Any(s => s.state.name == "Glide"))
+			{
+				return;
+			}
+
+			AddParameterIfMissing(controller, GlidingParameter, AnimatorControllerParameterType.Bool);
+			AnimatorState glide = machine.AddState("Glide");
+			glide.motion = AssetDatabase.LoadAssetAtPath<AnimationClip>(GlideClipPath);
+			glide.iKOnFeet = false;
+
+			AnimatorStateTransition enter = machine.AddAnyStateTransition(glide);
+			enter.hasExitTime = false;
+			enter.duration = GlideTransition;
+			enter.canTransitionToSelf = false;
+			enter.AddCondition(AnimatorConditionMode.If, 0f, GlidingParameter);
+
+			AddTransition(glide, machine.defaultState, AnimatorConditionMode.IfNot, GlidingParameter, GlideTransition);
 			AssetDatabase.SaveAssets();
 		}
 

@@ -7,8 +7,8 @@ namespace Game.UI.Elements
 {
 	/// <summary>
 	/// Turns a drag into one swipe per touch, sent as soon as the finger has moved <see cref="Threshold"/> panel
-	/// units, so the board reacts mid-gesture. Follows one finger at a time; buttons drawn on top keep their own
-	/// touches.
+	/// units, so the board reacts mid-gesture, and reports while a finger is down. Follows one finger at a time;
+	/// buttons drawn on top keep their own touches.
 	/// </summary>
 	[UxmlElement]
 	public partial class SwipeArea : VisualElement
@@ -27,6 +27,8 @@ namespace Game.UI.Elements
 		}
 
 		public event Action<Swipe> Swiped;
+		/// <summary>True when the finger goes down, false when it lifts.</summary>
+		public event Action<bool> HeldChanged;
 
 		[UxmlAttribute("threshold")]
 		public float Threshold { get; set; } = 40f;
@@ -42,6 +44,7 @@ namespace Game.UI.Elements
 			_start = evt.position;
 			_swiped = false;
 			this.CapturePointer(_pointerId);
+			HeldChanged?.Invoke(true);
 		}
 
 		private void OnPointerMove(PointerMoveEvent evt)
@@ -79,7 +82,11 @@ namespace Game.UI.Elements
 
 		private void OnPointerCaptureOut(PointerCaptureOutEvent evt)
 		{
-			_pointerId = -1;
+			if (_pointerId != -1)
+			{
+				_pointerId = -1;
+				HeldChanged?.Invoke(false);
+			}
 		}
 
 		private void Release(int pointerId)
@@ -91,6 +98,7 @@ namespace Game.UI.Elements
 
 			_pointerId = -1;
 			this.ReleasePointer(pointerId);
+			HeldChanged?.Invoke(false);
 		}
 	}
 }

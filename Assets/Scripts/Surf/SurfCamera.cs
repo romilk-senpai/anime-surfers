@@ -7,8 +7,9 @@ namespace Game.Surf
 	/// Chase camera that trails along the passage curve behind the board. It rises with the train roofs she rides on,
 	/// while jumps and wave bobbing above that level are only partly followed. After a crash it stays where she fell
 	/// instead of following the board on. The field of view springs wider with the nitro boost, overshooting a little
-	/// as it kicks in, and the boost shakes the camera; on screens wider than maxAspect the horizontal field of view
-	/// is held instead of stretching.
+	/// as it kicks in, and the boost shakes the camera. On the glider it follows her height all the way up, hanging
+	/// back higher and looking down a little at the coins ahead and the passage below. On screens wider than maxAspect
+	/// the horizontal field of view is held instead of stretching.
 	/// </summary>
 	[RequireComponent(typeof(Camera))]
 	public class SurfCamera : MonoBehaviour
@@ -26,6 +27,16 @@ namespace Game.Surf
 		[SerializeField] private float lookHeight = 0.8f;
 		[SerializeField] private float positionSmoothTime = 0.12f;
 		[SerializeField] private float rotationSharpness = 10f;
+		[Header("Glide")]
+		[Tooltip("Extra distance behind her while gliding.")]
+		[SerializeField] private float glideFollowDistance = 2f;
+		[Tooltip("Extra height above her while gliding.")]
+		[SerializeField] private float glideHeight = 1f;
+		[Tooltip("How far below her usual look target the camera looks while gliding.")]
+		[SerializeField] private float glideLookDrop = 1.5f;
+		[Tooltip("Seconds to blend into and out of the glide framing.")]
+		[SerializeField] private float glideSmoothTime = 0.5f;
+		[Header("Nitro")]
 		[Tooltip("Degrees added to the field of view at full nitro boost.")]
 		[SerializeField] private float nitroFovBoost = 12f;
 		[Tooltip("How fast the field of view springs toward the boost target, in hertz.")]
@@ -58,6 +69,8 @@ namespace Game.Surf
 		private float _followDistance;
 		private float _followLateral;
 		private float _followHeight;
+		private float _glide;
+		private float _glideVelocity;
 
 		[Inject]
 		public void Construct(IBoardState board, SurfPath path, Nitro nitro)
@@ -84,7 +97,10 @@ namespace Game.Surf
 				_followHeight = _board.Height;
 			}
 
-			_path.Sample(_followDistance - followDistance, out Vector3 behind, out Vector3 behindForward);
+			_glide = Mathf.SmoothDamp(_glide, _board.IsGliding ? 1f : 0f, ref _glideVelocity, glideSmoothTime);
+
+			_path.Sample(_followDistance - followDistance - glideFollowDistance * _glide, out Vector3 behind,
+				out Vector3 behindForward);
 			_path.Sample(_followDistance, out Vector3 followPosition, out Vector3 followForward);
 			Vector3 right = Vector3.Cross(Vector3.up, behindForward);
 			float boardHeight = _followHeight;
@@ -100,16 +116,16 @@ namespace Game.Surf
 			}
 
 			_floor = Mathf.SmoothDamp(_floor, _floorTarget, ref _floorVelocity, floorSmoothTime);
-			float rise = _floor + (boardHeight - _floor) * verticalFollow;
+			float rise = _floor + (boardHeight - _floor) * Mathf.Lerp(verticalFollow, 1f, _glide);
 
 			Vector3 desired = behind + right * (_followLateral * lateralFollow);
-			desired.y = behind.y + rise + height;
+			desired.y = behind.y + rise + height + glideHeight * _glide;
 
 			_position = Vector3.SmoothDamp(_position, desired, ref _velocity, positionSmoothTime);
 
 			Vector3 lookTarget = followPosition + followForward * lookAhead +
 			                     Vector3.Cross(Vector3.up, followForward) * (_followLateral * lateralFollow);
-			lookTarget.y = followPosition.y + rise + lookHeight;
+			lookTarget.y = followPosition.y + rise + lookHeight - glideLookDrop * _glide;
 
 			Quaternion targetRotation = Quaternion.LookRotation(lookTarget - _position);
 			_rotation = Quaternion.Slerp(_rotation, targetRotation, 1f - Mathf.Exp(-rotationSharpness * Time.deltaTime));

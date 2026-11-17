@@ -39,6 +39,7 @@ namespace Game.Surf
 		[SerializeField, Min(0f)] private float shieldWeight = 1f;
 		[SerializeField, Min(0f)] private float superJumpWeight = 1f;
 		[SerializeField, Min(0f)] private float coinDoublerWeight = 1f;
+		[SerializeField, Min(0f)] private float gliderWeight = 0.5f;
 
 		[Header("Collection")]
 		[Tooltip("How far from the rider's body a pickup is still collected.")]
@@ -70,6 +71,27 @@ namespace Game.Surf
 		[SerializeField, Min(0f)] private float coinDoublerDuration = 10f;
 		[SerializeField, Min(1)] private int coinMultiplier = 2;
 
+		[Header("Glider")]
+		[Tooltip("The flight, climb included; the fall back to the water comes after it.")]
+		[SerializeField, Min(0f)] private float gliderDuration = 8f;
+		[Tooltip("Glide height above the still water; well above the train roofs.")]
+		[SerializeField, Min(0f)] private float glideAltitude = 7f;
+		[SerializeField, Min(0.01f)] private float glideClimbTime = 1f;
+		[Tooltip("Height of the gentle bob while gliding, up and down from the glide height.")]
+		[SerializeField, Min(0f)] private float glideBobHeight = 0.3f;
+		[SerializeField, Min(0.01f)] private float glideBobPeriod = 2.5f;
+		[Tooltip("Obstacles stay away from under the fall and this far past the touchdown.")]
+		[SerializeField, Min(0f)] private float glideClearAfter = 30f;
+
+		[Header("Sky Coins")]
+		[Tooltip("Coins in a lane before the line weaves to a neighboring one, picked at random in this range.")]
+		[SerializeField] private Vector2Int skyCoinRun = new Vector2Int(5, 12);
+		[Tooltip("Coins along the weave from one lane to the next.")]
+		[SerializeField, Min(1)] private int skyCoinWeave = 4;
+		[Tooltip("Height of the slow rise and fall along the line, up and down from the glide height.")]
+		[SerializeField, Min(0f)] private float skyCoinWaveHeight = 0.5f;
+		[SerializeField, Min(1f)] private float skyCoinWaveLength = 30f;
+
 		[Header("Shop Upgrades")]
 		[Tooltip("Coins for each duration upgrade of a power-up, cheapest first; one level per entry.")]
 		[SerializeField] private int[] upgradeCosts = { 500, 800, 1000, 1200, 1500 };
@@ -96,6 +118,7 @@ namespace Game.Surf
 		public float ShieldWeight => shieldWeight;
 		public float SuperJumpWeight => superJumpWeight;
 		public float CoinDoublerWeight => coinDoublerWeight;
+		public float GliderWeight => gliderWeight;
 
 		public float PickupRadius => pickupRadius;
 
@@ -115,6 +138,17 @@ namespace Game.Surf
 		public float CoinDoublerDuration => coinDoublerDuration;
 		public int CoinMultiplier => coinMultiplier;
 
+		public float GlideAltitude => glideAltitude;
+		public float GlideClimbTime => glideClimbTime;
+		public float GlideBobHeight => glideBobHeight;
+		public float GlideBobPeriod => glideBobPeriod;
+		public float GlideClearAfter => glideClearAfter;
+
+		public Vector2Int SkyCoinRun => skyCoinRun;
+		public int SkyCoinWeave => skyCoinWeave;
+		public float SkyCoinWaveHeight => skyCoinWaveHeight;
+		public float SkyCoinWaveLength => skyCoinWaveLength;
+
 		public int UpgradeLevels => upgradeCosts.Length;
 		public float UpgradeDurationStep => upgradeDurationStep;
 
@@ -131,6 +165,7 @@ namespace Game.Surf
 				PickupKind.Shield => shieldDuration,
 				PickupKind.SuperJump => superJumpDuration,
 				PickupKind.CoinDoubler => coinDoublerDuration,
+				PickupKind.Glider => gliderDuration,
 				_ => 0f
 			};
 		}

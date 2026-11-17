@@ -34,6 +34,8 @@ namespace Game.Surf
 		/// lying down on the board when sliding.
 		/// </summary>
 		bool IsRunning { get; }
+		/// <summary>Flying on the glider power-up, from the climb off the water until it lands again.</summary>
+		bool IsGliding { get; }
 
 		/// <summary>Times are on the <see cref="RunClock"/>.</summary>
 		float SlideUntil { get; }

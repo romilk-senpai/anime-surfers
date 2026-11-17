@@ -11,7 +11,7 @@ namespace Game.UI
 {
 	/// <summary>
 	/// In-run HUD: score, distance, coins, nitro, power-up timers and the pause button, plus speed lines that
-	/// flicker while the nitro boost is on. The desktop HUD shows the nitro tank as a bar; the mobile one has swipe
+	/// flicker while the nitro boost is on and the barrel ride bar inside a big wave. The desktop HUD shows the nitro tank as a bar; the mobile one has swipe
 	/// controls and a hold-to-boost nitro button whose ring is the tank.
 	/// </summary>
 	public sealed class HudPresenter : IScreen, IStartable, ITickable, IDisposable
@@ -22,14 +22,21 @@ namespace Game.UI
 			("multiplier-timer", PickupKind.ScoreMultiplier),
 			("shield-timer", PickupKind.Shield),
 			("super-jump-timer", PickupKind.SuperJump),
-			("coin-doubler-timer", PickupKind.CoinDoubler)
+			("coin-doubler-timer", PickupKind.CoinDoubler),
+			("glider-timer", PickupKind.Glider)
 		};
 
 		private const float SpeedLinesFlickerInterval = 0.05f;
+		// Below this the barrel ride meter turns red.
+		private const float BarrelMeterLow = 0.25f;
+		// How long the bonus shows after riding out of the barrel.
+		private const float BarrelResultDuration = 1.8f;
 
 		private readonly RunState _run;
 		private readonly PowerUps _powerUps;
 		private readonly Nitro _nitro;
+		private readonly BarrelRide _barrel;
+		private readonly BigWaveSettings _waveSettings;
 		private readonly IBoardState _board;
 		private readonly IRunFlow _runFlow;
 		private readonly ScreenStack _screens;
@@ -51,13 +58,26 @@ namespace Game.UI
 		private RadialProgress _nitroButton; // mobile only
 		private int _nitroPointerId = -1;
 		private int _meters = -1;
+		private VisualElement _barrelPanel;
+		private Label _barrelTime;
+		private VisualElement _barrelCatch;
+		private VisualElement _barrelTarget;
+		private VisualElement _barrelMeterFill;
+		private VisualElement _barrelHint;
+		private int _barrelSeconds = -1;
+		private VisualElement _barrelResult;
+		private Label _barrelBonus;
+		private float _barrelResultUntil = float.NegativeInfinity;
 
-		public HudPresenter(RunState run, PowerUps powerUps, Nitro nitro, IBoardState board, IRunFlow runFlow,
-			ScreenStack screens, GameUi ui, ITouchInput touch)
+		public HudPresenter(RunState run, PowerUps powerUps, Nitro nitro, BarrelRide barrel,
+			BigWaveSettings waveSettings, IBoardState board, IRunFlow runFlow, ScreenStack screens, GameUi ui,
+			ITouchInput touch)
 		{
 			_run = run;
 			_powerUps = powerUps;
 			_nitro = nitro;
+			_barrel = barrel;
+			_waveSettings = waveSettings;
 			_board = board;
 			_runFlow = runFlow;
 			_screens = screens;
@@ -70,6 +90,7 @@ namespace Game.UI
 			_run.ScoreChanged += SetScore;
 			_run.CoinsChanged += SetCoins;
 			_runFlow.PhaseChanged += OnPhaseChanged;
+			_barrel.Ended += OnBarrelEnded;
 			OnPhaseChanged(_runFlow.Phase);
 			_ui.RegisterReloadCallback(Bind);
 		}
@@ -97,10 +118,20 @@ namespace Game.UI
 
 			if (_nitroButton != null)
 			{
+				// Out of the way of the hold-anywhere barrel ride, where nitro is off anyway.
+				bool nitroOff = _barrel.LocksControls;
+				GameUi.SetVisible(_nitroButton, !nitroOff);
+
+				if (nitroOff)
+				{
+					ReleaseNitro();
+				}
+
 				_nitroButton.Value = _nitro.Fill;
 				_nitroButton.EnableInClassList("nitro-button--active", _nitro.IsActive);
 			}
 			UpdateSpeedLines();
+			UpdateBarrel();
 
 			for (int i = 0; i < _timers.Length; i++)
 			{
@@ -116,6 +147,7 @@ namespace Game.UI
 			_run.ScoreChanged -= SetScore;
 			_run.CoinsChanged -= SetCoins;
 			_runFlow.PhaseChanged -= OnPhaseChanged;
+			_barrel.Ended -= OnBarrelEnded;
 			_ui.UnregisterReloadCallback(Bind);
 			Unbind();
 		}
@@ -145,10 +177,20 @@ namespace Game.UI
 			_pauseButton.clicked += _runFlow.Pause;
 			_swipeArea = _screen.Q<SwipeArea>("swipe-area");
 			_nitroButton = _screen.Q<RadialProgress>("nitro-button");
+			_barrelPanel = _screen.Q("barrel");
+			_barrelTime = _screen.Q<Label>("barrel-time");
+			_barrelCatch = _screen.Q("barrel-catch");
+			_barrelTarget = _screen.Q("barrel-target");
+			_barrelMeterFill = _screen.Q("barrel-meter-fill");
+			_barrelHint = _screen.Q("barrel-hint");
+			_barrelResult = _screen.Q("barrel-result");
+			_barrelBonus = _screen.Q<Label>("barrel-bonus");
+			_barrelSeconds = -1;
 
 			if (_swipeArea != null)
 			{
 				_swipeArea.Swiped += _touch.PushSwipe;
+				_swipeArea.HeldChanged += _touch.SetScreenHeld;
 			}
 
 			if (_nitroButton != null)
@@ -180,7 +222,10 @@ namespace Game.UI
 			if (_swipeArea != null)
 			{
 				_swipeArea.Swiped -= _touch.PushSwipe;
+				_swipeArea.HeldChanged -= _touch.SetScreenHeld;
 			}
+
+			_touch.SetScreenHeld(false);
 
 			if (_nitroButton != null)
 			{
@@ -302,6 +347,51 @@ namespace Game.UI
 				_nextSpeedLinesFlicker = Time.time + SpeedLinesFlickerInterval;
 				_speedLines.Phase = UnityEngine.Random.value * Mathf.PI * 2f;
 			}
+		}
+
+		private void OnBarrelEnded(bool success)
+		{
+			if (success)
+			{
+				_barrelResultUntil = Time.time + BarrelResultDuration;
+			}
+		}
+
+		private void UpdateBarrel()
+		{
+			bool showResult = Time.time < _barrelResultUntil;
+			_barrelResult.EnableInClassList("barrel-result--shown", showResult);
+
+			if (showResult)
+			{
+				_barrelBonus.text = "+" + _waveSettings.SuccessBonus.ToString("N0", CultureInfo.InvariantCulture);
+			}
+
+			bool active = _barrel.IsActive;
+			GameUi.SetVisible(_barrelPanel, active);
+
+			if (!active)
+			{
+				return;
+			}
+
+			int seconds = Mathf.CeilToInt(_barrel.TimeLeft);
+
+			if (seconds != _barrelSeconds)
+			{
+				_barrelSeconds = seconds;
+				_barrelTime.text = seconds.ToString(CultureInfo.InvariantCulture);
+			}
+
+			// Bar positions run up from the bottom; panel y runs down.
+			float size = _barrel.CatchSize;
+			_barrelCatch.style.top = Length.Percent((1f - _barrel.CatchPosition - size * 0.5f) * 100f);
+			_barrelCatch.style.height = Length.Percent(size * 100f);
+			_barrelTarget.style.top = Length.Percent((1f - _barrel.TargetPosition) * 100f);
+			_barrelMeterFill.style.height = Length.Percent(_barrel.Meter * 100f);
+			_barrelPanel.EnableInClassList("barrel--catching", _barrel.IsCatching);
+			_barrelPanel.EnableInClassList("barrel--low", _barrel.Meter < BarrelMeterLow);
+			GameUi.SetVisible(_barrelHint, _barrel.IsInGrace);
 		}
 
 		private static void UpdateTimer(RadialProgress timer, float remaining, float duration)

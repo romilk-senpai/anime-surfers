@@ -133,6 +133,10 @@
     --ring-color: #FFD23F;
 }
 
+.power-up--glider {
+    --ring-color: #2FC4B2;
+}
+
 .power-up__icon {
     width: 22px;
     height: 22px;
@@ -182,4 +186,124 @@
     margin: 0 3px;
     border-radius: 2px;
     background-color: var(--ink);
+}
+
+/* Barrel ride bar, to the right of the rider: the catch zone the player holds up, the target it has to keep inside,
+   and the hold meter beside them. */
+.barrel {
+    position: absolute;
+    left: 64%;
+    top: 50%;
+    translate: 0 -50%;
+    align-items: center;
+}
+
+.barrel__time {
+    margin-bottom: 8px;
+    font-size: 34px;
+    color: var(--paper);
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: var(--ink);
+}
+
+.barrel__body {
+    flex-direction: row;
+    height: 320px;
+}
+
+.barrel__track {
+    width: 46px;
+    background-color: rgba(28, 27, 77, 0.55);
+    border-width: 3px;
+    border-color: var(--paper);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.barrel__catch {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: rgba(63, 169, 245, 0.75);
+    border-top-width: 3px;
+    border-bottom-width: 3px;
+    border-color: var(--paper);
+}
+
+.barrel--catching .barrel__catch {
+    background-color: rgba(61, 220, 132, 0.85);
+}
+
+.barrel__target {
+    position: absolute;
+    left: 50%;
+    width: 26px;
+    height: 26px;
+    translate: -50% -50%;
+    rotate: 45deg;
+    background-color: var(--coin);
+    border-width: 3px;
+    border-color: var(--ink);
+}
+
+.barrel__meter {
+    width: 16px;
+    margin-left: 8px;
+    justify-content: flex-end;
+    background-color: rgba(28, 27, 77, 0.55);
+    border-width: 3px;
+    border-color: var(--paper);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.barrel__meter-fill {
+    width: 100%;
+    background-color: #3DDC84;
+}
+
+.barrel--low .barrel__meter-fill {
+    background-color: var(--alarm);
+}
+
+.barrel__hint {
+    margin-top: 10px;
+    font-size: 26px;
+    color: var(--coin);
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: var(--ink);
+}
+
+/* Bonus for riding out of the barrel: pops in over the rider, then fades. */
+.barrel-result {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 22%;
+    align-items: center;
+    opacity: 0;
+    scale: 0.6 0.6;
+    transition-property: opacity, scale;
+    transition-duration: 0.25s, 0.25s;
+    transition-timing-function: ease-out-back, ease-out-back;
+}
+
+.barrel-result--shown {
+    opacity: 1;
+    scale: 1 1;
+}
+
+.barrel-result__title {
+    font-size: 56px;
+    color: var(--coin);
+    rotate: -6deg;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: var(--ink);
+}
+
+.barrel-result__bonus {
+    font-size: 40px;
+    color: var(--paper);
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: var(--ink);
 }

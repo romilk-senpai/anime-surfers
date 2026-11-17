@@ -282,6 +282,30 @@ MonoBehaviour:
     m_Localized: Sign in to rank
     m_Metadata:
       m_Items: []
+  - m_Id: 5439766208176128
+    m_Localized: HOLD!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459043618816
+    m_Localized: The wave took you
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459047813120
+    m_Localized: "In the barrel, hold Space or \u2191 to lift the zone and let go to drop it. Keep the yellow marker inside it."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459047813121
+    m_Localized: In the barrel, touch and hold to lift the zone and let go to drop it. Keep the yellow marker inside it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5451176879316992
+    m_Localized: BARREL!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5643779881033728
+    m_Localized: Glider
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -13,6 +13,7 @@ namespace Game.Core
 		private Swipe? _swipe;
 		private int _swipeFrame;
 		private bool _touchBoost;
+		private bool _touchHold;
 
 		public InputService()
 		{
@@ -28,7 +29,8 @@ namespace Game.Core
 			return new GameplayInput(LaneChange(swipe),
 				_actions.Player.Jump.WasPerformedThisFrame() || swipe == Swipe.Up,
 				_actions.Player.Slide.WasPerformedThisFrame() || swipe == Swipe.Down,
-				_actions.Player.Boost.IsPressed() || (IsEnabled && _touchBoost));
+				_actions.Player.Boost.IsPressed() || (IsEnabled && _touchBoost),
+				_actions.Player.Jump.IsPressed() || (IsEnabled && _touchHold));
 		}
 
 		public bool ConfirmPressed => _actions.Menu.Confirm.WasPerformedThisFrame();
@@ -59,6 +61,11 @@ namespace Game.Core
 		public void SetBoostHeld(bool held)
 		{
 			_touchBoost = held;
+		}
+
+		public void SetScreenHeld(bool held)
+		{
+			_touchHold = held;
 		}
 
 		public void Dispose()

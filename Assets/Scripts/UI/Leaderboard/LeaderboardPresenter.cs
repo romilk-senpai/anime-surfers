@@ -11,7 +11,7 @@ using VContainer.Unity;
 namespace Game.UI
 {
 	/// <summary>
-	/// The online leaderboard over the main menu: the top of the board on playnesc.com with the player's own row
+	/// The online leaderboard over the main menu or the results: the top of the board on playnesc.com with the player's own row
 	/// highlighted, and the way to sign in.
 	/// </summary>
 	public sealed class LeaderboardPresenter : IScreen, IStartable, IDisposable

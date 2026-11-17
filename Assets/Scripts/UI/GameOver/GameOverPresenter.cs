@@ -12,7 +12,7 @@ namespace Game.UI
 {
 	/// <summary>
 	/// Results after a crash: what was hit and how to avoid it, the run's numbers, the online rank (or signing in to get
-	/// one), Surf again or Menu.
+	/// one), Surf again, Menu or the leaderboard.
 	/// </summary>
 	public sealed class GameOverPresenter : IScreen, IStartable, IDisposable
 	{
@@ -28,12 +28,14 @@ namespace Game.UI
 		private readonly IBoardState _board;
 		private readonly IPlayerProgress _progress;
 		private readonly ILeaderboard _leaderboard;
+		private readonly LeaderboardPresenter _leaderboardScreen;
 		private readonly ScreenStack _screens;
 		private readonly GameUi _ui;
 
 		private VisualElement _screen;
 		private Button _surfAgainButton;
 		private Button _menuButton;
+		private Button _leaderboardButton;
 		private Label _soundEffect;
 		private VisualElement _online;
 		private VisualElement _onlineRank;
@@ -43,13 +45,14 @@ namespace Game.UI
 		private IVisualElementScheduledItem _pulse;
 
 		public GameOverPresenter(IRunFlow runFlow, RunState run, IBoardState board, IPlayerProgress progress,
-			ILeaderboard leaderboard, ScreenStack screens, GameUi ui)
+			ILeaderboard leaderboard, LeaderboardPresenter leaderboardScreen, ScreenStack screens, GameUi ui)
 		{
 			_runFlow = runFlow;
 			_run = run;
 			_board = board;
 			_progress = progress;
 			_leaderboard = leaderboard;
+			_leaderboardScreen = leaderboardScreen;
 			_screens = screens;
 			_ui = ui;
 		}
@@ -58,6 +61,7 @@ namespace Game.UI
 		{
 			_runFlow.PhaseChanged += OnPhaseChanged;
 			_leaderboard.Changed += UpdateOnline;
+			_leaderboardScreen.Closed += OnLeaderboardClosed;
 			OnPhaseChanged(_runFlow.Phase);
 			_ui.RegisterReloadCallback(Bind);
 		}
@@ -66,6 +70,7 @@ namespace Game.UI
 		{
 			_runFlow.PhaseChanged -= OnPhaseChanged;
 			_leaderboard.Changed -= UpdateOnline;
+			_leaderboardScreen.Closed -= OnLeaderboardClosed;
 			_ui.UnregisterReloadCallback(Bind);
 			Unbind();
 		}
@@ -86,6 +91,7 @@ namespace Game.UI
 			_screen = root.Q("game-over");
 			_surfAgainButton = _screen.Q<Button>("surf-again-button");
 			_menuButton = _screen.Q<Button>("menu-button");
+			_leaderboardButton = _screen.Q<Button>("leaderboard-button");
 			_soundEffect = _screen.Q<Label>("sound-effect");
 			_pulse = GameUi.Pulse(_soundEffect, "sound-effect--big", PulseIntervalMs);
 			_online = _screen.Q("online");
@@ -96,6 +102,7 @@ namespace Game.UI
 
 			_surfAgainButton.clicked += _runFlow.Restart;
 			_menuButton.clicked += _runFlow.QuitToMenu;
+			_leaderboardButton.clicked += _leaderboardScreen.Open;
 			_signInButton.clicked += SignIn;
 
 			OnPhaseChanged(_runFlow.Phase);
@@ -110,6 +117,7 @@ namespace Game.UI
 
 			_surfAgainButton.clicked -= _runFlow.Restart;
 			_menuButton.clicked -= _runFlow.QuitToMenu;
+			_leaderboardButton.clicked -= _leaderboardScreen.Open;
 			_signInButton.clicked -= SignIn;
 			_pulse.Pause();
 		}
@@ -152,11 +160,15 @@ namespace Game.UI
 
 		private void Fill()
 		{
-			bool barrier = _board.CrashKind == CrashKind.Barrier;
-			string crash = barrier ? "crash.barrier" : "crash.wall";
+			(string crash, string soundEffect) = _board.CrashKind switch
+			{
+				CrashKind.Barrier => ("crash.barrier", "ガツン!"),
+				CrashKind.Wipeout => ("crash.wipeout", "ザバーン!"),
+				_ => ("crash.wall", "ドカン!")
+			};
 
 			// The sound effect is lettering, not copy: it stays Japanese in every language.
-			_soundEffect.text = barrier ? "ガツン!" : "ドカン!";
+			_soundEffect.text = soundEffect;
 			_screen.Q<Label>("crash-title").SetBinding("text", new LocalizedString(Table, crash + ".title"));
 			// The desktop tips name keys; the touch ones name swipes.
 			string tip = crash + (_ui.IsMobile ? ".tip.touch" : ".tip");
@@ -201,6 +213,14 @@ namespace Game.UI
 				{
 					_surfAgainButton.Focus();
 				}
+			}
+		}
+
+		private void OnLeaderboardClosed()
+		{
+			if (_runFlow.Phase == RunPhase.Results)
+			{
+				_leaderboardButton.Focus();
 			}
 		}
 

@@ -18,5 +18,8 @@ namespace Game.Core
 
 		/// <summary>The on-screen nitro button is held down.</summary>
 		void SetBoostHeld(bool held);
+
+		/// <summary>A finger is held down on the screen, outside the buttons.</summary>
+		void SetScreenHeld(bool held);
 	}
 }

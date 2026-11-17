@@ -8,7 +8,9 @@ namespace Game.Surf
 		/// <summary>Head-on into a solid face, like a train's front.</summary>
 		Wall,
 		/// <summary>Into an obstacle with a gap under it that could have been slid under.</summary>
-		Barrier
+		Barrier,
+		/// <summary>Swallowed by a big wave after losing the barrel ride.</summary>
+		Wipeout
 	}
 
 	/// <summary>
@@ -52,6 +54,8 @@ namespace Game.Surf
 		/// lying down on the board when sliding.
 		/// </summary>
 		public bool IsRunning { get; set; }
+		/// <summary>Flying on the glider power-up, from the climb off the water until it lands again.</summary>
+		public bool IsGliding { get; set; }
 
 		/// <summary>Times are on the <see cref="RunClock"/>.</summary>
 		public float SlideUntil { get; set; } = float.NegativeInfinity;

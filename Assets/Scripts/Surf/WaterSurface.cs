@@ -12,7 +12,8 @@ namespace Game.Surf
 	/// sample the exact same surface the GPU renders. The wave mesh is a set of nested levels around a point ahead of
 	/// the board, each twice the size of the one inside it with cells twice as large, ringed by flat, static water
 	/// out to the far extent. Waves too short for a level's cells flatten out on its geometry, and all of them
-	/// flatten toward the outer edge to meet the flat water; the shading keeps every wave.
+	/// flatten toward the outer edge to meet the flat water; the shading keeps every wave. A big wave
+	/// (<see cref="BigWaveShape"/>) can rise on top of them.
 	/// </summary>
 	[ExecuteAlways]
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -48,6 +49,11 @@ namespace Game.Surf
 		private static readonly int MeshBoundsId = Shader.PropertyToID("_WaterMeshBounds");
 		private static readonly int LodParamsId = Shader.PropertyToID("_WaterLodParams");
 		private static readonly int OriginId = Shader.PropertyToID("_WaterOrigin");
+		private static readonly int BigWaveLineId = Shader.PropertyToID("_BigWaveLine");
+		private static readonly int BigWaveShapeId = Shader.PropertyToID("_BigWaveShape");
+		private static readonly int BigWaveProfileId = Shader.PropertyToID("_BigWaveProfile");
+		private static readonly int BigWaveLipId = Shader.PropertyToID("_BigWaveLip");
+		private static readonly int BigWaveLipSpanId = Shader.PropertyToID("_BigWaveLipSpan");
 		// Packed wave shapes by wavelength (z), longest first.
 		private static readonly IComparer<Vector4> LongestFirst =
 			Comparer<Vector4>.Create((a, b) => b.z.CompareTo(a.z));
@@ -75,7 +81,7 @@ namespace Game.Surf
 		[SerializeField, Range(16, 128)] private int levelCells = 64;
 		[Tooltip("How far the waves reach from the center at medium view distance; levels are added until they cover " +
 		         "it. The player's setting scales it.")]
-		[SerializeField, Min(1f)] private float waveExtent = 80f;
+		[SerializeField, Min(1f)] private float waveExtent = 130f;
 		[Tooltip("The levels are centered this far ahead of the follow target, so little of the mesh lies behind " +
 		         "the camera.")]
 		[SerializeField] private float forwardOffset = 12f;
@@ -94,6 +100,7 @@ namespace Game.Surf
 		private readonly List<int> _polygon = new List<int>(5);
 		private float _amplitudeSum;
 		private float _waveScale = 1f;
+		private BigWaveShape _bigWave;
 		private float _time;
 		private Mesh _mesh;
 		private bool _meshDirty;
@@ -135,6 +142,13 @@ namespace Game.Surf
 				_waveScale = value;
 				PackWaves();
 			}
+		}
+
+		/// <summary>The big wave on top of the others; gameplay queries see it right away.</summary>
+		public BigWaveShape BigWave
+		{
+			get => _bigWave;
+			set => _bigWave = value;
 		}
 
 		// The mesh is snapped up to half a coarse cell away from the fade center on each axis.
@@ -259,12 +273,14 @@ namespace Game.Surf
 
 			float distance = CenterDistance(x, z);
 			float inverseCell = LodInverseCell(distance);
+			float bigHeight = BigWaveHeight(x, z, out Vector2 bigGradient);
+			float calm = BigWaveCalm(bigHeight);
 
 			for (int i = 0; i < MaxWaves; i++)
 			{
 				Vector4 wave = _packedWaves[i];
 				Vector4 shape = _packedShapes[i];
-				float fade = Mathf.Clamp01((shape.z * inverseCell - MinWaveCells) / (FullWaveCells - MinWaveCells));
+				float fade = Mathf.Clamp01((shape.z * inverseCell - MinWaveCells) / (FullWaveCells - MinWaveCells)) * calm;
 				float dx = wave.x;
 				float dz = wave.y;
 				float steepness = shape.x * fade;
@@ -287,10 +303,66 @@ namespace Game.Surf
 				binormal.z -= dz * dz * steepness * s;
 			}
 
+			offset.y += bigHeight;
+			tangent.y += bigGradient.x;
+			binormal.y += bigGradient.y;
+
 			float edgeFade = EdgeFade(distance);
 			offset *= edgeFade;
 			tangent = Vector3.right + (tangent - Vector3.right) * edgeFade;
 			binormal = Vector3.forward + (binormal - Vector3.forward) * edgeFade;
+		}
+
+		// Mirrors BigWaveCalm in WaterWaves.hlsl: the small waves die down up the big wave's face and over its crest.
+		private static float BigWaveCalm(float bigWaveHeight)
+		{
+			return 1f - 0.85f * Mathf.SmoothStep(0f, 1f, (bigWaveHeight - 2.5f) / 3f);
+		}
+
+		// Mirrors BigWaveHeight in WaterWaves.hlsl: the big wave's height at x, z above the still water, with its xz
+		// gradient.
+		private float BigWaveHeight(float x, float z, out Vector2 gradient)
+		{
+			BigWaveShape wave = _bigWave;
+			gradient = Vector2.zero;
+
+			if (!wave.Exists)
+			{
+				return 0f;
+			}
+
+			Vector2 side = wave.SideDirection;
+			Vector2 relative = new Vector2(x - wave.Origin.x, z - wave.Origin.y);
+			float along = Vector2.Dot(relative, wave.Direction);
+			float across = Vector2.Dot(relative, side);
+			float profile;
+			float dProfile;
+
+			if (across < wave.Crest)
+			{
+				float width = Mathf.Max(wave.Crest - wave.FaceBase, 1e-3f);
+				float t = Mathf.Clamp01((across - wave.FaceBase) / width);
+				profile = BigWaveShape.FaceProfile(t, wave.FaceHollow, out float dFace);
+				dProfile = across > wave.FaceBase ? dFace / width : 0f;
+			}
+			else
+			{
+				float back = Mathf.Max(wave.BackWidth, 1e-3f);
+				float t = Mathf.Clamp01((across - wave.Crest) / back);
+				profile = 1f - t * t * (3f - 2f * t);
+				dProfile = -6f * t * (1f - t) / back;
+			}
+
+			float taper = Mathf.Max(wave.Taper, 1e-3f);
+			float rise = Mathf.Clamp01((along - wave.AlongStart) / taper);
+			float fall = Mathf.Clamp01((wave.AlongEnd - along) / taper);
+			float endA = rise * rise * (3f - 2f * rise);
+			float endB = fall * fall * (3f - 2f * fall);
+			float ends = endA * endB;
+			float dEnds = 6f * rise * (1f - rise) / taper * endB - endA * 6f * fall * (1f - fall) / taper;
+
+			gradient = wave.Height * (dProfile * ends * side + profile * dEnds * wave.Direction);
+			return wave.Height * profile * ends;
 		}
 
 		/// <summary>Chebyshev distance from the fade center; the levels are squares.</summary>
@@ -365,6 +437,15 @@ namespace Game.Surf
 			Shader.SetGlobalVector(MeshBoundsId,
 				new Vector4(_lodCenter.x, _lodCenter.y, _outerHalfSize - SnapMargin, edgeFlatten));
 			Shader.SetGlobalVector(LodParamsId, new Vector4(cellSize, 2f / _innerHalfSize, SnapMargin, 0f));
+
+			BigWaveShape big = _bigWave;
+			Shader.SetGlobalVector(BigWaveLineId, new Vector4(big.Origin.x, big.Origin.y, big.Direction.x, big.Direction.y));
+			Shader.SetGlobalVector(BigWaveShapeId, new Vector4(big.Height, big.Side, big.AlongStart, big.AlongEnd));
+			Shader.SetGlobalVector(BigWaveProfileId, new Vector4(big.FaceBase, big.Crest, big.BackWidth, big.Taper));
+			Shader.SetGlobalVector(BigWaveLipId, new Vector4(big.LipAlong, big.Throw, big.LipReach, big.MouthLength));
+			// The lip is fully pitched, dripping from its tip, from its back end to just ahead of the rider.
+			Shader.SetGlobalVector(BigWaveLipSpanId,
+				new Vector4(big.LipAlong - big.LipBehind, big.LipAlong + big.PitchAhead, big.FaceHollow, 0f));
 		}
 
 		private void FollowTarget()

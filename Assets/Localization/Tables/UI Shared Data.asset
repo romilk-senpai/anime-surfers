@@ -279,6 +279,30 @@ MonoBehaviour:
     m_Key: gameover.sign_in
     m_Metadata:
       m_Items: []
+  - m_Id: 5439766208176128
+    m_Key: hud.barrel.hold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459043618816
+    m_Key: crash.wipeout.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459047813120
+    m_Key: crash.wipeout.tip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5442459047813121
+    m_Key: crash.wipeout.tip.touch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5451176879316992
+    m_Key: hud.barrel.made
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5643779881033728
+    m_Key: shop.glider
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

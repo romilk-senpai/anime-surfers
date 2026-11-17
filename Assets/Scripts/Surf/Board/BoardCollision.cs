@@ -4,7 +4,8 @@ namespace Game.Surf
 {
 	/// <summary>
 	/// Obstacle hits: bounces the board back into its lane when it changes lanes into an obstacle's side
-	/// and crashes it when hit head-on, unless the shield absorbs the hit and smashes the obstacle. After a crash the riderless board slides on under barriers and bounces back
+	/// and crashes it when hit head-on, unless the shield absorbs the hit and smashes the obstacle. On the glider, anything
+	/// still hit on the climb is smashed. After a crash the riderless board slides on under barriers and bounces back
 	/// off walls, stopping against trains instead of passing through them.
 	/// </summary>
 	public sealed class BoardCollision
@@ -18,9 +19,10 @@ namespace Game.Surf
 		private readonly PowerUps _powerUps;
 		private readonly RunClock _clock;
 		private readonly RandomStream _random;
+		private readonly GlideFlight _glide;
 
 		public BoardCollision(BoardSettings settings, BoardState state, ObstacleField obstacles, PowerUps powerUps,
-			RunClock clock, RunRandom random)
+			RunClock clock, RunRandom random, GlideFlight glide)
 		{
 			_settings = settings;
 			_state = state;
@@ -28,6 +30,7 @@ namespace Game.Surf
 			_powerUps = powerUps;
 			_clock = clock;
 			_random = random.Stream(RunRandom.CollisionStream);
+			_glide = glide;
 		}
 
 		public void Tick()
@@ -75,7 +78,7 @@ namespace Game.Surf
 
 		private void HitHeadOn(ObstacleBox hit)
 		{
-			if (_powerUps.TryAbsorbHit())
+			if (_glide.IsActive || _powerUps.TryAbsorbHit())
 			{
 				hit.Smashed = true;
 				return;

@@ -8,7 +8,9 @@ namespace Game.Surf
 	/// Generates coin trails along single lanes ahead of the board, shaped around the obstacles already placed there:
 	/// arcs over barriers, up ramps and along train roofs, ending before walls that cannot be climbed. While super jump
 	/// will still be active when the board gets there, trains without a ramp get a coin arc along the jump onto the roof.
-	/// Some trails carry a power-up in the middle. Pickups that are collected or left behind are removed and reused.
+	/// Some trails carry a power-up in the middle, and big waves are left clear. Nothing is placed under a glider
+	/// flight, and a glider is only placed where no flight from it could reach a big wave. Pickups that are collected
+	/// or left behind are removed.
 	/// Ticked after <see cref="ObstacleGenerator"/>, and stays behind it, so trails are only shaped around obstacles
 	/// that already exist.
 	/// </summary>
@@ -22,14 +24,15 @@ namespace Game.Surf
 		private readonly ObstacleField _obstacles;
 		private readonly ObstacleGenerator _obstacleGenerator;
 		private readonly PickupField _field;
+		private readonly WaveSchedule _waves;
+		private readonly GlideFlight _glide;
 		private readonly IGraphicsSettings _graphics;
 		private readonly RandomStream _random;
-		private readonly Stack<Pickup> _freePickups = new Stack<Pickup>();
 		private float _nextTrailDistance;
 
 		public PickupGenerator(PickupSettings settings, BoardSettings boardSettings, BoardState board,
 			PowerUps powerUps, IWaterSurface water, ObstacleField obstacles, ObstacleGenerator obstacleGenerator,
-			PickupField field, IGraphicsSettings graphics, RunRandom random)
+			PickupField field, WaveSchedule waves, GlideFlight glide, IGraphicsSettings graphics, RunRandom random)
 		{
 			_settings = settings;
 			_boardSettings = boardSettings;
@@ -39,6 +42,8 @@ namespace Game.Surf
 			_obstacles = obstacles;
 			_obstacleGenerator = obstacleGenerator;
 			_field = field;
+			_waves = waves;
+			_glide = glide;
 			_graphics = graphics;
 			_random = random.Stream(RunRandom.PickupStream);
 			_nextTrailDistance = settings.FirstTrailDistance;
@@ -53,6 +58,19 @@ namespace Game.Surf
 
 			while (_nextTrailDistance < horizon)
 			{
+				if (_waves.TryGetClearOverlap(_nextTrailDistance, _nextTrailDistance + longestTrail, out WaveEvent wave))
+				{
+					_nextTrailDistance = wave.ClearEnd;
+					continue;
+				}
+
+				// Out of reach under the flight.
+				if (_glide.IsActive && _nextTrailDistance < _glide.LandingDistance)
+				{
+					_nextTrailDistance = _glide.LandingDistance;
+					continue;
+				}
+
 				_nextTrailDistance = GenerateTrail(_nextTrailDistance) +
 					_random.Range(_settings.TrailGap.x, _settings.TrailGap.y);
 			}
@@ -66,7 +84,6 @@ namespace Game.Surf
 				if (pickup.Collected || pickup.Distance < distance - _settings.DespawnBehind)
 				{
 					_field.Remove(pickup);
-					_freePickups.Push(pickup);
 				}
 			}
 		}
@@ -96,22 +113,24 @@ namespace Game.Surf
 				previousSurface = surface;
 				end = distance;
 
-				PickupKind kind = i != powerUpIndex ? PickupKind.Coin : RandomPowerUp();
-				Add(kind, distance, lateral, height, followsWater);
+				PickupKind kind = i != powerUpIndex ? PickupKind.Coin : RandomPowerUp(distance);
+				_field.Add(kind, distance, lateral, height, followsWater);
 			}
 
 			return end;
 		}
 
-		private PickupKind RandomPowerUp()
+		private PickupKind RandomPowerUp(float distance)
 		{
+			float gliderWeight = CanGlideFrom(distance) ? _settings.GliderWeight : 0f;
+			float coinDoublerWeight = _settings.CoinDoublerWeight;
 			float nitroWeight = _settings.NitroWeight;
 			float magnetWeight = _settings.MagnetWeight;
 			float multiplierWeight = _settings.MultiplierWeight;
 			float shieldWeight = _settings.ShieldWeight;
 			float superJumpWeight = _settings.SuperJumpWeight;
 			float roll = _random.Range(0f, nitroWeight + magnetWeight + multiplierWeight + shieldWeight +
-				superJumpWeight + _settings.CoinDoublerWeight);
+				superJumpWeight + coinDoublerWeight + gliderWeight);
 
 			if ((roll -= nitroWeight) < 0f)
 			{
@@ -133,7 +152,22 @@ namespace Game.Surf
 				return PickupKind.Shield;
 			}
 
-			return roll - superJumpWeight < 0f ? PickupKind.SuperJump : PickupKind.CoinDoubler;
+			if ((roll -= superJumpWeight) < 0f)
+			{
+				return PickupKind.SuperJump;
+			}
+
+			return roll - coinDoublerWeight < 0f || gliderWeight <= 0f ? PickupKind.CoinDoubler : PickupKind.Glider;
+		}
+
+		/// <summary>
+		/// Whether a glider picked up at the given distance would land short of the next big wave, however fast the
+		/// board goes by then, and isn't taken while already gliding.
+		/// </summary>
+		private bool CanGlideFrom(float distance)
+		{
+			float longestFlight = _powerUps.Duration(PickupKind.Glider) * _boardSettings.MaxSpeed;
+			return !_glide.IsActive && !_waves.TryGetClearOverlap(distance, distance + longestFlight, out _);
 		}
 
 		/// <summary>
@@ -230,19 +264,6 @@ namespace Game.Surf
 			float time = (runUp - beforeWall) / speed;
 			rise = launchSpeed * time - 0.5f * gravity * time * time;
 			return true;
-		}
-
-		private void Add(PickupKind kind, float distance, float lateral, float height, bool followsWater)
-		{
-			Pickup pickup = _freePickups.Count > 0 ? _freePickups.Pop() : new Pickup();
-			pickup.Kind = kind;
-			pickup.Distance = distance;
-			pickup.Lateral = lateral;
-			pickup.Height = height;
-			pickup.FollowsWater = followsWater;
-			pickup.Attracted = false;
-			pickup.Collected = false;
-			_field.Add(pickup);
 		}
 	}
 }

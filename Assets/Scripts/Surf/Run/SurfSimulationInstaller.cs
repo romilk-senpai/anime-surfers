@@ -25,11 +25,14 @@ namespace Game.Surf
 			builder.Register<BoardInput>(Lifetime.Singleton);
 
 			builder.Register<WaveSchedule>(Lifetime.Singleton);
+			builder.Register<BarrelRide>(Lifetime.Singleton);
+			builder.Register<BigWave>(Lifetime.Singleton);
 			builder.Register<SurfPath>(Lifetime.Singleton).WithParameter(_pathOrigin);
 			builder.Register<ObstacleField>(Lifetime.Singleton);
 			builder.Register<PickupField>(Lifetime.Singleton);
 			builder.Register<ObstacleGenerator>(Lifetime.Singleton);
 			builder.Register<PickupGenerator>(Lifetime.Singleton);
+			builder.Register<SkyCoinGenerator>(Lifetime.Singleton);
 
 			builder.Register<BoardState>(Lifetime.Singleton).AsSelf().As<IBoardState>();
 			builder.Register<Nitro>(Lifetime.Singleton);
@@ -39,6 +42,7 @@ namespace Game.Surf
 			builder.Register<PickupCollector>(Lifetime.Singleton);
 			builder.Register<PowerUpUpgrades>(Lifetime.Singleton);
 			builder.Register<PowerUps>(Lifetime.Singleton);
+			builder.Register<GlideFlight>(Lifetime.Singleton);
 
 			builder.Register<RunState>(Lifetime.Singleton);
 			builder.Register<ScoreCounter>(Lifetime.Singleton);
@@ -46,6 +50,10 @@ namespace Game.Surf
 			builder.Register<RunStateMachine>(Lifetime.Singleton).AsSelf().As<IRunFlow>();
 
 			builder.RegisterEntryPoint<RunLoop>();
+#if UNITY_EDITOR || DEBUG
+			builder.RegisterEntryPoint<BigWaveDebug>().AsSelf();
+			builder.RegisterEntryPoint<GlideDebug>().AsSelf();
+#endif
 		}
 	}
 }

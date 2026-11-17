@@ -15,7 +15,9 @@ namespace Game.Surf
 		/// <summary>Jumps high enough to land on trains.</summary>
 		SuperJump,
 		/// <summary>Each coin counts more.</summary>
-		CoinDoubler
+		CoinDoubler,
+		/// <summary>Flies high above the passage, through coins in the sky.</summary>
+		Glider
 	}
 
 	/// <summary>
@@ -35,19 +37,28 @@ namespace Game.Surf
 	}
 
 	/// <summary>
-	/// Active pickups the rider can collect.
+	/// Active pickups the rider can collect. Removed pickups are reused for the next ones added.
 	/// </summary>
 	public sealed class PickupField
 	{
 		private readonly List<Pickup> _pickups = new List<Pickup>();
+		private readonly Stack<Pickup> _free = new Stack<Pickup>();
 
 		public IReadOnlyList<Pickup> Pickups => _pickups;
 
 		public event Action<Pickup> Added;
 		public event Action<Pickup> Removed;
 
-		public void Add(Pickup pickup)
+		public void Add(PickupKind kind, float distance, float lateral, float height, bool followsWater)
 		{
+			Pickup pickup = _free.Count > 0 ? _free.Pop() : new Pickup();
+			pickup.Kind = kind;
+			pickup.Distance = distance;
+			pickup.Lateral = lateral;
+			pickup.Height = height;
+			pickup.FollowsWater = followsWater;
+			pickup.Attracted = false;
+			pickup.Collected = false;
 			_pickups.Add(pickup);
 			Added?.Invoke(pickup);
 		}
@@ -57,6 +68,7 @@ namespace Game.Surf
 			if (_pickups.Remove(pickup))
 			{
 				Removed?.Invoke(pickup);
+				_free.Push(pickup);
 			}
 		}
 	}

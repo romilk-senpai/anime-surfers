@@ -265,6 +265,7 @@ Button:focus {
 .icon--magnet { background-image: url("../Icons/magnet.svg"); }
 .icon--shield { background-image: url("../Icons/shield.svg"); }
 .icon--super-jump { background-image: url("../Icons/super-jump.svg"); }
+.icon--glider { background-image: url("../Icons/glider.svg"); }
 .icon--nitro { background-image: url("../Icons/nitro.svg"); }
 .icon--trophy { background-image: url("../Icons/trophy.svg"); }
 

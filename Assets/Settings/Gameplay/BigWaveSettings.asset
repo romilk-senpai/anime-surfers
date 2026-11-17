@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67af711ce4b9c894cb44ca095745acee, type: 3}
+  m_Name: BigWaveSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Surf.BigWaveSettings
+  firstDistance: {x: 300, y: 400}
+  gapDistance: {x: 600, y: 900}
+  approachLength: 260
+  clearBefore: 15
+  dropInLength: 40
+  barrelSpeed: 20
+  barrelDuration: 20
+  exitLength: 60
+  clearAfter: 40
+  turnAngle: 45
+  pathBlend: 40
+  waveHeight: 7
+  faceBase: -6
+  crestOffset: 9
+  backWidth: 18
+  ridgeBefore: 120
+  ridgeTaper: 30
+  throwDistance: 80
+  mouthLength: 35
+  pitchAhead: 5
+  lipReach: 15
+  lipBehind: 25
+  lipAhead: 80
+  catchSize: 0.28
+  holdAcceleration: 3
+  fallAcceleration: 2.5
+  bounce: 0.35
+  targetInterval: {x: 0.5, y: 1.4}
+  targetSmoothTime: {x: 0.2, y: 0.55}
+  dartChance: 0.25
+  dartSmoothTime: 0.1
+  meterStart: 0.5
+  meterFill: 0.3
+  meterDrain: 0.26
+  graceTime: 1.2
+  difficultyPerWave: 0.05
+  successBonus: 1500

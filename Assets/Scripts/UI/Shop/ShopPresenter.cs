@@ -37,7 +37,8 @@ namespace Game.UI
 				new UpgradeRow("multiplier", PickupKind.ScoreMultiplier, this),
 				new UpgradeRow("shield", PickupKind.Shield, this),
 				new UpgradeRow("super-jump", PickupKind.SuperJump, this),
-				new UpgradeRow("coin-doubler", PickupKind.CoinDoubler, this)
+				new UpgradeRow("coin-doubler", PickupKind.CoinDoubler, this),
+				new UpgradeRow("glider", PickupKind.Glider, this)
 			};
 		}
 

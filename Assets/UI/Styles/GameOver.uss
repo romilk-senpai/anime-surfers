@@ -175,6 +175,15 @@
     margin-top: 24px;
 }
 
+.results__footer-buttons {
+    flex-direction: row;
+    align-items: center;
+}
+
+.results__leaderboard {
+    margin-left: 14px;
+}
+
 /* ---- Portrait: sound effect, results and crash card stacked down the screen ---- */
 
 .portrait .sound-effect {

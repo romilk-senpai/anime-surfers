@@ -29,6 +29,7 @@ MonoBehaviour:
   shieldWeight: 1
   superJumpWeight: 1
   coinDoublerWeight: 1
+  gliderWeight: 0.5
   pickupRadius: 0.6
   magnetDuration: 10
   magnetRange: 10
@@ -41,5 +42,15 @@ MonoBehaviour:
   superJumpHeight: 4.5
   coinDoublerDuration: 10
   coinMultiplier: 2
+  gliderDuration: 8
+  glideAltitude: 7
+  glideClimbTime: 1
+  glideBobHeight: 0.3
+  glideBobPeriod: 2.5
+  glideClearAfter: 30
+  skyCoinRun: {x: 5, y: 12}
+  skyCoinWeave: 4
+  skyCoinWaveHeight: 0.5
+  skyCoinWaveLength: 30
   upgradeCosts: f401000020030000e8030000b0040000dc050000i
   upgradeDurationStep: 0.2

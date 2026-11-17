@@ -6,6 +6,35 @@
         <e:SwipeArea name="swipe-area" class="swipe-area" />
 
         <ui:VisualElement class="hud__safe safe-area" picking-mode="Ignore">
+            <!-- Riding out of the barrel: the bonus pops up over the rider. -->
+            <ui:VisualElement name="barrel-result" class="barrel-result" picking-mode="Ignore">
+                <ui:Label class="barrel-result__title display" picking-mode="Ignore">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="hud.barrel.made" />
+                    </Bindings>
+                </ui:Label>
+                <ui:Label name="barrel-bonus" class="barrel-result__bonus display" text="+1,500" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- Barrel ride: hold to push the catch zone up, keep the target in it to fill the meter. -->
+            <ui:VisualElement name="barrel" class="barrel" picking-mode="Ignore">
+                <ui:Label name="barrel-time" class="barrel__time display" text="30" picking-mode="Ignore" />
+                <ui:VisualElement class="barrel__body" picking-mode="Ignore">
+                    <ui:VisualElement class="barrel__track" picking-mode="Ignore">
+                        <ui:VisualElement name="barrel-catch" class="barrel__catch" picking-mode="Ignore" />
+                        <ui:VisualElement name="barrel-target" class="barrel__target" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="barrel__meter" picking-mode="Ignore">
+                        <ui:VisualElement name="barrel-meter-fill" class="barrel__meter-fill" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="barrel-hint" class="barrel__hint display" picking-mode="Ignore">
+                    <Bindings>
+                        <l:LocalizedString property="text" table="UI" entry="hud.barrel.hold" />
+                    </Bindings>
+                </ui:Label>
+            </ui:VisualElement>
+
             <ui:VisualElement class="hud__left" picking-mode="Ignore">
                 <ui:Button name="pause-button" class="round-button pause-button">
                     <ui:VisualElement class="pause-button__bar" picking-mode="Ignore" />
@@ -26,6 +55,9 @@
                     </e:RadialProgress>
                     <e:RadialProgress name="coin-doubler-timer" class="power-up power-up--coin-doubler" picking-mode="Ignore">
                         <ui:VisualElement class="icon coin-icon power-up__coin" picking-mode="Ignore" />
+                    </e:RadialProgress>
+                    <e:RadialProgress name="glider-timer" class="power-up power-up--glider" picking-mode="Ignore">
+                        <ui:VisualElement class="icon icon--glider power-up__icon" picking-mode="Ignore" />
                     </e:RadialProgress>
                 </ui:VisualElement>
             </ui:VisualElement>

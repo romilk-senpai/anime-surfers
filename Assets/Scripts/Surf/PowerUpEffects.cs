@@ -7,7 +7,7 @@ namespace Game.Surf
 	/// <summary>
 	/// Power-up visuals around the rider. A bubble surrounds her while the shield is up: it pops in when picked up,
 	/// blinks before running out and bursts when it breaks. Super jumps leave a shockwave ring on the water at the take-off and a glowing trail through the air. The nitro
-	/// boost streams two exhaust trails from the board's tail.
+	/// boost streams two exhaust trails from the board's tail, and the glider's wingtips leave wind trails.
 	/// Built from primitives and trails at runtime; the bubble, ring and trail materials are meant for the
 	/// PowerUpGlow shader, whose colour is faded through a property block.
 	/// </summary>
@@ -42,6 +42,16 @@ namespace Game.Surf
 		[SerializeField] private float trailWidth = 0.6f;
 		[Tooltip("Height of the trail above the board's bottom.")]
 		[SerializeField] private float trailHeight = 0.3f;
+
+		[Header("Glide")]
+		[Tooltip("Wingtip trails, in the super jump trail's material.")]
+		[SerializeField] private float glideTrailTime = 0.6f;
+		[SerializeField] private float glideTrailWidth = 0.08f;
+		[Tooltip("Wingtip position relative to the board while gliding: half the span, the height above the board " +
+		         "and how far back of it.")]
+		[SerializeField] private Vector3 glideTrailTip = new Vector3(1.3f, 2.6f, 0.3f);
+		[Tooltip("Wing bank in degrees per unit of carve; matches RiderIK's glider bank.")]
+		[SerializeField] private float glideTrailBank = 30f;
 
 		[Header("Nitro")]
 		[SerializeField] private Material nitroTrailMaterial;
@@ -79,6 +89,7 @@ namespace Game.Surf
 
 		private TrailRenderer _trail;
 		private readonly TrailRenderer[] _nitroTrails = new TrailRenderer[2];
+		private readonly TrailRenderer[] _glideTrails = new TrailRenderer[2];
 
 		[Inject]
 		public void Construct(IBoardState board, BoardSettings settings, PowerUps powerUps, Nitro nitro)
@@ -112,6 +123,11 @@ namespace Game.Surf
 			}
 
 			_nitroTrailBlock = new MaterialPropertyBlock();
+
+			for (int i = 0; i < _glideTrails.Length; i++)
+			{
+				_glideTrails[i] = CreateTrail("GlideTrail", jumpTrailMaterial, glideTrailTime, glideTrailWidth);
+			}
 		}
 
 		private void OnDestroy()
@@ -155,6 +171,7 @@ namespace Game.Surf
 			UpdateRing(dt);
 			UpdateTrail();
 			UpdateNitroTrails();
+			UpdateGlideTrails();
 		}
 
 		private void UpdateShield(float dt)
@@ -250,6 +267,22 @@ namespace Game.Surf
 				trail.widthMultiplier = nitroTrailWidth * blend * flicker;
 				trail.emitting = blend > 0f && !_board.IsCrashed;
 				trail.SetPropertyBlock(_nitroTrailBlock);
+			}
+		}
+
+		private void UpdateGlideTrails()
+		{
+			Vector3 center = _board.PlanarPosition - _board.PathForward * glideTrailTip.z;
+			center.y = _board.Height + glideTrailTip.y;
+			// Banking into a lane change dips the wing on the side she moves to.
+			float bank = _board.Carve * glideTrailBank * Mathf.Deg2Rad;
+			Vector3 span = (_board.PathRight * Mathf.Cos(bank) - Vector3.up * Mathf.Sin(bank)) * glideTrailTip.x;
+
+			for (int i = 0; i < _glideTrails.Length; i++)
+			{
+				TrailRenderer trail = _glideTrails[i];
+				trail.transform.position = center + span * (i == 0 ? -1f : 1f);
+				trail.emitting = _board.IsGliding && !_board.IsCrashed;
 			}
 		}
 

@@ -50,6 +50,7 @@
 .shop-row--shield { --accent: #8C5CFF; }
 .shop-row--super-jump { --accent: #3DDC84; }
 .shop-row--coin-doubler { --accent: #FFD23F; }
+.shop-row--glider { --accent: #2FC4B2; }
 
 .shop-badge {
     flex-shrink: 0;
@@ -138,6 +139,7 @@
 .shop-row--shield .shop-pip--filled { --panel-fill: #8C5CFF; }
 .shop-row--super-jump .shop-pip--filled { --panel-fill: #3DDC84; }
 .shop-row--coin-doubler .shop-pip--filled { --panel-fill: #FFD23F; }
+.shop-row--glider .shop-pip--filled { --panel-fill: #2FC4B2; }
 
 /* Buy: a small ink slab with the price in coin yellow, like the coin counters. */
 .shop-buy {

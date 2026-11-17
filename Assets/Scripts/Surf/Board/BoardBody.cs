@@ -4,7 +4,7 @@ namespace Game.Surf
 {
 	/// <summary>
 	/// Vertical motion: buoyancy against the water surface, riding on obstacle tops, jump (higher with super jump)
-	/// and slide.
+	/// and slide. On the glider the board follows the flight's height instead.
 	/// </summary>
 	public sealed class BoardBody
 	{
@@ -18,9 +18,10 @@ namespace Game.Surf
 		private readonly BoardInput _input;
 		private readonly PowerUps _powerUps;
 		private readonly RunClock _clock;
+		private readonly GlideFlight _glide;
 
 		public BoardBody(BoardSettings settings, BoardState state, IWaterHeight water, ObstacleField obstacles,
-			BoardInput input, PowerUps powerUps, RunClock clock)
+			BoardInput input, PowerUps powerUps, RunClock clock, GlideFlight glide)
 		{
 			_settings = settings;
 			_state = state;
@@ -29,6 +30,7 @@ namespace Game.Surf
 			_input = input;
 			_powerUps = powerUps;
 			_clock = clock;
+			_glide = glide;
 		}
 
 		public void Initialize()
@@ -39,6 +41,12 @@ namespace Game.Surf
 
 		public void Tick(float dt)
 		{
+			if (_glide.IsActive)
+			{
+				Glide(dt);
+				return;
+			}
+
 			if (_input.Current.Jump)
 			{
 				_state.JumpRequestTime = _clock.Time;
@@ -50,6 +58,19 @@ namespace Game.Surf
 			}
 
 			Simulate(dt);
+		}
+
+		/// <summary>Physics take over again when the glider is gone, dropping the board back to the water.</summary>
+		private void Glide(float dt)
+		{
+			_state.WaterHeight = _water.GetHeight(_state.PlanarPosition);
+
+			float height = _glide.Height();
+			_state.VerticalVelocity = (height - _state.Height) / dt;
+			_state.Height = height;
+			_state.IsOnWater = false;
+			_state.IsOnSurface = false;
+			_state.IsRunning = false;
 		}
 
 		private void Slide()

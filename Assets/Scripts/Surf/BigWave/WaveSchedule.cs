@@ -6,7 +6,7 @@ namespace Game.Surf
 	public enum WavePhase
 	{
 		None,
-		/// <summary>The wave rises ahead while the passage runs straight and clear.</summary>
+		/// <summary>The wave rises ahead while the passage runs straight; obstacles keep coming for most of it.</summary>
 		Approach,
 		/// <summary>The passage turns to run along the wave, into the barrel.</summary>
 		DropIn,
@@ -26,7 +26,8 @@ namespace Game.Surf
 		public float BarrelEnd;
 		/// <summary>End of the exit turn.</summary>
 		public float End;
-		/// <summary>Obstacles and pickups stay out of <see cref="Start"/>..<see cref="ClearEnd"/>.</summary>
+		/// <summary>Obstacles and pickups stay out of <see cref="ClearStart"/>..<see cref="ClearEnd"/>.</summary>
+		public float ClearStart;
 		public float ClearEnd;
 		/// <summary>Side the passage turns to if it's heading close to its starting direction: -1 left, 1 right.</summary>
 		public int PreferredTurn;
@@ -75,11 +76,11 @@ namespace Game.Surf
 			_nextStart = _random.Range(settings.FirstDistance.x, settings.FirstDistance.y);
 		}
 
-		/// <summary>The wave whose <see cref="WaveEvent.Start"/>..<see cref="WaveEvent.End"/>, widened by the margin
-		/// on both sides, contains the distance.</summary>
-		public bool TryGet(float distance, float margin, out WaveEvent wave)
+		/// <summary>The first wave whose <see cref="WaveEvent.Start"/>..<see cref="WaveEvent.End"/> overlaps
+		/// from..to.</summary>
+		public bool TryGetOverlap(float from, float to, out WaveEvent wave)
 		{
-			return TryGetOverlap(distance - margin, distance + margin, false, out wave);
+			return TryGetOverlap(from, to, false, out wave);
 		}
 
 		/// <summary>The first wave whose clear range overlaps from..to.</summary>
@@ -88,13 +89,34 @@ namespace Game.Surf
 			return TryGetOverlap(from, to, true, out wave);
 		}
 
+		/// <summary>
+		/// For testing: brings the next wave forward to start at the given distance, which must lie past everything
+		/// generated so far. Fails if a wave is already under way there. The waves after it are picked again.
+		/// </summary>
+		public bool TryStartWaveAt(float start)
+		{
+			EnsureUntil(start);
+
+			foreach (WaveEvent e in _events)
+			{
+				if (e.Start <= start && start < e.ClearEnd)
+				{
+					return false;
+				}
+			}
+
+			_events.RemoveAll(e => e.Start > start);
+			_nextStart = start;
+			return true;
+		}
+
 		private bool TryGetOverlap(float from, float to, bool clear, out WaveEvent wave)
 		{
 			EnsureUntil(to);
 
 			foreach (WaveEvent e in _events)
 			{
-				if (e.Start < to && from < (clear ? e.ClearEnd : e.End))
+				if ((clear ? e.ClearStart : e.Start) <= to && from < (clear ? e.ClearEnd : e.End))
 				{
 					wave = e;
 					return true;
@@ -114,6 +136,7 @@ namespace Game.Surf
 				wave.BarrelStart = wave.DropInStart + _settings.DropInLength;
 				wave.BarrelEnd = wave.BarrelStart + _settings.BarrelLength;
 				wave.End = wave.BarrelEnd + _settings.ExitLength;
+				wave.ClearStart = Mathf.Max(wave.Start, wave.DropInStart - _settings.ClearBefore);
 				wave.ClearEnd = wave.End + _settings.ClearAfter;
 				wave.PreferredTurn = _random.Value < 0.5f ? -1 : 1;
 				_events.Add(wave);
